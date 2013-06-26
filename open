@@ -1,0 +1,290 @@
+#!/bin/bash
+
+# ---------------------------------------------------------
+# Variables.
+# Change things here to suit your needs.
+# ---------------------------------------------------------
+
+# Genres -----------
+Genre_array=(text video audio pdf web image word spreadsheet archive svg)
+
+#     Genre=("fast"     "complex"       )
+       text=(gvim       subl            )
+      video=(mplayer                    )
+      audio=(mplayer                    )
+        pdf=(zathura    evince          )
+        web=(luakit     google-chrome  jumanji )
+      image=(fehviewer  mirage          )
+       word=(abiword                    )
+spreadsheet=(gnumeric                   )
+    archive=(file-roller                )
+
+# File types -------
+       text_array=(txt tex sh markdown zsh)
+      video_array=(mpg mpeg avi webm m4v swf wmv mp4 flv)
+      audio_array=(mp3 ogg vorbis m4a m4b aif wma wav)
+        pdf_array=(pdf)
+        web_array=(html htm xml)
+      image_array=(jpg jpeg png bmp gif tiff)
+       word_array=(docx doc odf rtf abw odt rtf)
+spreadsheet_array=(gnumeric xls xlsx csv dat)
+    archive_array=(zip rar bz tar)
+
+# Exceptions
+    svg=(rsvg-view-3)
+    svg_array=(svg)
+
+# Other Programs
+    terminal=(xterm  terminator)
+
+# Other Options ----
+default=fast # fast/complex
+verbose_output=false # true/false
+
+# --------------------------------------------------------
+# Program
+# --------------------------------------------------------
+
+# Check if a value exists in an array
+# Usage: in_array "$needle" "${haystack[@]}"
+# See: http://fvue.nl/wiki/Bash:_Check_if_array_element_exists
+in_array() {
+    local hay needle=$1
+    shift
+    for hay; do
+        [[ $hay == $needle ]] && return 0
+    done
+    return 1
+}
+
+verbose() {
+    if $verbose_output; then
+        if [[ $2 == "n" ]]; then
+           echo -n $1 
+        else 
+            echo $1
+        fi
+    fi
+}
+
+dumpFunc() {
+    if $dumpOutput; then
+        dump="2> /dev/null"
+    fi
+}
+
+# --------------------------------------------------------
+# Usage details
+# --------------------------------------------------------
+helpOutput() {
+    cat << 'EOF'
+
+Usage:
+  open [options] <file|url|prgram>
+  open [options] <program-genre>
+  open -h
+
+Options:
+  -f    use the "fast" program
+  -c    use the "complex" program
+  -v    output debugging info
+  -d    dump output error messages so they are not displayed
+  -w    open a web url
+  -t    open the specified program genre defined program
+  -h    print this help message
+
+Configuration:
+  * The script is configured at the moment, from within the script its self.
+  * A number of arrays are defined at the top of the script file. Each array 
+    corresponds to a filetype, or "genre", and contains 1 or 2 elements, each 
+    of which is the executable name of a program. 
+      * The first is the fast program - designed to be a quick to open, usually
+        lower on features, that is used to simply view the file specifier.
+      * The second is the complex program - intended to be a more feature rich 
+        program for editing the file, but which is likely to take longer to 
+        start.
+
+Examples:
+    open example.html
+        Use the default web browser to view the file example.html.
+
+    open -c example.pdf
+        Use the complex pdf viewer to view the file example.pdf.
+
+    open -tvfd terminal
+        Open the fast terminal with verbose program information printed to 
+        stdout and dump any error messages from the terminal to /dev/null.
+
+Bugs:
+    Contact wainwright.ja@gmail.com
+
+EOF
+    exit
+}
+
+# --------------------------------------------------------------
+
+if [[ $# -eq 0 ]]; then
+    helpOutput
+    exit
+fi
+
+webParse=false
+programSpecify=false
+# --------------------------------------------------------------
+# Options Handler
+# --------------------------------------------------------------
+while getopts ":fcvhdwt" opt; do
+    case $opt in
+        f)
+            verbose "Fast option selected"
+            fast=true
+            complex=false
+            ;;
+        c)
+            verbose "Complex option selected"
+            complex=true
+            fast=false
+            ;;
+        v)
+            verbose "Verbose option selected"
+            verbose_output=true
+            ;;
+        h)
+            helpOutput
+            ;;
+        d) 
+            dumpOutput=true
+            dumpFunc
+            verbose "Dumping output to null"
+            ;;
+        w)
+            webParse=true
+            ;;
+        t)
+            programSpecify=true
+            ;;
+        \?)
+            echo "Unkown option: -$OPTARG. Defaulting to fast"
+    esac
+done
+
+shift $((OPTIND-1))
+
+# --------------------------------------------------------------
+# Program Specifying
+# --------------------------------------------------------------
+if $programSpecify ; then
+    if $fast; then
+        prog="$1[0]"
+    else
+        prog="$1[1]"
+    fi
+    verbose "Executing specified program genre - ${!prog}"
+    eval ${!prog}
+    exit
+fi
+
+# --------------------------------------------------------------
+# URL Handler
+# --------------------------------------------------------------
+if $webParse ; then
+    if $fast; then
+        verbose "Found url, using web browser - $web_fast"
+        eval ${web[2]} "\"$1\"" $dump
+    else
+        verbose "Found url, using web browser - $web_complex"
+        eval ${web[1]} "\"$1\"" $dump
+    fi
+    exit
+fi
+
+# --------------------------------------------------------------
+# File parser and handler
+#   This is admittedly fantastically difficult to understand,
+#+  used for flexibility. New genres with new filetypes can be
+#+  added by the user easily without changing anything here.
+#
+# Genre_array[0] = fast
+# Genre_array[1] = complex
+# --------------------------------------------------------------
+ext=${1##*.}
+ext=${ext,,}
+
+# if the user has specified a genre to use, then there must be
+# two arguments - genre and file.
+#if [[ $# -eq 2 ]]; then
+if in_array "$1" "${Genre_array[@]}"; then
+    for genre in "${Genre_array[@]}"; do
+        if [[ $genre = $1 ]]; then
+            do_fast=$genre[0]
+            do_complex=$genre[1]
+
+            if $fast; then
+                verbose "Executing ${!do_fast}"
+                eval ${!do_fast} "\"$2\"" $dump
+            elif $complex; then
+                verbose "Executing ${!do_complex}"
+                eval ${!do_complex} "\"$2\"" $dump
+            fi
+        fi
+    done
+    exit
+fi
+
+verbose "Extension is $ext"
+for fileType in "${Genre_array[@]}" ; do
+    fileType_array="$fileType""_array[@]"
+    
+    verbose "Checking genre $fileType ..." 
+
+    if in_array $ext "${!fileType_array}"; then
+        verbose "Found extension $ext in genre $fileType"
+
+        do_fast=$fileType[0]
+        do_complex=$fileType[1]
+
+        verbose "Filetype = $fileType"
+        if $fast; then
+            verbose "Executing ${!do_fast}"
+            eval ${!do_fast} "\"$1\"" $dump
+        elif $complex; then
+            verbose "Executing ${!do_complex}"
+            eval ${!do_complex} "\"$1\"" $dump
+        else
+            verbose "No fast/complex option given, using default - $default"
+            if [[ $default=="fast" ]]; then
+                verbose "Executing ${!do_fast}"
+                eval ${!do_fast} "\"$1\"" $dump
+            else
+                verbose "Executing ${!do_complex}"
+                eval ${!do_complex} "\"$1\"" $dump
+            fi
+        fi
+        exit 0
+    else
+        verbose "nope"
+    fi
+done
+echo "Filetype not recognised"
+
+# ------------------------------------------------------------
+# If no extension is given, or the extension is not recognised
+#+  then use the mimetype of the file.
+# ------------------------------------------------------------
+mimeType=$(file --mime-type -b "$1")
+
+# Delete from string everything after "/"
+mimeType=${mimeType%/*}
+echo "Mime-type is $mimeType"
+
+do_fast=$mimeType[0]
+do_complex=$mimeType[1]
+
+if $fast; then
+    verbose "Executing ${!do_fast}"
+    eval ${!do_fast} "\"$1\"" $dump
+elif $complex; then
+    verbose "Executing ${!do_complex}"
+    eval ${!do_complex} "\"$1\"" $dump
+fi

@@ -1,0 +1,177 @@
+#! /bin/sh
+
+# Simple script to remove auxillary files created when compiling latex documents.
+AUX=0
+LOG=0
+OUT=0
+GZ=0
+FLS=0
+FDB=0
+BBL=0
+BLG=0
+TOC=0
+TOTAL=0
+
+REC=0
+VER=0
+DRY=0
+SIZE=0
+
+while :
+do
+	case $1 in
+		-h | --help | -\?)
+			#  Call your Help() or usage() function here.
+			exit 0      # This is not an error, User asked help. Don't do "exit 1"
+			;;
+		-r | --recursive)
+			REC=1
+			shift
+			;;
+		-v | --verbose)
+			VER=1
+			shift
+			;;
+		-d | --dryrun)
+			DRY=1
+			shift
+			;;
+		-s | --total-size)
+			SIZE=1
+			shift
+			;;
+		--) # End of all options
+			shift
+			break
+			;;
+		-*)
+			echo "WARN: Unknown option (ignored): $1" >&2
+			shift
+			;;
+		*)  # no more options. Stop while loop
+			break
+			;;
+	esac
+done
+
+if [ $REC == 1 ]
+then
+	FILES="$(find -name '*.aux' -or -name '*.log' -or -name '*.out' -or -name '*.gz' -or -name '*.fls' -or -name '*.fdb_latexmk' -or -name '*.bbl' -or -name '*.blg' -or -name '*.toc')"
+else
+	FILES="$(find -maxdepth 1 -name '*.aux' -or -name '*.log' -or -name '*.out' -or -name '*.gz' -or -name '*.fls' -or -name '*.fdb_latexmk' -or -name '*.bbl' -or -name '*.blg' -or -name '*.toc')"
+fi
+
+if [ $VER == 1 ]
+then 
+	echo "$FILES"
+fi
+
+if [ $DRY == 1 ]
+then
+	echo ""
+	echo "**** DRY RUN ****"
+	echo ""
+else
+	rm $FILES
+	# echo "REAL!"
+fi
+
+# if [ $SIZE == 1 ]
+# then 
+# 	size=$($FILES | xargs -0 du -ch)
+# 	echo "Size = $size"
+# fi
+
+for f in $FILES
+do
+	if [[ $f == *.aux ]]
+	then
+		#rm "$f"
+		# SIZE=`expr $SIZE + $("stat -c %s $f")`
+		AUX=`expr $AUX + 1`
+		TOTAL=`expr $TOTAL + 1`
+	fi
+	if [[ $f == *.log ]]
+	then
+		#rm "$f"
+		LOG=`expr $LOG + 1`
+		TOTAL=`expr $TOTAL + 1`
+	fi
+	if [[ $f == *.out ]]
+	then
+		#rm "$f"
+		OUT=`expr $OUT + 1`
+		TOTAL=`expr $TOTAL + 1`
+	fi
+	if [[ $f == *.gz ]]
+	then
+		#rm "$f"
+		GZ=`expr $GZ + 1`
+		TOTAL=`expr $TOTAL + 1`
+	fi
+	if [[ $f == *.fls ]]
+	then
+		#rm "$f"
+		FLS=`expr $FLS + 1`
+		TOTAL=`expr $TOTAL + 1`
+	fi
+	if [[ $f == *.fdb_latexmk ]]
+	then
+		#rm "$f"
+		FDB=`expr $FDB + 1`
+		TOTAL=`expr $TOTAL + 1`
+	fi
+	if [[ $f == *.bbl ]]
+	then
+		#rm "$f"
+		BBL=`expr $BBL + 1`
+		TOTAL=`expr $TOTAL + 1`
+	fi
+	if [[ $f == *.blg ]]
+	then
+		#rm "$f"
+		BLG=`expr $BLG + 1`
+		TOTAL=`expr $TOTAL + 1`
+	fi
+	if [[ $f == *.toc ]]
+	then
+		#rm "$f"
+		TOC=`expr $TOC + 1`
+		TOTAL=`expr $TOTAL + 1`
+	fi
+done
+
+if [ $TOTAL -eq "0" ]
+	then echo "No files to remove"
+	else echo "Removed:"
+fi
+if [ $AUX -ne "0" ]
+	then echo "       $AUX .aux files"
+fi
+if [ $AUX -ne "0" ]
+	then echo "       $LOG .log files"
+fi
+if [ $AUX -ne "0" ]
+	then echo "       $OUT .out files"
+fi
+if [ $GZ -ne "0" ]
+	then echo "       $GZ .gz files"
+fi
+if [ $FLS -ne "0" ]
+	then echo "       $FLS .fls files"
+fi
+if [ $FDB -ne "0" ]
+	then echo "       $FDB .fdb_latexmk files"
+fi
+if [ $BBL -ne "0" ]
+	then echo "       $BBL .bbl files"
+fi
+if [ $BLG -ne "0" ]
+	then echo "       $BLG .blg files"
+fi
+if [ $TOC -ne "0" ]
+	then echo "       $TOC .toc files"
+fi
+if [ $TOTAL -ne "0" ]
+	then echo "Total removed = $TOTAL"
+fi

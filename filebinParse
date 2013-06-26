@@ -1,0 +1,19 @@
+#!/bin/bash
+
+hist=$(fb -H | tail -n+2 | head -n-2)
+
+if [[ -z $hist ]]; then
+    echo "No new pastes, exiting..."
+    exit
+fi
+while read -r code temp; do
+    item=$(fb -g $code)
+    echo -e "$code\n"
+    cmd="hnb -e 'search --Todo--' 'go right' 'go bottom' 'add \"$item\"' 'go bottom' 'toggle_todo' 'save'";
+    eval $cmd
+#    hnb -e 'search "--Todo--"' 'go right' 'go bottom' 'add "$code"' 'go bottom' 'toggle_todo' 'save'
+    fb -d $code
+done <<< "$hist"
+
+notify-send "New todo items added"
+

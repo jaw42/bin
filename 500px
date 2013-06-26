@@ -1,0 +1,23 @@
+#!/bin/bash
+
+selection=editors
+catagories=(Landscapes "City+%26+Architecture" Journalism)
+catagory=${catagories[$RANDOM % ${#catagories[@]} ] }
+notify-send $catagory
+first=true
+
+imageLinks=`wget --referer='http://500px.com/' --quiet -O- http://500px.com/$selection\?only=$catagory\&page=$((RANDOM%10)) | grep "from=$selection" | sort -R | head -n2 | sed -n 's/.*<img src="\([^"]*\)".*/\1/p' | sed s/"3.jpg"/"4.jpg"/`
+
+for line in $imageLinks; do 
+    if $first; then
+        wget -O ~/Pictures/Wallpapers/500px/1.jpg --quiet "$line" 
+    else
+        wget -O ~/Pictures/Wallpapers/500px/2.jpg --quiet "$line"
+    fi
+    first=false
+done
+
+mogrify -crop 1920x1080^ 1.jpg
+mogrify -crop 1366x768^ 2.jpg
+
+imlibsetroot -x 1 -s f ~/Pictures/Wallpapers/500px/1.jpg -x 0 -s f ~/Pictures/Wallpapers/500px/2.jpg

@@ -1,0 +1,7 @@
+#!/bin/sh
+ 
+# read from stdin, write to a temp file, open the temp file in a browser, then delete it
+tmpfile="/tmp/tempfile";
+touch $tmpfile
+cat > $tmpfile; 
+open web $tmpfile; rm $tmpfile

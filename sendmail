@@ -1,0 +1,74 @@
+#!/bin/bash
+
+addressBook=~/.mutt/aliases
+research=false
+firstrun=true
+notFound=false
+
+function search {
+    echo -n "Search: "
+    read name; 
+    echo -e ""
+}
+
+while $research || $firstrun; do
+#    while [ ${#addresses[@]} -eq 0 ] ; do
+    while $notFound || $firstrun || $research; do
+
+        if [[ $# -eq 0 ]] || $research; then
+            search
+        else
+            name="$1"
+        fi
+
+        addresses=($(cat $addressBook | grep "$name" | sed 's/.*<\(.*\)>.*/\1/' ))
+        IFS=$'\n'
+        names=($(cat $addressBook | grep "$name" | awk '{print $3 " " $4}'))
+        unset IFS
+
+        num=0
+
+        for i in ${addresses[@]}; do
+            echo -e "$num ${names[$num]} \t$i"
+            num=$(($num+1))
+        done
+
+        if [[ ${#addresses[@]} -gt 1 ]]; then
+            echo -ne "\nSelect an address: "
+            read addressNum
+            sendTo=${addresses[$addressNum]}
+            sendToArray=("${sendToArray[@]}" "${addresses[$addressNum]}")
+            echo "$sendTo"
+        else
+            sendTo=${addresses[0]}
+            sendToArray=("${sendToArray[@]}" "${addresses[$addressNum]}")
+        fi
+
+        if [[ ${#addresses[@]} -eq 0 ]];then
+            echo "Name not found, please search again"
+            notFound=true
+        else
+            notFound=false
+        fi
+        firstrun=false
+        research=false
+    done
+
+    echo -en "\nSearch again? [y/N] "
+    read yesno
+    case $yesno in
+        Y|y|yes|Yes)
+            research=true;;
+        N|n|no|No|*)
+            research=false;;
+    esac
+done
+
+echo -e "--------------------------------------------------------------------------------"
+
+echo ${sendToArray[@]}
+sendTo=$(IFS=, ; echo "${sendToArray[*]}")
+
+echo -n "Subject: "
+read subject
+mailx -v -s "$subject" "$sendTo"
