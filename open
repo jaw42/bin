@@ -60,8 +60,8 @@ in_array() {
 verbose() {
     if $verbose_output; then
         if [[ $2 == "n" ]]; then
-           echo -n $1 
-        else 
+           echo -n $1
+        else
             echo $1
         fi
     fi
@@ -95,13 +95,13 @@ Options:
 
 Configuration:
   * The script is configured at the moment, from within the script its self.
-  * A number of arrays are defined at the top of the script file. Each array 
-    corresponds to a filetype, or "genre", and contains 1 or 2 elements, each 
-    of which is the executable name of a program. 
+  * A number of arrays are defined at the top of the script file. Each array
+    corresponds to a filetype, or "genre", and contains 1 or 2 elements, each
+    of which is the executable name of a program.
       * The first is the fast program - designed to be a quick to open, usually
         lower on features, that is used to simply view the file specifier.
-      * The second is the complex program - intended to be a more feature rich 
-        program for editing the file, but which is likely to take longer to 
+      * The second is the complex program - intended to be a more feature rich
+        program for editing the file, but which is likely to take longer to
         start.
 
 Examples:
@@ -112,7 +112,7 @@ Examples:
         Use the complex pdf viewer to view the file example.pdf.
 
     open -tvfd terminal
-        Open the fast terminal with verbose program information printed to 
+        Open the fast terminal with verbose program information printed to
         stdout and dump any error messages from the terminal to /dev/null.
 
 Bugs:
@@ -153,7 +153,7 @@ while getopts ":fcvhdwt" opt; do
         h)
             helpOutput
             ;;
-        d) 
+        d)
             dumpOutput=true
             dumpFunc
             verbose "Dumping output to null"
@@ -235,8 +235,8 @@ fi
 verbose "Extension is $ext"
 for fileType in "${Genre_array[@]}" ; do
     fileType_array="$fileType""_array[@]"
-    
-    verbose "Checking genre $fileType ..." 
+
+    verbose "Checking genre $fileType ..."
 
     if in_array $ext "${!fileType_array}"; then
         verbose "Found extension $ext in genre $fileType"
