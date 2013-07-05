@@ -1,6 +1,7 @@
 #!/bin/bash
 
 hist=$(fb -H | tail -n+2 | head -n-2)
+number=0
 
 if [[ -z $hist ]]; then
     echo "No new pastes, exiting..."
@@ -10,10 +11,8 @@ while read -r code temp; do
     item=$(fb -g $code)
     echo -e "$code\n"
     cmd="hnb -e 'search --Todo--' 'go right' 'go bottom' 'add \"$item\"' 'go bottom' 'toggle_todo' 'save'";
-    eval $cmd
-#    hnb -e 'search "--Todo--"' 'go right' 'go bottom' 'add "$code"' 'go bottom' 'toggle_todo' 'save'
-    fb -d $code
+    eval $cmd && fb -d $code
+    number=$(($number+1))
 done <<< "$hist"
 
-notify-send "New todo items added"
-
+notify-send "New todo items added ($number)"

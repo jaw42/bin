@@ -1,6 +1,14 @@
-#!/bin/bash
+#!/bin/zsh
 # Status script for dwm
 # colours: 01:normal 02:white 03:red 04:green 05:yellow 06:blue 07:cyan 08:magenta 09:grey
+#
+# This script will work almost completely in bash as well as zsh. The only
+# component that is not transferable is the notification for emails which seems
+# to use zsh specific regexes,
+
+arg=$1
+minute=$(date +%M)
+bigSec=$(date +%s)
 
 # mem(){
 # 	mem="$(awk '/^-/ {print $3}' <(free -m))"
@@ -18,10 +26,6 @@
 # 	echo -e "CPU\x05$cpu%\x01"
 # 	}
 
-arg=$1
-minute=$(date +%M)
-bigSec=$(date +%s)
-
 function removeUnprintable(){
 	clean=$(echo "$1" | tr 'āáǎàēéěèīíǐìú' 'aaaaeeeeiiiu' )
 	echo $clean
@@ -31,11 +35,12 @@ function testTimeNow(){
 	duration=$1
 	if [ "$arg" = "now" ]; then
 		return 0
-	else
-		return 1
 	fi
+	echo $2 "\t" $duration "\t" $(($bigSec%$duration))
 
-	if [ $(($bigSec%$duration)) -eq 0 ]; then
+	#if [ $(($bigSec%$duration)) -eq 0 ]; then
+	current=$(($bigSec%$duration))
+	if [[ $current -ge 0 && $current -lt 11 ]]; then
 		return 0
 	else
 		return 1
@@ -43,8 +48,7 @@ function testTimeNow(){
 }
 
 function open(){
-# if [[ $minute%5 -eq 0 ]]; then
-	if testTimeNow 300; then
+	if testTimeNow 300 "open"; then
 		opn=$(lsof | wc -l)
 		echo -ne " $opn" > /tmp/dwm_status_bar/open
 	fi
@@ -63,17 +67,17 @@ function mpd(){
 	echo -ne " \x08$stat_short $perc $cur\x01" > /tmp/dwm_status_bar/mpd
 }
 
-function rdog(){
-	read rawdog_unread updated < /tmp/rawdog_feeds
-	if [ "$rawdog_unread" -ne 0 ]; then
-		echo -ne " \x04R:\x01$rawdog_unread" > /tmp/dwm_status_bar/rdog
-	else
-		echo "" > /tmp/dwm_status_bar/rdog
-	fi
-}
+#function rdog(){
+#	read rawdog_unread updated < /tmp/rawdog_feeds
+#	if [ "$rawdog_unread" -ne 0 ]; then
+#		echo -ne " \x04R:\x01$rawdog_unread" > /tmp/dwm_status_bar/rdog
+#	else
+#		echo "" > /tmp/dwm_status_bar/rdog
+#	fi
+#}
 
 function grd(){
-	if testTimeNow 600; then
+	if testTimeNow 600 "greader"; then
 		unread=$(~/greaderunread.sh)
 		if [ "$unread" -ne 0 ]; then
 			echo -ne " \x04U:\x01$unread" > /tmp/dwm_status_bar/grd
@@ -84,16 +88,15 @@ function grd(){
 }
 
 function mail(){
-if testTimeNow 120; then
-		notify-send "Mail updated $((bigSec%120))"
+if testTimeNow 120 "email"; then
 		feed=$(nice -n 19 curl -n --silent "https://mail.google.com/mail/feed/atom")
 		new=$(echo $feed | sed -n -e 's/.*<fullcount>\(.*\)<\/fullcount>.*/\1/p')
-		# new=$(find ~/.mail/ -type f -wholename '*/new/*' | wc -l);
-		# unread=$(find ~/.mail/ -type f -regex '.*/cur/.*2,[^S]*$' | wc -l);
 		if [ "$new" -ne 0 ]; then
 			echo -ne " \x04M:\x01$new" > /tmp/dwm_status_bar/mail
-			details=$(echo $feed | sed -n -e 's/.*<title>\(.*\)<\/title>.*/\1/p' -e 's/.*<name>\(.*\)<\/name>.*/\t\1/p' | tail -n+2)
-			#notify-send "<b>New messages availible</b>\n$details"
+
+			things=$(echo $feed | sed -n -e 's/.*<title>\(.*\)<\/title>.*/\1/p' -e 's/.*<name>\(.*\)<\/name>.*/\t\1/p' | tail -n+2)
+			notify-send "<b>New messages availible</b>\n$things"
+
 		else
 			echo "" > /tmp/dwm_status_bar/mail
 		fi
@@ -101,10 +104,10 @@ if testTimeNow 120; then
 }
 
 function pac(){
-	if testTimeNow 120; then
-		notify-send "Pacman has been run!!!!"
+	if testTimeNow 120 "pacman"; then
 		pup="$(pacman -Qqu | wc -l)"
 		if [ "$pup" -ne 0 ]; then
+			notify-send "Pacman has been run - $pup updates"
 			echo -ne " \x04P:\x01$pup" > /tmp/dwm_status_bar/pac
 		else
 			echo "" > /tmp/dwm_status_bar/pac
@@ -172,7 +175,7 @@ fi
 
 echo "" > /tmp/dwm_status_bar/content
 
-for file in  mpd open pac rdog mail hdd int dte
+for file in  mpd open pac mail hdd int dte
 do
 	if [ ! -f "/tmp/dwm_status_bar/$file" ];
 	then
@@ -181,6 +184,8 @@ do
 	$file
 	cat /tmp/dwm_status_bar/$file >> /tmp/dwm_status_bar/content
 done
+
+xsetroot -name "$(cat /tmp/dwm_status_bar/content)"
 
 # ------------------------------------------------------------------
 ## Run commands
