@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
 			search = argv[1];
 		}
 
-		while(!contacts.eof()){
+		while(!contacts.eof() && (emailArray.size != 0)){
 			getline(contacts,line);
 			if ((offset = line.find(search, 0)) != string::npos) {
 				string name;
@@ -105,6 +105,8 @@ int main(int argc, char* argv[]) {
 
 // Functions --------------------------------------------------------------
 
+//split a string based on a character and return either the first or second half
+//of the sting. position=1 is first half, position=2 is second half.
 string split(string StringToSplit, string Separators, int position) {
 
 	size_t EndPart1 = StringToSplit.find_first_of(Separators);
@@ -118,6 +120,8 @@ string split(string StringToSplit, string Separators, int position) {
 	}
 }
 
+//Remove everything apart from the names of the aliases that relate to the
+//addresses.
 string splitToNames(string everything) {
 	stringstream ss(everything);
 	string s, finalName;
