@@ -1,0 +1,18 @@
+C++
+
+Enter search term
+Search file, line by line for search term
+For each result, read each field into a variable
+Present the names of the found results
+Select number of the name to view all details
+Empty fields are left empty and are not presented
+Give shortcut to google contacts for easier editing
+Search again | exit
+
+
+Some fields are two part - one for the specific name of the field, one for the
+data that is held by the field. Each of the 84 fields will need to be handled
+individually with it's name incase it is used for some contacts.
+
+Somehow need to deal with fields that span multiple lines, ie contain line
+breaks, eg address.
