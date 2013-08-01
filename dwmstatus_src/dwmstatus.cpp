@@ -27,6 +27,8 @@ bool testTimeNow(int duration, string prog, string arg);
 string delLast(string str);
 string substring(string text, string start_string, string end_string);
 void concatenate();
+int count(string String, char character);
+string Get(const string & s, unsigned int n);
 
 void open();
 void mpd();
@@ -58,6 +60,7 @@ int main(int argc, char *argv[]){
 	checkFolders();
 	concatenate();
 	popen("xsetroot -name \"$(cat /tmp/dwm_status_bar/content)\"", "r");
+
 	return 0;
 }
 
@@ -76,15 +79,15 @@ void concatenate(){
 	string functions[7] = {"mpd", "open", "pac", "mail", "hdd", "net", "dte"};
 
 	ofstream out(TMP_FOLDER"/content");
-    string line = "";
-    for (int i = 0; i < 7; i++) {
-        stringstream filename;
+	string line = "";
+	for (int i = 0; i < 7; i++) {
+		stringstream filename;
 		filename << TMP_FOLDER << "/" << functions[i];
-        ifstream in( filename.str().c_str() );
-        while (getline(in, line)) {
-            out << line;
-        }
-    }
+		ifstream in( filename.str().c_str() );
+		while (getline(in, line)) {
+			out << line;
+		}
+	}
 }
 
 string exec(string cmdstring) {
@@ -117,8 +120,7 @@ bool testTimeNow(int duration, string prog, string arg){
 }
 
 string delLast(string str){
-	string output = str.erase(str.length()-1);
-	return output;
+	return str.erase(str.length()-1);
 }
 
 string substring(string text, string start_string, string end_string){
@@ -140,7 +142,28 @@ string substring(string text, string start_string, string end_string){
 			return found_text;
 		}
 	}
-	return 0;
+	return " ";
+}
+
+int count(string String, char character){
+	int count = 0;
+	for (unsigned int i = 0; i < String.size(); ++i) {
+		if (String[i] == character) {
+			count++;
+		}
+	}
+	return count;
+}
+
+string Get(const string & s, unsigned int n) {
+    istringstream is( s );
+    string field;
+    do {
+        if ( ! ( is >> field ) ) {
+            return "";
+        }
+    } while( n-- != 0 );
+    return field;
 }
 
 /******************************************************************************
@@ -186,12 +209,17 @@ void mpd(){
 void mail(){
 	if (testTimeNow(120, "email", arg)) {
 		string feed = exec("nice -n 19 curl -n --silent 'https://mail.google.com/mail/feed/atom'");
-		string newNo = substring(feed, "<fullcount>", "</fullcount>");
 
 		ofstream mailfile;
 		mailfile.open(TMP_FOLDER"/mail");
-		if (newNo != "0") {
-			mailfile << " \x04M:\x01" << newNo;
+		if (feed.find("fullcount") != string::npos) {
+			string newNo = substring(feed, "<fullcount>", "</fullcount>");
+
+			if (newNo != "0") {
+				mailfile << " \x04M:\x01" << newNo;
+			}else{
+				mailfile << "";
+			}
 		}else{
 			mailfile << "";
 		}
@@ -202,18 +230,13 @@ void mail(){
 void pac(){
 	if (testTimeNow(120, "pacman", arg)) {
 
-		//TODO maybe count in c++ rather than spawning a wc shell.
-		string pup = exec("pacman -Qqu | wc -l");
-		pup = delLast(pup);
+		string pacup = exec("pacman -Qqu");
+		int pup = count(pacup, '\n');
 
 		ofstream pacfile;
 		pacfile.open(TMP_FOLDER"/pac");
 
-		if (pup != "0") {
-
-			//TODO create a notify-send function to make this easier.
-			string message = "notify-send 'pacman has been run (" + pup + " updates)'";
-			popen(message.c_str(),"r");
+		if (pup != 0) {
 			pacfile << " \x04P:\x01" << pup;
 		}else{
 			pacfile << "";
@@ -238,12 +261,23 @@ void net(){
 	//use the second columnm, local_address, the ip address is here but in hex
 	//and in reverse order. 0201A8C0 -> 192 168 1 2
 	string ipaddr=exec("ifconfig wlan0 | awk '/inet / {print $2}'");
-	ipaddr = delLast(ipaddr);
-	string signal_tmp=exec("cat /proc/net/wireless | grep wlan0 | awk '{print $3}' | tr -d '.'");
-	signal_tmp = delLast(signal_tmp);
+	if (ipaddr != "") {
+		ipaddr = delLast(ipaddr);
+	}
+	string signal_tmp;
+
+	ifstream wireless("/proc/net/wireless");
+	while (getline(wireless, signal_tmp)) {
+		if (signal_tmp.find("wlan0") != string::npos) {
+			signal_tmp = Get(signal_tmp, 2);
+			signal_tmp = delLast(signal_tmp);
+			break;
+		}
+	}
 
 	int signal_int;
-	stringstream(signal_tmp) >> signal_int;
+
+	signal_int = atoi(signal_tmp.c_str());
 
 	string signal;
 	if (signal_int < 30) {
@@ -259,7 +293,6 @@ void net(){
 }
 
 void date(){
-	//TODO read from /proc/uptime to get uptime info
 	int seconds;
 	ifstream uptimeFile("/proc/uptime");
 
@@ -302,7 +335,6 @@ void date(){
 	dateNow << day << " " << month_long << "'" << year;
 
 	int hour = now->tm_hour;
-	//TODO pad minutes so its always 2 characters wide.
 	int minute = now->tm_min;
 	int second = now->tm_sec;
 	string ampm;
@@ -312,8 +344,22 @@ void date(){
 	}else{
 		ampm = "am";
 	}
+
+	ostringstream minPad;
+	if (minute < 10) {
+		minPad << "0" << minute;
+	}else{
+		minPad << minute;
+	}
+	ostringstream secPad;
+	if (second < 10) {
+		secPad << "0" << second;
+	}else{
+		secPad << second;
+	}
+
 	ostringstream timeNow;
-	timeNow << hour << ":" << minute << ":" << second << ampm;
+	timeNow << hour << ":" << minPad.str() << ":" << secPad.str() << ampm;
 
 	ofstream datefile;
 	datefile.open(TMP_FOLDER"/dte");
