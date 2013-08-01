@@ -2,6 +2,7 @@ C++
 
 Enter search term
 Search file, line by line for search term
+		Or read whole file into 2d array/vector
 For each result, read each field into a variable
 Present the names of the found results
 Select number of the name to view all details
