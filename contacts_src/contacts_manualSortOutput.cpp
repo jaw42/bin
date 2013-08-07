@@ -17,7 +17,6 @@ using namespace std;
 
 int menu();
 int countSubstring(const string& str, const string& sub);
-bool startsWith(string str, string prefix);
 
 int main(int argc, char* argv[]) {
 string GOOGLECSV = "/home/josh/Downloads/google.csv";
@@ -37,10 +36,7 @@ string GOOGLECSV = "/home/josh/Downloads/google.csv";
 			return 1;
 		}
 
-		string command = "iconv -f $(file -b --mime-encoding " + GOOGLECSV + ") -t UTF-8 " + GOOGLECSV + " > tmp"
-							 /*+ " && tr '\r' ' ' <tmp > " + GOOGLECSV
-							 + " && awk -F'\"' -v OFS='' '{ for (i=2; i<=NF; i+=2) gsub(\",\", \"\", $i) } 1' " + GOOGLECSV + " > tmp "*/
-							 + " && mv tmp " + GOOGLECSV;
+		string command = "iconv -f $(file -b --mime-encoding " + GOOGLECSV + ") -t UTF-8 " + GOOGLECSV + " > tmp && mv tmp " + GOOGLECSV;
 		system(command.c_str());
 
 		ContactsArrayFull.clear();
@@ -62,20 +58,11 @@ string GOOGLECSV = "/home/josh/Downloads/google.csv";
 		//line-vector into a global vector.
 		int entryNumber=0;
 		string line2;
-		bool firstLine=true;
-		string fieldsLine;
-
 		while(!google.eof()){
 			getline(google,line);
 
-			//Get the number of fields from the number of commas in the first line
-			if (firstLine){
-				fieldsLine = line;
-			}
-			firstLine = false;
-
 			//Deal with lines that are split by internal newlines
-			while (countSubstring(line, ",") < countSubstring(fieldsLine, ",")){
+			while (countSubstring(line, ",") < 84){
 				getline(google, line2);
 				line = line + line2;
 			}
@@ -99,13 +86,13 @@ string GOOGLECSV = "/home/josh/Downloads/google.csv";
 		}
 
 		//Debuging - print out complete contact array
-		for (unsigned int i = 0; i < ContactsArrayFull.size()-1; ++i){
+		/*for (unsigned int i = 0; i < ContactsArrayFull.size()-1; ++i){
 
 			for (unsigned int j = 0; j < ContactsArrayFull[i].size()-1; ++j){
 					testout << ContactsArrayFull[i][j] << "\t";
 			}
 			testout << endl;
-		}
+		}*/
 
 		/*----------------------------------------------------------------
 		-------------------------- Search --------------------------------
@@ -154,62 +141,63 @@ string GOOGLECSV = "/home/josh/Downloads/google.csv";
 				if (ContactsArrayFull[R][i] != ""){
 					if (i < 27){
 						//Standard info
-						cout << left << setw(17) << ContactsArrayFull[0][i]
+						cout << i << "  "  << left << setw(17) << ContactsArrayFull[0][i]
 							<< " = " << ContactsArrayFull[R][i] << endl;
-					}else if (startsWith(ContactsArrayFull[0][i], "E-mail")){
+					}else if (i < 41){
 						//Emails
-						cout << "Email " << left << setw(11) << ContactsArrayFull[R][i]
+						if(i==27)cout << endl;
+						cout << i << "  "  << "Email " << left << setw(11) << ContactsArrayFull[R][i]
 							<< " = " << ContactsArrayFull[R][i+1] << endl;
 						i++;
-					}else if (startsWith(ContactsArrayFull[0][i], "IM")){
+					}else if (i < 44){
 						//IM
-						cout << left << setw(17) << ContactsArrayFull[0][i]
+						if(i==41)cout << endl;
+						cout << i << "  "  << left << setw(17) << ContactsArrayFull[0][i]
 							<< " = " << ContactsArrayFull[R][i] << endl;
-					}else if (startsWith(ContactsArrayFull[0][i], "Phone")){
+					}else if (i < 52){
 						//Phones
-						cout << "Phone " << left << setw(11) << ContactsArrayFull[R][i]
+						if(i==44)cout << endl;
+						cout << i << "  "  << "Phone " << left << setw(11) << ContactsArrayFull[R][i]
 							<< " = " << ContactsArrayFull[R][i+1] << endl;
 						i++;
-					}else if (startsWith(ContactsArrayFull[0][i], "Address")){
+					}else if (i < 70){
 						//Address
-					//	cout << left << setw(17) << ContactsArrayFull[0][i]
-					//		<< " = " << ContactsArrayFull[R][i] << endl;
-						cout << "Address " << ContactsArrayFull[R][i] << endl
-								<< "        " << ContactsArrayFull[R][i+1] << endl
-								<< "        " << ContactsArrayFull[R][i+2] << endl
-								<< "        " << ContactsArrayFull[R][i+4] << endl
-								<< "        " << ContactsArrayFull[R][i+5] << endl
-								<< "        " << ContactsArrayFull[R][i+6] << endl
-								<< "        " << ContactsArrayFull[R][i+7] << endl
-								<< "        " << ContactsArrayFull[R][i+8] << endl;
-						i=i+8;
-					}else if (startsWith(ContactsArrayFull[0][i], "Organisation")){
-						//Organisation
-						cout << left << setw(17) << ContactsArrayFull[0][i]
+						if(i==52)cout << endl;
+						cout << i << "  "  << left << setw(17) << ContactsArrayFull[0][i]
 							<< " = " << ContactsArrayFull[R][i] << endl;
-					}else if (startsWith(ContactsArrayFull[0][i], "Relation")){
+					}else if (i < 78){
+						//Organisation
+						if(i==70)cout << endl;
+						cout << i << "  "  << left << setw(17) << ContactsArrayFull[0][i]
+							<< " = " << ContactsArrayFull[R][i] << endl;
+					}else if (i < 80){
 						//Relation
-						cout << "Relation " << left << setw(11) << ContactsArrayFull[R][i]
+						if(i==78)cout << endl;
+						cout << i << "  "  << "Relation " << left << setw(11) << ContactsArrayFull[R][i]
 							<< " = " << ContactsArrayFull[R][i+1] << endl;
 						i++;
-					}else if (startsWith(ContactsArrayFull[0][i], "Website")){
+					}else if (i < 82){
 						//Website
-						cout << "Website " << left << setw(11) << ContactsArrayFull[R][i]
+						if(i==80)cout << endl;
+						cout << i << "  "  << "Website " << left << setw(11) << ContactsArrayFull[R][i]
 							<< " = " << ContactsArrayFull[R][i+1] << endl;
 						i++;
-					}else if (startsWith(ContactsArrayFull[0][i], "Event")){
+					}else if (i < 84){
 						//Event
-						cout << "Event " << left << setw(11) << ContactsArrayFull[R][i]
+						if(i==82)cout << endl;
+						cout << i << "  "  << "Event " << left << setw(11) << ContactsArrayFull[R][i]
 							<< " = " << ContactsArrayFull[R][i+1] << endl;
 						i++;
-					}else if (startsWith(ContactsArrayFull[0][i], "Custom")){
-						//Custom
-						cout << "Event " << left << setw(11) << ContactsArrayFull[R][i]
+					}else if (i < 86){
+						//Event
+						if(i==84)cout << endl;
+						cout << i << "  "  << "Event " << left << setw(11) << ContactsArrayFull[R][i]
 							<< " = " << ContactsArrayFull[R][i+1] << endl;
 						i++;
 					}else{
 						//Everything else
-						cout << "Other " <<  left << setw(17) << ContactsArrayFull[0][i]
+						if(i==84)cout << endl;
+						cout << i << "  " <<  left << setw(17) << ContactsArrayFull[0][i]
 							<< " = " << ContactsArrayFull[R][i] << endl;
 					}
 				}
@@ -248,12 +236,4 @@ int countSubstring(const string& str, const string& sub)
         ++count;
     }
     return count;
-}
-
-bool startsWith(string str, string prefix){
-	if (str.compare(0, prefix.size(), prefix) == 0){
-		return true;
-	}else{
-		return false;
-	}
 }

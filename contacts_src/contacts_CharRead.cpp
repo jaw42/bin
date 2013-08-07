@@ -20,32 +20,89 @@ int countSubstring(const string& str, const string& sub);
 bool startsWith(string str, string prefix);
 
 int main(int argc, char* argv[]) {
-string GOOGLECSV = "/home/josh/Downloads/google.csv";
+	string GOOGLECSV = "/home/josh/Downloads/google.csv";
 
-	int Continue = 1;
-	string Search;
-	vector<vector<string> > ContactsArrayFull;
-	vector<int> resultsArray;
-	string line;
-	bool first=true;
+	string command = "iconv -f $(file -b --mime-encoding " + GOOGLECSV + ") -t UTF-8 " + GOOGLECSV + " > tmp"
+						 /*+ " && tr '\r' ' ' <tmp > " + GOOGLECSV
+						 + " && awk -F'\"' -v OFS='' '{ for (i=2; i<=NF; i+=2) gsub(\",\", \"\", $i) } 1' " + GOOGLECSV + " > tmp "*/
+						 + " && mv tmp " + GOOGLECSV;
+	system(command.c_str());
+
+	ifstream google(GOOGLECSV.c_str());
+	if (!google) {
+		cout << "Cannot open input file" << endl;
+		return 1;
+	}
+
 	ofstream testout("testout");
 
-	do{
-		ifstream google(GOOGLECSV.c_str());
-		if (!google) {
-			cout << "Cannot open input file" << endl;
-			return 1;
+	vector<vector<string> > ContactsArrayFull;
+	ContactsArrayFull.push_back(vector <string> ());
+
+	/*----------------------------------------------------------------
+	------------------ Contacts array generation ---------------------
+	----------------------------------------------------------------*/
+	int entryNumber = 0;
+	double fieldNumber = 0;
+	string fieldsLine;
+
+	getline(google,fieldsLine);
+	int totalFields = countSubstring(fieldsLine, ",");
+	google.clear();
+	google.seekg(0);
+	cout << totalFields << endl;
+
+	string currentField;
+	bool insideQuote = false;
+	char c;
+
+	//Ignore first three escape characters
+	c = google.get();
+	c = google.get();
+	c = google.get();
+	while(google){
+
+		c = google.get();
+		if ((c == '"') && (insideQuote == false)){
+			insideQuote = true;
+		}else if((c == '"') && (insideQuote == true)){
+			insideQuote = false;
 		}
 
-		string command = "iconv -f $(file -b --mime-encoding " + GOOGLECSV + ") -t UTF-8 " + GOOGLECSV + " > tmp"
-							 /*+ " && tr '\r' ' ' <tmp > " + GOOGLECSV
-							 + " && awk -F'\"' -v OFS='' '{ for (i=2; i<=NF; i+=2) gsub(\",\", \"\", $i) } 1' " + GOOGLECSV + " > tmp "*/
-							 + " && mv tmp " + GOOGLECSV;
-		system(command.c_str());
+		if ((c == ',') && (insideQuote == false)){
+			fieldNumber++;
+			//cout << currentField << endl;
 
-		ContactsArrayFull.clear();
-		resultsArray.clear();
+			ContactsArrayFull[entryNumber].push_back(currentField);
+			currentField = "";
+		}else if((c != '\n') && (c != '\r')){
+			currentField += c;
+		}
 
+		if ((fieldNumber == totalFields) && (c == '\n')){
+			ContactsArrayFull.push_back(vector <string> ());
+			entryNumber++;
+			fieldNumber = 0;
+		}
+	}
+
+	//Debuging - print out complete contact array
+	for (unsigned int i = 0; i < ContactsArrayFull.size()-1; ++i){
+
+		for (unsigned int j = 0; j < ContactsArrayFull[i].size()-1; ++j){
+				testout << ContactsArrayFull[i][j] << "\t";
+		}
+		testout << endl;
+	}
+
+	/*----------------------------------------------------------------
+	-------------------------- Search --------------------------------
+	----------------------------------------------------------------*/
+	int Continue = 1;
+	string Search;
+	vector<int> resultsArray;
+	bool first=true;
+	do{
 		//Check if any arguements were given to program start and use these for
 		//Search term. Else prompt for Search
 		if ((argc < 2) || (first == false)) {
@@ -55,61 +112,6 @@ string GOOGLECSV = "/home/josh/Downloads/google.csv";
 			Search = argv[1];
 		}
 
-		/*----------------------------------------------------------------
-		------------------ Contacts array generation ---------------------
-		----------------------------------------------------------------*/
-		//Until the end of the file, split each line into a vector, place each
-		//line-vector into a global vector.
-		int entryNumber=0;
-		string line2;
-		bool firstLine=true;
-		string fieldsLine;
-
-		while(!google.eof()){
-			getline(google,line);
-
-			//Get the number of fields from the number of commas in the first line
-			if (firstLine){
-				fieldsLine = line;
-			}
-			firstLine = false;
-
-			//Deal with lines that are split by internal newlines
-			while (countSubstring(line, ",") < countSubstring(fieldsLine, ",")){
-				getline(google, line2);
-				line = line + line2;
-			}
-
-			//Add new contact
-			ContactsArrayFull.push_back(vector <string> ());
-
-			string delimiter = ",";
-			size_t pos = 0;
-			string fieldContents;
-
-			while ((pos = line.find(delimiter)) != string::npos) {
-				fieldContents = line.substr(0, pos);
-
-				//Add new field, and populate, to the new contact added above
-				ContactsArrayFull[entryNumber].push_back(fieldContents);
-				line.erase(0, pos + delimiter.length());
-
-			}
-			entryNumber++;
-		}
-
-		//Debuging - print out complete contact array
-		for (unsigned int i = 0; i < ContactsArrayFull.size()-1; ++i){
-
-			for (unsigned int j = 0; j < ContactsArrayFull[i].size()-1; ++j){
-					testout << ContactsArrayFull[i][j] << "\t";
-			}
-			testout << endl;
-		}
-
-		/*----------------------------------------------------------------
-		-------------------------- Search --------------------------------
-		----------------------------------------------------------------*/
 		int counter=0;
 		int found = 0;
 		cout << "Total size = " << ContactsArrayFull.size() << endl;
@@ -128,6 +130,7 @@ string GOOGLECSV = "/home/josh/Downloads/google.csv";
 			}
 			++counter;
 		}
+				cout << "Something"  << endl;
 
 		if (resultsArray.size() == 0){
 			//No results found
@@ -140,6 +143,11 @@ string GOOGLECSV = "/home/josh/Downloads/google.csv";
 				cout << "Choose a result: ";
 				int pickResult;
 				cin >> pickResult;
+
+				while ((cin.fail()) || (pickResult < 0) || pickResult > resultsArray.size()){
+					cout << "Not a valid selection. Choose a result: ";
+					cin >> pickResult;
+				}
 				R = resultsArray[pickResult];
 			}else{
 				//One result found
@@ -174,14 +182,18 @@ string GOOGLECSV = "/home/josh/Downloads/google.csv";
 						//Address
 					//	cout << left << setw(17) << ContactsArrayFull[0][i]
 					//		<< " = " << ContactsArrayFull[R][i] << endl;
-						cout << "Address " << ContactsArrayFull[R][i] << endl
-								<< "        " << ContactsArrayFull[R][i+1] << endl
-								<< "        " << ContactsArrayFull[R][i+2] << endl
-								<< "        " << ContactsArrayFull[R][i+4] << endl
-								<< "        " << ContactsArrayFull[R][i+5] << endl
-								<< "        " << ContactsArrayFull[R][i+6] << endl
-								<< "        " << ContactsArrayFull[R][i+7] << endl
-								<< "        " << ContactsArrayFull[R][i+8] << endl;
+						cout << "Address " << ContactsArrayFull[R][i] << endl;
+							for (int p = 1; p < 8; ++p) {
+								if (ContactsArrayFull[R][i+p] != ""){
+									cout << p << "        " << ContactsArrayFull[R][i+p] << endl;
+								}
+							}
+								/*<< " 2      " << ContactsArrayFull[R][i+2] << endl
+								<< " 7      " << ContactsArrayFull[R][i+8] << endl
+								<< " 3      " << ContactsArrayFull[R][i+4] << endl
+								<< " 4      " << ContactsArrayFull[R][i+5] << endl
+								<< " 5      " << ContactsArrayFull[R][i+6] << endl
+								<< " 6      " << ContactsArrayFull[R][i+7] << endl;*/
 						i=i+8;
 					}else if (startsWith(ContactsArrayFull[0][i], "Organisation")){
 						//Organisation
@@ -214,7 +226,11 @@ string GOOGLECSV = "/home/josh/Downloads/google.csv";
 					}
 				}
 			}
+			Continue = 0;
 			Continue = menu();
+			if (Continue == 1){
+				Search = "";
+			}
 		}
 		first = false;
 		google.close();
