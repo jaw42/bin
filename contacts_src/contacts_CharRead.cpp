@@ -8,24 +8,21 @@
 #include <vector>
 #include <sstream>
 #include <cstdlib>
-//#include <algorithm>
-//#include <unistd.h>
-
-//#define GOOGLECSV "/home/josh/.mutt/google.csv"
 
 using namespace std;
+
+bool verbose=false;
 
 int menu();
 int countSubstring(const string& str, const string& sub);
 bool startsWith(string str, string prefix);
 
 int main(int argc, char* argv[]) {
-	string GOOGLECSV = "/home/josh/Downloads/google.csv";
+	//string GOOGLECSV = "/home/josh/Downloads/google.csv";
+	string GOOGLECSV = "/home/josh/.mutt/google.csv";
 
-	string command = "iconv -f $(file -b --mime-encoding " + GOOGLECSV + ") -t UTF-8 " + GOOGLECSV + " > tmp"
-						 /*+ " && tr '\r' ' ' <tmp > " + GOOGLECSV
-						 + " && awk -F'\"' -v OFS='' '{ for (i=2; i<=NF; i+=2) gsub(\",\", \"\", $i) } 1' " + GOOGLECSV + " > tmp "*/
-						 + " && mv tmp " + GOOGLECSV;
+	string command = "iconv -f $(file -b --mime-encoding " + GOOGLECSV + ") -t UTF-8 " + GOOGLECSV + " > /tmp/google"
+						 		+ " && mv /tmp/google " + GOOGLECSV;
 	system(command.c_str());
 
 	ifstream google(GOOGLECSV.c_str());
@@ -34,7 +31,6 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	ofstream testout("testout");
 
 	vector<vector<string> > ContactsArrayFull;
 	ContactsArrayFull.push_back(vector <string> ());
@@ -50,7 +46,6 @@ int main(int argc, char* argv[]) {
 	int totalFields = countSubstring(fieldsLine, ",");
 	google.clear();
 	google.seekg(0);
-	cout << totalFields << endl;
 
 	string currentField;
 	bool insideQuote = false;
@@ -75,6 +70,10 @@ int main(int argc, char* argv[]) {
 
 			ContactsArrayFull[entryNumber].push_back(currentField);
 			currentField = "";
+		//}else if((c != '\n') && (c != '\r') && (c != '"')){
+		}else if((c == '\n') || (c == '\r')){
+			currentField += c;
+			currentField += ' ';
 		}else if((c != '\n') && (c != '\r')){
 			currentField += c;
 		}
@@ -87,12 +86,15 @@ int main(int argc, char* argv[]) {
 	}
 
 	//Debuging - print out complete contact array
-	for (unsigned int i = 0; i < ContactsArrayFull.size()-1; ++i){
+	if(verbose){
+		ofstream testout("testout");
+		for (unsigned int i = 0; i < ContactsArrayFull.size()-1; ++i){
 
-		for (unsigned int j = 0; j < ContactsArrayFull[i].size()-1; ++j){
-				testout << ContactsArrayFull[i][j] << "\t";
+			for (unsigned int j = 0; j < ContactsArrayFull[i].size()-1; ++j){
+					testout << ContactsArrayFull[i][j] << "\t";
+			}
+			testout << endl;
 		}
-		testout << endl;
 	}
 
 	/*----------------------------------------------------------------
@@ -141,7 +143,7 @@ int main(int argc, char* argv[]) {
 			int R;
 			if (resultsArray.size() > 1){
 				cout << "Choose a result: ";
-				int pickResult;
+				unsigned int pickResult;
 				cin >> pickResult;
 
 				while ((cin.fail()) || (pickResult < 0) || pickResult > resultsArray.size()){
@@ -183,11 +185,12 @@ int main(int argc, char* argv[]) {
 					//	cout << left << setw(17) << ContactsArrayFull[0][i]
 					//		<< " = " << ContactsArrayFull[R][i] << endl;
 						cout << "Address " << ContactsArrayFull[R][i] << endl;
-							for (int p = 1; p < 8; ++p) {
-								if (ContactsArrayFull[R][i+p] != ""){
-									cout << p << "        " << ContactsArrayFull[R][i+p] << endl;
-								}
+						int q[] = {1,2,8,3,4,5,6,7};
+						for (int p = 0; p < 8; ++p) {
+							if (ContactsArrayFull[R][i+q[p]] != ""){
+								cout << p << setw(17) << "        " << ContactsArrayFull[R][i+q[p]] << endl;
 							}
+						}
 								/*<< " 2      " << ContactsArrayFull[R][i+2] << endl
 								<< " 7      " << ContactsArrayFull[R][i+8] << endl
 								<< " 3      " << ContactsArrayFull[R][i+4] << endl
