@@ -1,0 +1,79 @@
+#!/bin/bash
+# Create a new post with today's date and prompt for the title.
+
+# Config
+editor="vim"
+format="md"
+basename="/home/josh/Web/jaw42.github.com/_posts/"
+edit=true
+
+datechosen=""
+# Get layout via getopts (-l)
+while getopts ":l:nd:" opt; do
+    case $opt in
+        l)
+            layout=$OPTARG
+            ;;
+        n)
+            edit=false
+            ;;
+        d)
+            datechosen=$OPTARG
+            ;;
+        :) echo "$opt requires an argument" >&2
+            exit 1
+            ;;
+    esac
+done
+shift $(( ${OPTIND} - 1 ))
+
+# Set default config values
+: ${layout:="blog"}
+
+
+# I like giving myself a polite greeting.
+echo "---"
+echo "Creating a new ${layout} for" `date +%A", "%B" "%e", "%Y`"."
+echo ""
+if [ $# -eq 0 ]; then
+    read -p "Enter the title: " title
+else
+    title=$1
+fi
+
+# Turn spaces into dashes
+for word in $title
+do
+    dashedTitle=${dashedTitle}-${word}
+done
+
+# Convert title to lowercase
+dashedTitle="`echo ${dashedTitle} | tr '[A-Z]' '[a-z]'`"
+
+# Create a filename with the date, dashed title, and format
+filename="$datechosen${dashedTitle}.${format}"
+
+# Get current date and time
+if [[ datechosen == "" ]]; then
+	datechosen="`date '+%Y-%m-%d %T'`"
+fi
+
+filename=$basename$filename
+
+echo $filename
+
+touch $filename
+
+# Add initial YAML to the top of the new bit
+echo "---" >> $filename
+echo "layout: ${layout}" >> $filename
+echo "date: ${datechosen}-`date +%T`" >> $filename
+echo "tags: " >> $filename
+echo "title: \"${title}\"" >> $filename
+echo "---" >> $filename
+echo "" >> $filename
+
+# Open in vim and go to the end of the file ( + )
+if $edit; then
+    ${editor} + $filename
+fi

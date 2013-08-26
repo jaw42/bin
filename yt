@@ -1,0 +1,32 @@
+#!/bin/bash
+
+#Quality setting 2 = 240p
+#                3 = 360p
+#                4 = 480p
+#                7 = 720p
+#                1 = 1080p
+
+qual=4
+dir="/home/josh/Videos/Youtube"
+
+options="--download-dir=$dir -$qual -d"
+
+if [ $# -eq 0 ]; then
+	youtube-viewer -S joshwainwright1 $options
+else
+	youtube-viewer "$@" $options
+fi
+
+if [ "$(ls -A $dir)" ]; then
+	open $dir/*
+
+	echo "Delete all downloaded youtube videos?"
+	select s in y n; do
+		break;
+	done;
+	s=($s)
+
+#	if [[ s -eq y ]]; then
+#		rm $dir/*
+#	fi
+fi

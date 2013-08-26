@@ -5,42 +5,44 @@
 # Change things here to suit your needs.
 # ---------------------------------------------------------
 
-# Genres -----------
-Genre_array=(text video audio pdf web image word spreadsheet archive svg)
+         # Genres
+      Genre_array=(text alt_video video audio pdf web image word spreadsheet archive svg )
 
-#			Genre=("fast"	 "complex"	  					)
-			 text=(gvim	 subl 										)
-			video=(mplayer 												)
-			audio=(mplayer 												)
-				pdf=(zathura		evince 							)
-				web=(luakit			google-chromejumanji)
-			image=(fehviewer	mirage 							)
-			 word=(abiword 												)
-spreadsheet=(gnumeric 											)
-		archive=(file-roller 										)
+           #Genre=("fast" "complex"             )
+             text=(gvim subl                    )
+        alt_video=(mplayer                      )
+            video=(mpv                          )
+            audio=(mpv                          )
+              pdf=(zathura evince               )
+              web=(luakit google-chrome jumanji )
+            image=(fehviewer mirage             )
+             word=(abiword                      )
+      spreadsheet=(gnumeric                     )
+          archive=(file-roller                  )
 
-# File types -------
-			 text_array=(txt tex sh markdown zsh)
-			video_array=(mpg mpeg avi webm m4v swf wmv mp4 flv)
-			audio_array=(mp3 ogg vorbis m4a m4b aif wma wav)
-			pdf_array=(pdf PDF)
-				web_array=(html htm xml)
-			image_array=(jpg jpeg png bmp gif tiff)
-			 word_array=(docx doc odf rtf abw odt rtf)
-spreadsheet_array=(gnumeric xls xlsx csv dat)
-		archive_array=(zip rar bz tar)
+     # File types
+       text_array=(txt tex sh markdown zsh            )
+  alt_video_array=(webm flv                           )
+      video_array=(mpg mpeg avi m4v swf wmv mp4       )
+      audio_array=(mp3 ogg vorbis m4a m4b aif wma wav )
+        pdf_array=(pdf PDF                            )
+        web_array=(html htm xml                       )
+      image_array=(jpg jpeg png bmp gif tiff          )
+       word_array=(docx doc odf rtf abw odt rtf       )
+spreadsheet_array=(gnumeric xls xlsx csv dat          )
+    archive_array=(zip rar bz tar                     )
 
-# Exceptions
-			svg=(rsvg-view-3)
-svg_array=(svg)
+     # Exceptions
+              svg=(rsvg-view-3 )
+        svg_array=(svg         )
 
-# Other Programs
-terminal=(xterm terminator xfce4-terminal)
-	 email=("${terminal[1]} -e mutt" )
+ # Other Programs
+         terminal=(xterm terminator xfce4-terminal )
+            email=("${terminal[1]} -e mutt"        )
 
-# Other Options ----
-default=fast # fast/complex
-verbose_output=false # true/false
+        # Options
+          default=fast # fast/complex
+   verbose_output=false # true/false
 
 # --------------------------------------------------------
 # Program
