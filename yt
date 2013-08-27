@@ -12,21 +12,23 @@ dir="/home/josh/Videos/Youtube"
 options="--download-dir=$dir -$qual -d"
 
 if [ $# -eq 0 ]; then
-	youtube-viewer -S joshwainwright1 $options
+    youtube-viewer -S joshwainwright1 $options
 else
-	youtube-viewer "$@" $options
+    youtube-viewer "$@" $options
 fi
 
 if [ "$(ls -A $dir)" ]; then
-	open $dir/*
+    for file in $dir/*; do
+        open "$file"
+    done
 
-	echo "Delete all downloaded youtube videos?"
-	select s in y n; do
-		break;
-	done;
-	s=($s)
+    echo "Delete all downloaded youtube videos?"
+    select s in y n; do
+        break;
+    done;
+    s=($s)
 
-#	if [[ s -eq y ]]; then
-#		rm $dir/*
-#	fi
+    if [[ s -eq y ]]; then
+        rm $dir/*
+    fi
 fi

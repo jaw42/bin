@@ -22,8 +22,8 @@
 
      # File types
        text_array=(txt tex sh markdown zsh            )
-  alt_video_array=(webm flv                           )
-      video_array=(mpg mpeg avi m4v swf wmv mp4       )
+  alt_video_array=(webm flv mp4                       )
+      video_array=(mpg mpeg avi m4v swf wmv           )
       audio_array=(mp3 ogg vorbis m4a m4b aif wma wav )
         pdf_array=(pdf PDF                            )
         web_array=(html htm xml                       )
