@@ -2,7 +2,7 @@
 # Create a new post with today's date and prompt for the title.
 
 # Config
-editor="vim"
+editor="gvim"
 format="md"
 basename="/home/josh/Web/jaw42.github.com/_posts/"
 edit=true
@@ -31,10 +31,15 @@ shift $(( ${OPTIND} - 1 ))
 : ${layout:="blog"}
 
 
-# I like giving myself a polite greeting.
+# Get current date and time
+if [[ $datechosen == "" ]]; then
+	datechosen="`date '+%Y-%m-%d'`"
+fi
+
 echo "---"
-echo "Creating a new ${layout} for" `date +%A", "%B" "%e", "%Y`"."
+echo "Creating a new ${layout} for" `date -d $datechosen +%A", "%B" "%e", "%Y`"."
 echo ""
+
 if [ $# -eq 0 ]; then
     read -p "Enter the title: " title
 else
@@ -52,11 +57,6 @@ dashedTitle="`echo ${dashedTitle} | tr '[A-Z]' '[a-z]'`"
 
 # Create a filename with the date, dashed title, and format
 filename="$datechosen${dashedTitle}.${format}"
-
-# Get current date and time
-if [[ datechosen == "" ]]; then
-	datechosen="`date '+%Y-%m-%d %T'`"
-fi
 
 filename=$basename$filename
 
@@ -77,3 +77,5 @@ echo "" >> $filename
 if $edit; then
     ${editor} + $filename
 fi
+
+# TODO: if lines in new file == 5 (ie no change has been made) delete the file.
