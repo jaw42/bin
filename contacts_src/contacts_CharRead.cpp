@@ -64,24 +64,28 @@ int main(int argc, char* argv[]) {
 			insideQuote = false;
 		}
 
-		if ((c == ',') && (insideQuote == false)){
-			fieldNumber++;
-			//cout << currentField << endl;
+		if (c != '"'){
+			if ((c == ',') && (insideQuote == false)){
+				fieldNumber++;
+				//cout << currentField << endl;
 
-			ContactsArrayFull[entryNumber].push_back(currentField);
-			currentField = "";
-		//}else if((c != '\n') && (c != '\r') && (c != '"')){
-		}else if((c == '\n') || (c == '\r')){
-			currentField += c;
-			currentField += ' ';
-		}else if((c != '\n') && (c != '\r')){
-			currentField += c;
-		}
+				ContactsArrayFull[entryNumber].push_back(currentField);
+				currentField = "";
+			}else if((c == '\n') || (c == '\r')){
+				//currentField += c;
+				currentField += ' ';
+			}else if((c != '\n') && (c != '\r')){
+				currentField += c;
+			}
 
-		if ((fieldNumber == totalFields) && (c == '\n')){
-			ContactsArrayFull.push_back(vector <string> ());
-			entryNumber++;
-			fieldNumber = 0;
+			if ((fieldNumber == totalFields) && (c == '\n')){
+				ContactsArrayFull[entryNumber].push_back(currentField);
+				currentField = "";
+
+				ContactsArrayFull.push_back(vector <string> ());
+				entryNumber++;
+				fieldNumber = 0;
+			}
 		}
 	}
 
@@ -105,6 +109,7 @@ int main(int argc, char* argv[]) {
 	vector<int> resultsArray;
 	bool first=true;
 	do{
+		resultsArray.clear();
 		//Check if any arguements were given to program start and use these for
 		//Search term. Else prompt for Search
 		if ((argc < 2) || (first == false)) {
@@ -117,7 +122,7 @@ int main(int argc, char* argv[]) {
 		int counter=0;
 		int found = 0;
 		cout << "Total size = " << ContactsArrayFull.size() << endl;
-		cout << Search << endl;
+		cout << "searching for \"" << Search << "\"...\n" << endl;
 		for (unsigned int i = 0; i < ContactsArrayFull.size()-1; ++i){
 
 			for (unsigned int j = 0; j < ContactsArrayFull[i].size()-1; ++j){
@@ -132,7 +137,6 @@ int main(int argc, char* argv[]) {
 			}
 			++counter;
 		}
-				cout << "Something"  << endl;
 
 		if (resultsArray.size() == 0){
 			//No results found
@@ -168,7 +172,7 @@ int main(int argc, char* argv[]) {
 							<< " = " << ContactsArrayFull[R][i] << endl;
 					}else if (startsWith(ContactsArrayFull[0][i], "E-mail")){
 						//Emails
-						cout << "Email " << left << setw(11) << ContactsArrayFull[R][i]
+						cout << "Email: " << left << setw(10) << ContactsArrayFull[R][i]
 							<< " = " << ContactsArrayFull[R][i+1] << endl;
 						i++;
 					}else if (startsWith(ContactsArrayFull[0][i], "IM")){
@@ -177,26 +181,21 @@ int main(int argc, char* argv[]) {
 							<< " = " << ContactsArrayFull[R][i] << endl;
 					}else if (startsWith(ContactsArrayFull[0][i], "Phone")){
 						//Phones
-						cout << "Phone " << left << setw(11) << ContactsArrayFull[R][i]
+						cout << "Phone: " << left << setw(10) << ContactsArrayFull[R][i]
 							<< " = " << ContactsArrayFull[R][i+1] << endl;
 						i++;
 					}else if (startsWith(ContactsArrayFull[0][i], "Address")){
 						//Address
 					//	cout << left << setw(17) << ContactsArrayFull[0][i]
 					//		<< " = " << ContactsArrayFull[R][i] << endl;
-						cout << "Address " << ContactsArrayFull[R][i] << endl;
-						int q[] = {1,2,8,3,4,5,6,7};
-						for (int p = 0; p < 8; ++p) {
+						cout << "Address: " << left << setw(8) << ContactsArrayFull[R][i]
+							<< " = " << ContactsArrayFull[R][i+1] << endl;
+						int q[] = {2,8,3,4,5,6,7};
+						for (int p = 0; p < 7; ++p) {
 							if (ContactsArrayFull[R][i+q[p]] != ""){
-								cout << p << setw(17) << "        " << ContactsArrayFull[R][i+q[p]] << endl;
+								cout << setw(21) << " " << ContactsArrayFull[R][i+q[p]] << endl;
 							}
 						}
-								/*<< " 2      " << ContactsArrayFull[R][i+2] << endl
-								<< " 7      " << ContactsArrayFull[R][i+8] << endl
-								<< " 3      " << ContactsArrayFull[R][i+4] << endl
-								<< " 4      " << ContactsArrayFull[R][i+5] << endl
-								<< " 5      " << ContactsArrayFull[R][i+6] << endl
-								<< " 6      " << ContactsArrayFull[R][i+7] << endl;*/
 						i=i+8;
 					}else if (startsWith(ContactsArrayFull[0][i], "Organisation")){
 						//Organisation
@@ -204,27 +203,32 @@ int main(int argc, char* argv[]) {
 							<< " = " << ContactsArrayFull[R][i] << endl;
 					}else if (startsWith(ContactsArrayFull[0][i], "Relation")){
 						//Relation
-						cout << "Relation " << left << setw(11) << ContactsArrayFull[R][i]
+						cout << "Relation: " << left << setw(8) << ContactsArrayFull[R][i]
 							<< " = " << ContactsArrayFull[R][i+1] << endl;
 						i++;
 					}else if (startsWith(ContactsArrayFull[0][i], "Website")){
 						//Website
-						cout << "Website " << left << setw(11) << ContactsArrayFull[R][i]
+						cout << "Website: " << left << setw(9) << ContactsArrayFull[R][i]
 							<< " = " << ContactsArrayFull[R][i+1] << endl;
 						i++;
 					}else if (startsWith(ContactsArrayFull[0][i], "Event")){
 						//Event
-						cout << "Event " << left << setw(11) << ContactsArrayFull[R][i]
+						cout << "Event: " << left << setw(11) << ContactsArrayFull[R][i]
 							<< " = " << ContactsArrayFull[R][i+1] << endl;
 						i++;
 					}else if (startsWith(ContactsArrayFull[0][i], "Custom")){
 						//Custom
-						cout << "Event " << left << setw(11) << ContactsArrayFull[R][i]
+						cout << "Custom: " << left << setw(10) << ContactsArrayFull[R][i]
 							<< " = " << ContactsArrayFull[R][i+1] << endl;
 						i++;
+					/*}else if (startsWith(ContactsArrayFull[0][i], "Jot")){
+						//Jot
+						cout << "Jot: " << left << setw(11) << ContactsArrayFull[R][i]
+							<< " = " << ContactsArrayFull[R][i+1] << endl;
+						i++;*/
 					}else{
 						//Everything else
-						cout << "Other " <<  left << setw(17) << ContactsArrayFull[0][i]
+						cout << "Other: " <<  left << setw(17) << ContactsArrayFull[0][i]
 							<< " = " << ContactsArrayFull[R][i] << endl;
 					}
 				}
@@ -241,6 +245,10 @@ int main(int argc, char* argv[]) {
 
 }
 
+/******************************************************************************
+ *                                 Functions                                  *
+ ******************************************************************************/
+
 int menu(){
 	cout << endl;
 	cout << "1 Search again\n"
@@ -252,10 +260,6 @@ int menu(){
 
 	return option;
 }
-
-/******************************************************************************
- *                                 Functions                                  *
- ******************************************************************************/
 
 int countSubstring(const string& str, const string& sub)
 {
