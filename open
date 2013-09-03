@@ -9,7 +9,7 @@
       Genre_array=(text alt_video video audio pdf web image word spreadsheet archive svg )
 
            #Genre=("fast" "complex"             )
-             text=(gvim subl                    )
+             text=(gvim gvim                    )
         alt_video=(mplayer                      )
             video=(mpv                          )
             audio=(mpv                          )
