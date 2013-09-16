@@ -150,9 +150,18 @@ int main(int argc, char* argv[]) {
 				unsigned int pickResult;
 				cin >> pickResult;
 
-				while ((cin.fail()) || (pickResult < 0) || pickResult > resultsArray.size()){
+			/*	while ((pickResult < 0) || pickResult > resultsArray.size()){
 					cout << "Not a valid selection. Choose a result: ";
 					cin >> pickResult;
+				}*/
+				while ((pickResult < 0) || (pickResult > resultsArray.size())) {
+					if (!(cin >> pickResult)) {
+						cin.clear();
+						cin.ignore(255, '\n');
+					}
+					if ((pickResult < 0) || (pickResult > resultsArray.size())) {
+    	    		cout << "Input out of range. Please try again. " << endl;
+    				}
 				}
 				R = resultsArray[pickResult];
 			}else{
