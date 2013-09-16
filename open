@@ -6,13 +6,12 @@
 # ---------------------------------------------------------
 
          # Genres
-      Genre_array=(text alt_video video audio pdf web image word spreadsheet archive svg )
+      Genre_array=(text video audio pdf web image word spreadsheet archive svg )
 
            #Genre=("fast" "complex"             )
              text=(gvim gvim                    )
-        alt_video=(mplayer                      )
-            video=(mpv                          )
-            audio=(mpv                          )
+            video=(mplayer                      )
+            audio=(mplayer                      )
               pdf=(zathura evince               )
               web=(luakit google-chrome jumanji )
             image=(fehviewer mirage             )
@@ -21,16 +20,15 @@
           archive=(file-roller                  )
 
      # File types
-       text_array=(txt tex sh markdown zsh            )
-  alt_video_array=(webm flv mp4                       )
-      video_array=(mpg mpeg avi m4v swf wmv           )
-      audio_array=(mp3 ogg vorbis m4a m4b aif wma wav )
-        pdf_array=(pdf PDF                            )
-        web_array=(html htm xml                       )
-      image_array=(jpg jpeg png bmp gif tiff          )
-       word_array=(docx doc odf rtf abw odt rtf       )
-spreadsheet_array=(gnumeric xls xlsx csv dat          )
-    archive_array=(zip rar bz tar                     )
+       text_array=(txt tex sh markdown zsh               )
+      video_array=(mpg mpeg avi m4v swf wmv webm flv mp4 )
+      audio_array=(mp3 ogg vorbis m4a m4b aif wma wav    )
+        pdf_array=(pdf PDF                               )
+        web_array=(html htm xml                          )
+      image_array=(jpg jpeg png bmp gif tiff             )
+       word_array=(docx doc odf rtf abw odt rtf          )
+spreadsheet_array=(gnumeric xls xlsx csv dat             )
+    archive_array=(zip rar bz tar                        )
 
      # Exceptions
               svg=(rsvg-view-3 )
@@ -83,7 +81,7 @@ helpOutput() {
 	cat << 'EOF'
 
 Usage:
-	open [options] <file|url|prgram>
+	open [options] <file|url|prgram> [[file|url|program]...]
 	open [options] <program-genre>
 	open -h
 
@@ -111,8 +109,8 @@ Examples:
 	open example.html
 		Use the default web browser to view the file example.html.
 
-	open -c example.pdf
-		Use the complex pdf viewer to view the file example.pdf.
+	open -c example.pdf other.jpg
+		Use the complex pdf viewer to view the files example.pdf and other.jpg.
 
 	open -tvfd terminal
 		Open the fast terminal with verbose program information printed to
@@ -171,6 +169,8 @@ while getopts ":fcvhdwt" opt; do
 			echo "Unkown option: -$OPTARG. Defaulting to fast"
 	esac
 done
+
+verbose "There are $# arugument(s), they are $*."
 
 shift $((OPTIND-1))
 
@@ -238,39 +238,46 @@ if in_array "$1" "${Genre_array[@]}"; then
 fi
 
 verbose "Extension is $ext"
-for fileType in "${Genre_array[@]}" ; do
-	fileType_array="$fileType""_array[@]"
+verbose "Files are $*."
+#verbose "TWO  There are $# arugument(s), they are $*."
+for fileItem in $*; do
+	verbose "Opening file $fileItem"
+	for fileType in "${Genre_array[@]}" ; do
+		fileType_array="$fileType""_array[@]"
 
-	verbose "Checking genre $fileType ..."
+		verbose "Checking genre $fileType ..."
 
-	if in_array $ext "${!fileType_array}"; then
-		verbose "Found extension $ext in genre $fileType"
+		if in_array $ext "${!fileType_array}"; then
+			verbose "Found extension $ext in genre $fileType"
 
-		do_fast=$fileType[0]
-		do_complex=$fileType[1]
+			do_fast=$fileType[0]
+			do_complex=$fileType[1]
 
-		verbose "Filetype = $fileType"
-		if $fast; then
-			verbose "Executing ${!do_fast}"
-			eval ${!do_fast} "\"$1\"" $dump
-		elif $complex; then
-			verbose "Executing ${!do_complex}"
-			eval ${!do_complex} "\"$1\"" $dump
-		else
-			verbose "No fast/complex option given, using default - $default"
-			if [[ $default=="fast" ]]; then
+			verbose "Filetype = $fileType"
+			if $fast; then
 				verbose "Executing ${!do_fast}"
-				eval ${!do_fast} "\"$1\"" $dump
-			else
+				eval ${!do_fast} "\"$fileItem\"" $dump
+			elif $complex; then
 				verbose "Executing ${!do_complex}"
-				eval ${!do_complex} "\"$1\"" $dump
+				eval ${!do_complex} "\"$fileItem\"" $dump
+			else
+				verbose "No fast/complex option given, using default - $default"
+				if [[ $default=="fast" ]]; then
+					verbose "Executing ${!do_fast}"
+					eval ${!do_fast} "\"$fileItem\"" $dump
+				else
+					verbose "Executing ${!do_complex}"
+					eval ${!do_complex} "\"$fileItem\"" $dump
+				fi
 			fi
+			break 1
+		else
+			verbose "nope"
 		fi
-		exit 0
-	else
-		verbose "nope"
-	fi
+	done
 done
+
+exit 0
 echo "Filetype not recognised"
 
 # ------------------------------------------------------------
