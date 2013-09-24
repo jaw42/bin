@@ -238,10 +238,10 @@ if in_array "$1" "${Genre_array[@]}"; then
 fi
 
 verbose "Extension is $ext"
-verbose "Files are $*."
+verbose "Files are \"$*\"."
 #verbose "TWO  There are $# arugument(s), they are $*."
-for fileItem in $*; do
-	verbose "Opening file $fileItem"
+for fileItem in "$*"; do
+	verbose "Opening file \"$fileItem\""
 	for fileType in "${Genre_array[@]}" ; do
 		fileType_array="$fileType""_array[@]"
 

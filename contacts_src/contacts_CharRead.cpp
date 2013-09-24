@@ -31,6 +31,7 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
+	//TODO Add help info/use info
 
 	vector<vector<string> > ContactsArrayFull;
 	ContactsArrayFull.push_back(vector <string> ());

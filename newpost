@@ -4,7 +4,7 @@
 # Config
 editor="gvim"
 format="md"
-basename="/home/josh/Web/jaw42.github.com/_posts/"
+basename="/home/josh/Web/joshaw.github.com/_posts/"
 edit=true
 
 datechosen=""

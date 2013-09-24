@@ -22,13 +22,10 @@ if [ "$(ls -A $dir)" ]; then
         open "$file"
     done
 
-    echo "Delete all downloaded youtube videos?"
-    select s in y n; do
-        break;
-    done;
-    s=($s)
-
-    if [[ s -eq y ]]; then
+	read -p "Delete all downloaded Youtube videos? [yn] " -n 1 -r
+	echo    # (optional) move to a new line
+	if [[ $REPLY =~ ^[Yy]$ ]]; then
         rm $dir/*
-    fi
+	fi
+
 fi
