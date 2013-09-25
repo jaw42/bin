@@ -9,18 +9,18 @@
       Genre_array=(text video audio pdf web image word spreadsheet archive svg )
 
            #Genre=("fast" "complex"             )
-             text=(gvim gvim                    )
-            video=(mplayer                      )
-            audio=(mplayer                      )
+             text=(gvim vim                     )
+            video=(mpv                          )
+            audio=(mpv                          )
               pdf=(zathura evince               )
-              web=(luakit google-chrome jumanji )
+              web=(dwb google-chrome jumanji    )
             image=(fehviewer mirage             )
              word=(abiword                      )
       spreadsheet=(gnumeric                     )
           archive=(file-roller                  )
 
      # File types
-       text_array=(txt tex sh markdown zsh               )
+       text_array=(txt tex sh markdown md zsh            )
       video_array=(mpg mpeg avi m4v swf wmv webm flv mp4 )
       audio_array=(mp3 ogg vorbis m4a m4b aif wma wav    )
         pdf_array=(pdf PDF                               )
@@ -36,7 +36,7 @@ spreadsheet_array=(gnumeric xls xlsx csv dat             )
 
  # Other Programs
          terminal=(xterm terminator xfce4-terminal )
-            email=("${terminal[1]} -e mutt"        )
+            email=("${terminal[0]} -e mutt"        )
 
         # Options
           default=fast # fast/complex
@@ -186,7 +186,7 @@ if $programSpecify ; then
 	verbose "Executing specified program genre - ${!prog}"
 
 	shift $((OPTIND-1))
-	eval ${!prog} $@
+	eval ${!prog} $@ $dump
 	exit
 fi
 
@@ -196,7 +196,7 @@ fi
 if $webParse ; then
 	if $fast; then
 		verbose "Found url, using web browser - $web_fast"
-		eval ${web[2]} "\"$1\"" $dump
+		eval ${web[0]} "\"$1\"" $dump
 	else
 		verbose "Found url, using web browser - $web_complex"
 		eval ${web[1]} "\"$1\"" $dump
@@ -216,9 +216,8 @@ fi
 ext=${1##*.}
 ext=${ext,,}
 
-# if the user has specified a genre to use, then there must be
-# two arguments - genre and file.
-#if [[ $# -eq 2 ]]; then
+# If the user has specified a genre to use, then it must be first,
+#+ so if the first arguement matches a genre, use it.
 if in_array "$1" "${Genre_array[@]}"; then
 	for genre in "${Genre_array[@]}"; do
 		if [[ $genre = $1 ]]; then
@@ -240,7 +239,7 @@ fi
 verbose "Extension is $ext"
 verbose "Files are \"$*\"."
 #verbose "TWO  There are $# arugument(s), they are $*."
-for fileItem in "$*"; do
+for fileItem in "$@"; do
 	verbose "Opening file \"$fileItem\""
 	for fileType in "${Genre_array[@]}" ; do
 		fileType_array="$fileType""_array[@]"
@@ -282,7 +281,7 @@ echo "Filetype not recognised"
 
 # ------------------------------------------------------------
 # If no extension is given, or the extension is not recognised
-#+  then use the mimetype of the file.
+#+ then use the mimetype of the file.
 # ------------------------------------------------------------
 mimeType=$(file --mime-type -b "$1")
 
