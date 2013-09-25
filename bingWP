@@ -97,7 +97,8 @@ done
 #imlibsetroot -x 0 -s a -p c ${saveDir}0.jpg -x 1 -s a -p c ${saveDir}1.jpg
 if [ -e 0.jpg -a -e 1.jpg ]; then
     echo "Setting wallpaper"
-    nitrogen --restore
+    #nitrogen --restore
+    feh --bg-fill 0.jpg
 else
     echo "Error, pictures not downloaded."
     exit 1
