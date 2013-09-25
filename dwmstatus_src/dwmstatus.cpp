@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 
 #define TMP_FOLDER "/tmp/dwm_status_bar"
+#define INTERFACE "wlp4s0"
 
 using namespace std;
 
@@ -88,6 +89,7 @@ void concatenate(){
 			out << line;
 		}
 	}
+	out << "  ";
 }
 
 string exec(string cmdstring) {
@@ -174,7 +176,7 @@ void open(){
 		string opn = exec("lsof | wc -l");
 		ofstream openfile;
 		openfile.open (TMP_FOLDER"/open");
-		openfile << " " << opn;
+		openfile << "  " << opn;
 		openfile.close();
 	}
 }
@@ -202,7 +204,7 @@ void mpd(){
 
 	ofstream mpdfile;
 	mpdfile.open(TMP_FOLDER"/mpd");
-	mpdfile << " \x08" << stat_short << delLast(perc) << " " << delLast(cur) << "\x01";
+	mpdfile << "  \x08" << stat_short << delLast(perc) << " " << delLast(cur) << "\x01";
 	mpdfile.close();
 }
 
@@ -216,7 +218,7 @@ void mail(){
 			string newNo = substring(feed, "<fullcount>", "</fullcount>");
 
 			if (newNo != "0") {
-				mailfile << " \x04M:\x01" << newNo;
+				mailfile << "  \x04[M] \x01" << newNo;
 			}else{
 				mailfile << "";
 			}
@@ -237,7 +239,7 @@ void pac(){
 		pacfile.open(TMP_FOLDER"/pac");
 
 		if (pup != 0) {
-			pacfile << " \x04P:\x01" << pup;
+			pacfile << "  \x04[P] \x01" << pup;
 		}else{
 			pacfile << "";
 		}
@@ -248,10 +250,10 @@ void pac(){
 
 void hdd(){
 	//TODO read from /proc to get hdd infor
-	string disk = exec("df /dev/sda7 --output=pcent | tail -n 1 | tr -d ' '");
+	string disk = exec("df /dev/sda3 --output=pcent | tail -n 1 | tr -d ' '");
 	ofstream hddfile;
 	hddfile.open(TMP_FOLDER"/hdd");
-	hddfile << " \x06H:\x01" << delLast(disk);
+	hddfile << "  \x06[H] \x01" << delLast(disk);
 	hddfile.close();
 }
 
@@ -260,7 +262,7 @@ void net(){
 	///proc/net/tcp
 	//use the second columnm, local_address, the ip address is here but in hex
 	//and in reverse order. 0201A8C0 -> 192 168 1 2
-	string ipaddr=exec("ifconfig wlan0 | awk '/inet / {print $2}'");
+	string ipaddr=exec("ip addr show dev wlp4s0 | awk '/inet / {print $2}'");
 	if (ipaddr != "") {
 		ipaddr = delLast(ipaddr);
 	}
@@ -268,8 +270,8 @@ void net(){
 
 	ifstream wireless("/proc/net/wireless");
 	while (getline(wireless, signal_tmp)) {
-		if (signal_tmp.find("wlan0") != string::npos) {
-			signal_tmp = Get(signal_tmp, 2);
+		if (signal_tmp.find(INTERFACE) != string::npos) {
+		signal_tmp = Get(signal_tmp, 2);
 			signal_tmp = delLast(signal_tmp);
 			break;
 		}
@@ -287,7 +289,7 @@ void net(){
 	}
 	ofstream netfile;
 	netfile.open(TMP_FOLDER"/net");
-	netfile << " \x06I:\x01(" << ipaddr << ") \x06W:\x01" << signal;
+	netfile << "  \x06[I] \x01(" << ipaddr << ")  \x06[W] \x01" << signal;
 	netfile.close();
 
 }
@@ -363,6 +365,6 @@ void date(){
 
 	ofstream datefile;
 	datefile.open(TMP_FOLDER"/dte");
-	datefile << " \x06Up:\x01" << uptime.str() << " \x08" << timeNow.str() << "\x01 " << " " << dateNow.str();
+	datefile << "  \x06[Up] \x01" << uptime.str() << "   \x08" << timeNow.str() << "\x01   " << dateNow.str();
 	datefile.close();
 }
