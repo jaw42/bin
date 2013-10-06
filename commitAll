@@ -1,0 +1,16 @@
+#!/bin/bash
+
+for gitDir in $(find / -name ".git" -exec dirname {} \; 2> /dev/null); do
+
+	cd $gitDir;
+	pwd;
+	numberLines=$(git status -s | wc -l);
+
+	if [ "$numberLines" != "0" ]; then
+		git gui;
+		echo $numberLines
+	fi
+
+done
+
+cd
