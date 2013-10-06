@@ -1,0 +1,85 @@
+#!/bin/bash
+
+all_name="[ALL]"
+mode=library
+pivoted=0
+was_playing=0
+
+dmenu_args=(-i -l 10)
+our_args=()
+
+d_artist() {
+    mpc list artist | sort -f | dmenu -p artist "${dmenu_args[@]}"
+}
+
+d_album() {
+    local artist="$1"
+    local albums
+
+    mapfile -t albums < <(mpc list album artist "$artist")
+    if (( "${#albums[@]}" > 1 )) ; then
+        {
+            printf '%s\n' "$all_name"
+            printf '%s\n' "${albums[@]}" | sort -f
+        } | dmenu -p album "${dmenu_args[@]}"
+    else
+        # We only have one album, so just use that.
+        printf '%s\n' "${albums[0]}"
+    fi
+}
+
+d_playlist() {
+    local format="%position% - %title% - %album% - %artist%"
+    local track
+
+    track="$(mpc playlist -f "$format" | dmenu -p track "${dmenu_args[@]}")"
+    printf '%s' "${track%% *}"
+}
+
+is_playing() {
+    [[ "$(mpc current)" ]]
+}
+
+for arg do
+    if [[ "$arg" == "::" ]]; then
+        pivoted=1
+        continue
+    fi
+
+    if (( pivoted )); then
+        dmenu_args+=( "$arg" )
+    else
+        case "$arg" in
+            -l) mode=library ;;
+            -p) mode=playlist ;;
+        esac
+    fi
+done
+
+case "$mode" in
+    library)
+        artist="$(d_artist)"
+        [[ "$artist" ]] || exit 1
+
+        album="$(d_album "$artist")"
+        [[ "$album" ]] || exit 2
+
+        if is_playing; then
+            was_playing=1
+        fi
+
+        mpc clear
+        if [[ "$album" == "$all_name" ]]; then
+            mpc find artist "$artist" | mpc add
+        else
+            mpc find artist "$artist" album "$album" | mpc add
+        fi
+
+        if (( was_playing )); then
+            mpc play >/dev/null 2>&1
+        fi
+    ;;
+    playlist)
+        mpc play "$(d_playlist)"
+    ;;
+esac
