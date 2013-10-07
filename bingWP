@@ -7,7 +7,7 @@ dir=~/Pictures/BingPics
 [ -d $dir ] || mkdir $dir
 if [ -d $dir ]; then
     cd $dir
-    rm 0.jpg 1.jpg
+    #rm 0.jpg 1.jpg
 else
     mkdir $dir
     cd $dir
@@ -98,7 +98,7 @@ done
 if [ -e 0.jpg -a -e 1.jpg ]; then
     echo "Setting wallpaper"
     #nitrogen --restore
-    feh --bg-fill 0.jpg
+    feh --bg-fill $dir/0.jpg
 else
     echo "Error, pictures not downloaded."
     exit 1
