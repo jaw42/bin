@@ -37,9 +37,9 @@ for html in $today $Previous; do
 
     echo "Downloading the image"
     if $todayNow; then
-        wget -nvc $link -O 0.jpg
+        wget -nvc $link -O 00.jpg && mv -f 00.jpg 0.jpg
     else
-        wget -nvc $link -O 1.jpg
+        wget -nvc $link -O 11.jpg && mv -f 11.jpg 1.jpg
     fi
 
     ## echo "Setting the wallpaper"
