@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for gitDir in $(find / -name ".git" -exec dirname {} \; 2> /dev/null); do
+for gitDir in $(find ~/ -name ".git" -exec dirname {} \; 2> /dev/null); do
 
 	cd $gitDir;
 	pwd;
