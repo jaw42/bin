@@ -13,7 +13,7 @@
             video=(mpv                          )
             audio=(mpv                          )
               pdf=(zathura evince               )
-              web=(dwb google-chrome jumanji    )
+              web=(dwb surf                     )
             image=(fehviewer mirage             )
              word=(abiword                      )
       spreadsheet=(gnumeric                     )
@@ -21,11 +21,11 @@
 
      # File types
        text_array=(txt tex sh markdown md zsh            )
-      video_array=(mpg mpeg avi m4v swf wmv webm flv mp4 )
+      video_array=(mpg mpeg avi m4v swf wmv webm flv mp4 ogv)
       audio_array=(mp3 ogg vorbis m4a m4b aif wma wav    )
         pdf_array=(pdf PDF                               )
         web_array=(html htm xml                          )
-      image_array=(jpg jpeg png bmp gif tiff             )
+      image_array=(jpg jpeg png bmp gif tiff pnm         )
        word_array=(docx doc odf rtf abw odt rtf          )
 spreadsheet_array=(gnumeric xls xlsx csv dat             )
     archive_array=(zip rar bz tar                        )
