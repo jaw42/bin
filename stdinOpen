@@ -4,4 +4,4 @@
 tmpfile="/tmp/tempfile";
 touch $tmpfile
 cat > $tmpfile;
-open -c web $tmpfile; rm $tmpfile
+open -f web $tmpfile; rm $tmpfile
