@@ -24,20 +24,21 @@ Previous="$today""$prev"
 todayNow=true
 
 for html in $today $Previous; do
+#for html in $today ; do
 
     wget -q $html -O index.html
     echo "Downloading index.html"
 
     ## echo "Scraping the link"
-    link=$(cat index.html | grep "Download Wallpaper" |  grep -Po 'http.*.jpg')
+    link=$(cat index.html | grep "Download Wallpaper" |  grep -Po 'images.*.jpg')
     if [[ $link = "" ]]; then
         echo "Download link not availible, using smaller image"
-        link=$(cat index.html | grep -A3 "Go to the previous" | tail -n1 | grep -Po 'http.*.jpg')
+        link=$(cat index.html | grep -A3 "Go to the previous" | tail -n1 | grep -Po 'images.*.jpg')
     fi
 
     echo "Downloading the image"
     if $todayNow; then
-        wget -nvc $link -O 00.jpg && mv -f 00.jpg 0.jpg
+        wget -nvc "http://$link" -O 00.jpg && mv -f 00.jpg 0.jpg
     else
         wget -nvc $link -O 11.jpg && mv -f 11.jpg 1.jpg
     fi
