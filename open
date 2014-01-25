@@ -12,7 +12,7 @@
              text=(gvim vim                     )
             video=(mpv                          )
             audio=(mpv                          )
-              pdf=(zathura evince               )
+              pdf=(zathura epdfview             )
               web=(dwb surf                     )
             image=(fehviewer mirage             )
              word=(abiword                      )
