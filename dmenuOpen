@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if hash ag 2>/dev/null; then
+	searchCmd="ag --hidden -g \"\""
+else
+	searchCmd="git ls-files"
+fi
+
+case $1 in
+	"-v" )
+		limitCmd="$searchCmd | egrep -v -f ~/.binignore"
+		runCmd="gvim"
+		runName="gvim"
+		;;
+	"-o" )
+		limitCmd="$searchCmd"
+		runCmd="/home/josh/Bin/open"
+		runName="open"
+esac
+
+results=$(eval $limitCmd)
+file=$(echo "$results" | dmenu -i -l 20 -p $runName)
+echo $file
+
+if [ ! "$file" == "" ]; then
+	# zenity --info --text="$runCmd \"$file\""
+	VAR=$(($runCmd "$file") 2>&1)
+	# zenity --info --text="$VAR"
+
+fi

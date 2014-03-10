@@ -4,6 +4,7 @@
 # Variables.
 # Change things here to suit your needs.
 # ---------------------------------------------------------
+fehviewer="/home/josh/Bin/fehviewer"
 
          # Genres
       Genre_array=(text video audio pdf web image word spreadsheet archive svg )
@@ -14,7 +15,7 @@
             audio=(mpv                          )
               pdf=(zathura epdfview             )
               web=(dwb surf                     )
-            image=(fehviewer mirage             )
+            image=($fehviewer mirage            )
              word=(abiword                      )
       spreadsheet=(gnumeric                     )
           archive=(file-roller                  )
@@ -256,17 +257,21 @@ for fileItem in "$@"; do
 			if $fast; then
 				verbose "Executing ${!do_fast}"
 				eval ${!do_fast} "\"$fileItem\"" $dump
+				exit 0
 			elif $complex; then
 				verbose "Executing ${!do_complex}"
 				eval ${!do_complex} "\"$fileItem\"" $dump
+				exit 0
 			else
 				verbose "No fast/complex option given, using default - $default"
 				if [[ $default=="fast" ]]; then
 					verbose "Executing ${!do_fast}"
 					eval ${!do_fast} "\"$fileItem\"" $dump
+					exit 0
 				else
 					verbose "Executing ${!do_complex}"
 					eval ${!do_complex} "\"$fileItem\"" $dump
+					exit 0
 				fi
 			fi
 			break 1
@@ -275,6 +280,7 @@ for fileItem in "$@"; do
 		fi
 	done
 done
+$text "$fileItem"
 
 exit 0
 echo "Filetype not recognised"
