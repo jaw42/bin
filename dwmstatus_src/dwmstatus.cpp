@@ -13,7 +13,7 @@
 #include <sys/stat.h>
 
 #define TMP_FOLDER "/tmp/dwm_status_bar"
-#define INTERFACE "wlp4s0"
+#define INTERFACE "wlan0"
 
 using namespace std;
 
@@ -262,7 +262,7 @@ void net(){
 	///proc/net/tcp
 	//use the second columnm, local_address, the ip address is here but in hex
 	//and in reverse order. 0201A8C0 -> 192 168 1 2
-	string ipaddr=exec("ip addr show dev wlp4s0 | awk '/inet / {print $2}'");
+	string ipaddr=exec("ip addr show dev wlan0 | awk '/inet / {print $2}'");
 	if (ipaddr != "") {
 		ipaddr = delLast(ipaddr);
 	}
