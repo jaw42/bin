@@ -1,0 +1,31 @@
+#!/bin/sh
+
+#LASTL=`sudo grep "package database" /var/log/crond.log | awk 'END { print$3 }'`
+
+#LAST=`date -d $LASTL +%s`
+#NOW=`date +%s`
+#DIFF=$(($NOW - $LAST))
+
+#DIFFMIN=$(($DIFF/60))
+#NEXT=$((10-$DIFFMIN))
+sudo pacman -Sy
+NUM=`pacman -Qu | wc -l`
+
+if [ "$NUM" != "0" ]
+then
+    img=/usr/share/icons/elementary-mono-dark/panel/22/steadyflow-alert-panel.svg
+    tool="There are $NUM updates."
+    click="terminal -e 'yaourt -Syua'"
+	yad --notification --image=$img --tex "There are $NUM updates" --command "terminal -x yaourt -Syua"
+else
+    img=/usr/share/icons/elementary-mono-dark/panel/22/steadyflow-panel.svg
+    #img=/usr/share/icons/Faience/places/scalable/folder-download-symbolic.svg
+    #tool="Last update was $DIFFMIN mins ago\nNext update in $NEXT minutes."
+    click="echo 'No Updates'"
+fi
+
+#echo $tool
+#echo -e "<img>$img</img>"
+#echo -e "<click>$click</click>"
+#echo -e "<tool>$tool</tool>"
+

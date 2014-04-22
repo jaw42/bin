@@ -1,0 +1,6 @@
+#!/bin/sh
+
+#mplayer -framedrop -vfm ffmpeg -lavdopts lowres=1:fast:skiploopfilter=all -cookies -cookies-file /tmp/cookie.txt $(youtube-dl -g --cookies /tmp/cookie.txt "$(yad --entry)")
+
+
+mplayer -framedrop -vfm ffmpeg -lavdopts lowres=1:fast:skiploopfilter=all -cookies -cookies-file /tmp/cookie.txt $(youtube-dl -g --cookies /tmp/cookie.txt "$1")

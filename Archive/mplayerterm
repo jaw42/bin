@@ -1,0 +1,10 @@
+#!/bin/sh
+
+shopt -s nullglob
+
+if [[ ! -f $1 ]]; then
+	echo "$0: first argument is not a file" >&2
+	exit 1
+fi
+
+exec xfce4-terminal -x mplayer -quiet -msgcolor -nolirc -nojoystick "$@"
