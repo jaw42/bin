@@ -1,16 +1,111 @@
 #!/bin/bash
+# Created  : TIMESTAMP
+# Modified : TIMESTAMP
 
-for gitDir in $(find ~/ -name ".git" -exec dirname {} \; 2> /dev/null); do
+set -o nounset
+# set -o errexit
 
+verboseOn=true
+pullAllOn=false
+pushAllOn=false
+noCommit=false
+list=""
+
+verbose() {
+	set +u
+	if $verboseOn; then
+		echo -e ${2} "$1"
+	fi
+	set -u
+}
+
+getGitRepos() {
+	if hash locate 2>/dev/null; then
+		list=$(dirname $(locate -br '\.git$'))
+	else
+		verbose "Command locate not availible. Using find instead."
+		list=$(find ~/ -name ".git" -exec dirname {} \; 2> /dev/null)
+	fi
+}
+
+pullAll() {
+	if $pullAllOn; then
+		git pull 2>&1 | sed 's/^/\t/'
+	fi
+}
+
+pushAll() {
+	if $pushAllOn; then
+		git push 2>&1 | sed 's/^/\t/'
+	fi
+}
+
+currentDir=$(pwd)
+cd ~/
+
+while getopts "Vpun" opt; do
+	case "$opt" in
+		V)
+			verboseOn=false
+			;;
+		p)
+			pullAllOn=true
+			;;
+		u)
+			pushAllOn=true
+			;;
+		n)
+			noCommit=true
+			;;
+		*)
+			echo "Flag "$opt" not recognised."
+			exit 0
+			;;
+	esac
+done
+shift $((OPTIND-1))
+
+#### Start script ####
+
+getGitRepos
+
+# while read -r gitDir; do
+for gitDir in $(echo $list); do
+
+	addNewline=false
 	cd $gitDir;
-	pwd;
-	numberLines=$(git status -s | wc -l);
 
-	if [ "$numberLines" != "0" ]; then
-		git gui;
-		echo $numberLines
+	verbose "$gitDir"
+	if ! git diff --quiet HEAD &>/dev/null; then
+
+		numberLines=$(git status -s | wc -l);
+
+		if [[ "$numberLines" != "0" ]]; then
+			verbose  "\tChanged $numberLines"
+			addNewline=true
+		fi
+
+		if ! $noCommit; then
+			git gui
+		fi
 	fi
 
-done
+	if $verboseOn; then
 
-cd
+		numberAhead=$(git log --oneline origin..HEAD 2> /dev/null | wc -l)
+		if [[ "$numberAhead" -ne 0 ]]; then
+			verbose "\tAhead: $numberAhead"
+			addNewline=true
+		fi
+	fi
+
+	pullAll
+	pushAll
+
+	if $addNewline; then
+		verbose
+	fi
+
+done <<< "$list"
+
+cd $currentDir
