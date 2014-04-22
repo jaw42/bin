@@ -1,0 +1,5 @@
+#! /bin/zsh
+
+xfce4-appfinder -c
+wmctrl -r "Application Finder" -b toggle,above
+wmctrl -a "Application Finder"

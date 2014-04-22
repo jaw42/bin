@@ -1,0 +1,5 @@
+#! /bin/bash
+notify-send -u normal "Song:	$(ncmpcpp --now-playing %t)" \
+"Artist:	'$(ncmpcpp --now-playing %a)' 
+Album:	'$(ncmpcpp --now-playing %b)'" \
+	 --icon=/usr/share/pixmaps/notification-audio-play.svg

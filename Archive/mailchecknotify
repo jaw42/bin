@@ -1,0 +1,31 @@
+#! /bin/bash
+
+ACCOUNT=wainwright.ja
+GMAIL="https://mail.google.com/mail/feed/atom"
+
+NOTIFY=`curl -u wainwright.ja:WSOGMM42[] --silent $GMAIL | perl -ne 'print "\t" if /<name>/; print "$2\n" if /<(title|name)>(.*)<\/\1>/;'`
+
+echo $NOTIFY
+CLICK="google-chrome --app='https://mail.google.com'"
+
+img=/usr/share/icons/elementary-mono-dark/panel/22/indicator-messages.svg
+
+if [ "$NOTIFY" == "Gmail - Inbox for wainwright.ja@gmail.com" ]; then
+    NOTIFY="No new messages"
+    img=/usr/share/icons/elementary-mono-dark/panel/22/indicator-messages.svg
+#elif [ -z "$(ifconfig|grep wlan0)" ]; then
+else
+    notify-send -i '/usr/share/icons/elementary/categories/48/applications-mail.svg' -c email #"$NOTIFY"
+    img=/usr/share/icons/elementary-mono-dark/panel/22/indicator-messages-new.svg
+fi
+
+if [ "$(ping -c1 google.com)" == "ping: unknown host google.com" ]; then
+    NOTIFY="Not connected"
+	img=/usr/share/icons/elementary-mono-dark/panel/22/indicator-messages-error.svg
+	CLICK=echo
+fi
+
+echo -e "<img>$img</img>"
+echo -e "<click>$CLICK</click>"
+echo -e "<tool>$NOTIFY</tool>"
+

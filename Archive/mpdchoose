@@ -1,0 +1,22 @@
+#!/bin/sh
+
+title="Actions"
+action=$(yad --width 300 --entry --title="$title" --undecorated --borders=10 --window-icon=/usr/share/icons/Faenza/categories/64/applications-multimedia.png\
+    --image=/usr/share/icons/Faenza/categories/64/applications-multimedia.png \
+    --button="gtk-close:1" --button="gtk-ok:0"\
+    --text "Choose mpd config:" \
+    --entry-text \
+    "Standard" "Audiobooks" "Kill mpd")
+    
+ret=$?
+
+[[ $ret -eq 1 ]] && exit 0
+
+case $action in
+    Standard*) cmd="mpd | notify-send -i gtk-info MPD Stardard" ;;
+    Audiobooks*) cmd="mpd .mpdconf1 | notify-send -i gtk-info MPD Audiobooks" ;;
+    Kill*) cmd="killall mpd | notify-send -i gtk-dialog-error MPD Closed";;
+    *) exit 1 ;;        
+esac
+
+eval exec $cmd
