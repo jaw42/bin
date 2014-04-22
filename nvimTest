@@ -1,0 +1,16 @@
+#!/bin/bash
+
+number=100
+
+if [ $# -gt 0 ]; then
+	number=$1
+fi
+
+for command in {vim,nvim}; do
+	echo -en "\n$command ---------"
+	time {
+		for (( i=0; i<= $number; i++  )); do
+			$command -u NONE -U NONE -s ${0%/*}/vimScript
+		done
+	}
+done

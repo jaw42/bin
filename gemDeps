@@ -1,0 +1,11 @@
+#!/bin/bash
+
+gem list \
+    | cut -d\  -f1 \
+    | xargs gem dep \
+    | awk '\
+        BEGIN { print "digraph gems {" } \
+        /^Gem / { cur=$2; sub(/-[0-9\.]+$/, "", cur); print "  \"" cur "\";" } \
+        ! /^Gem / && $0 != "" { print "  \"" cur "\" -> \"" $1 "\";" } \
+        END { print "}" }' \
+    | dot -Tpng -o gems.png
