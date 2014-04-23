@@ -9,29 +9,16 @@ fehviewer="/home/josh/Bin/fehviewer"
          # Genres
       Genre_array=(text video audio pdf web image word spreadsheet archive svg )
 
-<<<<<<< HEAD
            #Genre=("fast" "complex"             )
              text=(gvim vim                     )
             video=(mpv                          )
             audio=(mpv                          )
               pdf=(mupdf epdfview               )
-              web=(dwb surf                     )
+              web=(chromium surf                )
             image=($fehviewer mirage            )
              word=(abiword                      )
       spreadsheet=(gnumeric                     )
           archive=(file-roller                  )
-=======
-           #Genre=("fast" "complex"  )
-             text=(gvim vim          )
-            video=(mpv               )
-            audio=(mpv               )
-              pdf=(llpp epdfview     )
-              web=(dwb surf          )
-            image=($fehviewer mirage )
-             word=(abiword           )
-      spreadsheet=(gnumeric          )
-          archive=(file-roller       )
->>>>>>> 92cfc26040c3dacbcf43a0b3a4053cb6ee22187c
 
      # File types
        text_array=(txt tex sh markdown md zsh            )
