@@ -1,6 +1,6 @@
 #!/bin/bash
-# Created  : TIMESTAMP
-# Modified : TIMESTAMP
+# Created  : Wed 23 Apr 2014 12:58 pm
+# Modified : Wed 23 Apr 2014 01:19 pm
 
 set -o nounset
 # set -o errexit
@@ -10,6 +10,7 @@ pullAllOn=false
 pushAllOn=false
 noCommit=false
 list=""
+ignore=("Osaka")
 
 verbose() {
 	set +u
@@ -26,6 +27,11 @@ getGitRepos() {
 		verbose "Command locate not availible. Using find instead."
 		list=$(find ~/ -name ".git" -exec dirname {} \; 2> /dev/null)
 	fi
+
+	for i in "${ignore[@]}"; do
+		list=$(sed "/${i}/d" <<< "$list")
+	done
+
 }
 
 pullAll() {
@@ -43,7 +49,7 @@ pushAll() {
 currentDir=$(pwd)
 cd ~/
 
-while getopts "Vpun" opt; do
+while getopts "Vpunx:" opt; do
 	case "$opt" in
 		V)
 			verboseOn=false
@@ -56,6 +62,9 @@ while getopts "Vpun" opt; do
 			;;
 		n)
 			noCommit=true
+			;;
+		x)
+			ignore+=("$OPTARG")
 			;;
 		*)
 			echo "Flag "$opt" not recognised."
