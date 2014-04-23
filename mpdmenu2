@@ -6,7 +6,7 @@ height=20
 
 DMENU() {
     # Vertical menu if $3 is given
-    echo -e "$1" | dmenu -i -b -p "$2" ${3:+"-l" $3}
+    echo -e "$1" | dmenu -i -p "$2" ${3:+"-l" $3}
 }
 
 get_playlist() {
@@ -57,13 +57,14 @@ jump() {
     [ -n "$song" ] && $MPC play ${song%%\ *}
 }
 
-while true; do
-    action=$(DMENU "Clear\nAdd\nRemove\nJump" "Do you want to")
-    case $action in
-        Clear) $MPC clear;;
-        Add) add;;
-        Remove) remove;;
-        Jump) jump;;
-        "") exit 0;;
-    esac
-done
+add
+# while true; do
+#     action=$(DMENU "Clear\nAdd\nRemove\nJump" "Do you want to")
+#     case $action in
+#         Clear) $MPC clear;;
+#         Add) add;;
+#         Remove) remove;;
+#         Jump) jump;;
+#         "") exit 0;;
+#     esac
+# done
