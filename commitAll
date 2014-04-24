@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created  : Wed 23 Apr 2014 12:58 pm
-# Modified : Wed 23 Apr 2014 01:24 pm
+# Modified : Thu 24 Apr 2014 09:12 am
 
 set -o nounset
 # set -o errexit
@@ -51,12 +51,12 @@ pushAll() {
 currentDir=$(pwd)
 cd ~/
 
-while getopts "Vpunx:" opt; do
+while getopts "Vdunx:" opt; do
 	case "$opt" in
 		V)
 			verboseOn=false
 			;;
-		p)
+		d)
 			pullAllOn=true
 			;;
 		u)
