@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created  : Wed 23 Apr 2014 12:58 pm
-# Modified : Wed 23 Apr 2014 01:19 pm
+# Modified : Wed 23 Apr 2014 01:24 pm
 
 set -o nounset
 # set -o errexit
@@ -42,7 +42,9 @@ pullAll() {
 
 pushAll() {
 	if $pushAllOn; then
-		git push 2>&1 | sed 's/^/\t/'
+		if [[ $1 -gt 0 ]]; then
+			git push 2>&1 | sed 's/^/\t/'
+		fi
 	fi
 }
 
@@ -109,7 +111,7 @@ for gitDir in $(echo $list); do
 	fi
 
 	pullAll
-	pushAll
+	pushAll $numberAhead
 
 	if $addNewline; then
 		verbose
