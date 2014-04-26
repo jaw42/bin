@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created  : Wed 23 Apr 2014 12:58 pm
-# Modified : Thu 24 Apr 2014 09:12 am
+# Modified : Sat 26 Apr 2014 05:42 pm
 
 set -o nounset
 # set -o errexit
@@ -11,6 +11,7 @@ pushAllOn=false
 noCommit=false
 list=""
 ignore=("Osaka")
+include=()
 
 verbose() {
 	set +u
@@ -32,6 +33,15 @@ getGitRepos() {
 		list=$(sed "/${i}/d" <<< "$list")
 	done
 
+	if [[ ${#include[@]} -ne 0 ]]; then
+		local includeString=""
+		for i in "${include[@]}"; do
+			includeString+="$i""|"
+		done
+		includeString=${includeString%?}
+		list=$(egrep "$includeString" <<< "$list")
+	fi
+
 }
 
 pullAll() {
@@ -51,7 +61,7 @@ pushAll() {
 currentDir=$(pwd)
 cd ~/
 
-while getopts "Vdunx:" opt; do
+while getopts "Vlducx:i:" opt; do
 	case "$opt" in
 		V)
 			verboseOn=false
@@ -67,6 +77,9 @@ while getopts "Vdunx:" opt; do
 			;;
 		x)
 			ignore+=("$OPTARG")
+			;;
+		i)
+			include+=("$OPTARG")
 			;;
 		*)
 			echo "Flag "$opt" not recognised."
