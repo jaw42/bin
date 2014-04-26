@@ -1,0 +1,18 @@
+#! /bin/bash
+
+for folder in *; do
+	cd "$folder" > /dev/null
+	echo "## $folder ##"
+	before=$(du -sb . | awk '{print $1}')
+	echo -e "\tBefore: $before"
+
+	git gc --aggressive --prune=all > /dev/null &>2
+
+	after=$(du -sb . | awk '{print $1}')
+	echo -e "\tAfter: $after"
+	diff=$(( $before - $after ))
+	echo -e "\tdifference: $diff"
+	# echo -e "\n\n\n"
+	# read -n 1 c </dev/tty
+	cd .. > /dev/null
+done
