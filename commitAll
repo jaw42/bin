@@ -5,17 +5,18 @@
 set -o nounset
 # set -o errexit
 
-verboseOn=true
-pullAllOn=false
-pushAllOn=false
-noCommit=false
+verbose=true
+justList=false
+pullAll=false
+pushAll=false
+commit=false
 list=""
 ignore=("Osaka")
 include=()
 
 verbose() {
 	set +u
-	if $verboseOn; then
+	if $verbose; then
 		echo -e ${2} "$1"
 	fi
 	set -u
@@ -45,13 +46,13 @@ getGitRepos() {
 }
 
 pullAll() {
-	if $pullAllOn; then
+	if $pullAll; then
 		git pull 2>&1 | sed 's/^/\t/'
 	fi
 }
 
 pushAll() {
-	if $pushAllOn; then
+	if $pushAll; then
 		if [[ $1 -gt 0 ]]; then
 			git push 2>&1 | sed 's/^/\t/'
 		fi
@@ -64,16 +65,19 @@ cd ~/
 while getopts "Vlducx:i:" opt; do
 	case "$opt" in
 		V)
-			verboseOn=false
+			verbose=false
+			;;
+		l)
+			justList=true
 			;;
 		d)
-			pullAllOn=true
+			pullAll=true
 			;;
 		u)
-			pushAllOn=true
+			pushAll=true
 			;;
-		n)
-			noCommit=true
+		c)
+			commit=true
 			;;
 		x)
 			ignore+=("$OPTARG")
@@ -93,6 +97,11 @@ shift $((OPTIND-1))
 
 getGitRepos
 
+if $justList; then
+	echo "$list"
+	exit
+fi
+
 # while read -r gitDir; do
 for gitDir in $(echo $list); do
 
@@ -109,12 +118,12 @@ for gitDir in $(echo $list); do
 			addNewline=true
 		fi
 
-		if ! $noCommit; then
+		if $commit; then
 			git gui
 		fi
 	fi
 
-	if $verboseOn; then
+	if $verbose; then
 
 		numberAhead=$(git log --oneline origin..HEAD 2> /dev/null | wc -l)
 		if [[ "$numberAhead" -ne 0 ]]; then
