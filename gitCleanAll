@@ -4,14 +4,17 @@ for folder in *; do
 	cd "$folder" > /dev/null
 	echo "## $folder ##"
 	before=$(du -sb . | awk '{print $1}')
-	echo -e "\tBefore: $before"
+	hbefore=$(awk '{ split( "KB MB GB" , v ); s=1; while( $1>1024 ){ $1/=1024; s++ } print int($1) v[s] }' <<< $before)
+	echo -e "\tBefore: $before \t $hbefore"
 
-	git gc --aggressive --prune=all > /dev/null &>2
+	# git gc --aggressive --prune=all > /dev/null &>2
 
 	after=$(du -sb . | awk '{print $1}')
-	echo -e "\tAfter: $after"
+	hafter=$(awk '{ split( "KB MB GB" , v ); s=1; while( $1>1024 ){ $1/=1024; s++ } print int($1) v[s] }' <<< $after)
+	echo -e "\tAfter: $after \t $hafter"
 	diff=$(( $before - $after ))
-	echo -e "\tdifference: $diff"
+	hdiff=$(awk '{ split( "KB MB GB" , v ); s=1; while( $1>1024 ){ $1/=1024; s++ } print int($1) v[s] }' <<< $diff)
+	echo -e "\tdifference: $diff \t $hdiff"
 	# echo -e "\n\n\n"
 	# read -n 1 c </dev/tty
 	cd .. > /dev/null
