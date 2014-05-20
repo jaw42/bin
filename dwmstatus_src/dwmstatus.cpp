@@ -250,10 +250,11 @@ void pac(){
 
 void hdd(){
 	//TODO read from /proc to get hdd infor
-	string disk = exec("df /dev/sda3 --output=pcent | tail -n 1 | tr -d ' '");
+	string disk3 = exec("df /dev/sda3 --output=pcent | tail -n 1 | tr -d ' '");
+	string disk2 = exec("df /dev/sda2 --output=pcent | tail -n 1 | tr -d ' '");
 	ofstream hddfile;
 	hddfile.open(TMP_FOLDER"/hdd");
-	hddfile << "  \x06[H] \x01" << delLast(disk);
+	hddfile << "  \x06[H] \x01" << delLast(disk2) << " " << delLast(disk3);
 	hddfile.close();
 }
 
