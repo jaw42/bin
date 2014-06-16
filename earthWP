@@ -2,7 +2,6 @@
 
 dir=/home/josh/Pictures/Wallpapers
 
-cd $dir
   # | egrep "500px|imgur|flickr|squarespace" \
 
 sites=("http://www.reddit.com/r/earthporn/top/?sort=top&t=week" \
@@ -21,8 +20,6 @@ url=$(curl -s $randomSite\
 
 ext="${url##*.}"
 sha=$(cksum <<< "$url" | tr -d ' ')
-wget -nc "$url" -O "$sha.$ext"
+wget -nc "$url" -O "$dir/$sha.$ext"
 
-feh --bg-fill $sha.$ext
-
-cd -
+feh --bg-fill "$dir/$sha.$ext"
