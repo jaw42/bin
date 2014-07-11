@@ -10,7 +10,7 @@ if [[ -d $arg ]]; then
 		oldexists=true
 	fi
 
-	tar --create --file - --posix --gzip -- $arg | openssl enc -e -aes256 -out $arg.enc \
+	(tar --create --file - --posix --gzip -- $arg | openssl enc -e -aes256 -out $arg.enc) \
 		&& rm -rf "$arg" > /dev/null
 
 	if $oldexists; then
