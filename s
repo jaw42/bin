@@ -63,3 +63,5 @@ elif hash ack 2> /dev/null; then
 else
 	usegrep "$@"
 fi
+
+# vim: ft=sh
