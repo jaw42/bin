@@ -209,7 +209,7 @@ void mpd(){
 }
 
 void mail(){
-/*	if (testTimeNow(120, "email", arg)) {
+	if (testTimeNow(120, "email", arg)) {
 		string feed = exec("nice -n 19 curl -n --silent 'https://mail.google.com/mail/feed/atom'");
 
 		ofstream mailfile;
@@ -226,8 +226,8 @@ void mail(){
 			mailfile << "";
 		}
 		mailfile.close();
-	} */
-	if (testTimeNow(120, "email", arg)) {
+	}
+/*	if (testTimeNow(120, "email", arg)) {
 		string number = exec("nice -n 19 find /home/josh/mail/gmail/INBOX/ -type f | grep -vE ',[^,]*S[^,]*$' | wc -l");
 		number = delLast(number);
 
@@ -240,7 +240,7 @@ void mail(){
 			mailfile << "";
 		}
 		mailfile.close();
-	}
+	}*/
 }
 
 void pac(){
