@@ -6,6 +6,7 @@ verbose=false
 i=""
 s=""
 v=""
+f=""
 
 verbose() {
 	set +u
@@ -17,22 +18,38 @@ verbose() {
 
 usegit() {
 	verbose "git"
-	git grep $i $v "$@"
+	if [[ $f = "files" ]]; then
+		git ls-files | \grep $i $v "$@"
+	else
+		git grep $i $v "$@"
+	fi
 }
 useag() {
 	verbose "ag"
-	ag $i $s $v "$@"
+	if [[ $f = "files" ]]; then
+		ag $i $s $v -g "$@"
+	else
+		ag $i $s $v "$@"
+	fi
 }
 useack() {
 	verbose "ack"
-	ack $i $s $v "$@"
+	if [[ $f = "files" ]]; then
+		find . | grep $i $v "$@"
+	else
+		ack $i $s $v "$@"
+	fi
 }
 usegrep() {
 	verbose "grep"
-	grep --recursive $i $v "$@"
+	if [[ $f = "files" ]]; then
+		find . | grep $i $v "$@"
+	else
+		grep --recursive $i $v "$@"
+	fi
 }
 
-while getopts "isvV" opt; do
+while getopts "isvfV" opt; do
 	case "$opt" in
 		i)
 			i="--ignore-case"
@@ -42,6 +59,9 @@ while getopts "isvV" opt; do
 			;;
 		v)
 			v="--invert-match"
+			;;
+		f)
+			f="files"
 			;;
 		V)
 			verbose=true
