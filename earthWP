@@ -5,10 +5,12 @@ dir=/home/josh/Pictures/Wallpapers
   # | egrep "500px|imgur|flickr|squarespace" \
 
 sites=("http://www.reddit.com/r/earthporn/top/?sort=top&t=week" \
+		"http://www.reddit.com/r/wallpapers/top/?sort=top&t=week" \
 		"http://www.reddit.com/r/spaceporn/top/?sort=top&t=week"
 )
 
 randomSite=${sites[$RANDOM % ${#sites[@]} ]}
+echo $randomSite
 
 url=$(curl -s $randomSite\
   | tr '"' '\n' \
