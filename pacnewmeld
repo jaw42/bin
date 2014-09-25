@@ -6,12 +6,14 @@ pacnew=$(find /etc -type f -name "*.pacnew" 2>/dev/null)
 # Check if any .pacnew configurations are found
 if [[ -z "$pacnew" ]]; then
   echo " No configurations to update"
+  exit 0
 fi
 
 for config in $pacnew; do
   # Diff original and new configuration to merge
   #sudo meld ${config%\.*} $config 2> /dev/null &
-  sudo meld ${config%\.*} $config &
+  #sudo meld ${config%\.*} $config &
+  sudo gvimdiff ${config%\.*} $config &
   wait
   # Remove .pacnew file?
   while true; do
