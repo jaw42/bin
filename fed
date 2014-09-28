@@ -1,0 +1,31 @@
+#!/bin/bash
+
+arg="$1"
+
+if [[ -d $arg ]]; then
+	echo "Creating encrypted archive..."
+	oldexists=false
+	if [[ -f $arg.enc ]]; then
+		mv $arg.enc $arg.enc.old
+		oldexists=true
+	fi
+
+	(tar --create --file - --posix --gzip -- $arg | openssl enc -e -aes256 -out $arg.enc) \
+		&& rm -rf "$arg" > /dev/null
+
+	if $oldexists; then
+		echo "Checking old file."
+		hash1=$(cksum $arg.enc)
+		hash2=$(cksum $arg.enc.old)
+		if [[ "hash1" == "hash2" ]]; then
+			rm $arg.enc
+			mv $arg.enc.old $arg.enc
+		else
+			rm $arg.enc.old
+		fi
+	fi
+
+elif [[ $arg == *.enc ]]; then
+	echo "Decrypting archive..."
+	openssl enc -d -aes256 -in $arg | tar --extract --file - --gzip
+fi

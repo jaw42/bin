@@ -227,6 +227,20 @@ void mail(){
 		}
 		mailfile.close();
 	}
+/*	if (testTimeNow(120, "email", arg)) {
+		string number = exec("nice -n 19 find /home/josh/mail/gmail/INBOX/ -type f | grep -vE ',[^,]*S[^,]*$' | wc -l");
+		number = delLast(number);
+
+		ofstream mailfile;
+		mailfile.open(TMP_FOLDER"/mail");
+
+		if (number != "0") {
+			mailfile << "  \x04[M] \x01" << number;
+		} else {
+			mailfile << "";
+		}
+		mailfile.close();
+	}*/
 }
 
 void pac(){
@@ -250,47 +264,50 @@ void pac(){
 
 void hdd(){
 	//TODO read from /proc to get hdd infor
-	string disk = exec("df /dev/sda3 --output=pcent | tail -n 1 | tr -d ' '");
+	string disk3 = exec("df /dev/sda3 --output=pcent | tail -n 1 | tr -d ' '");
+	string disk2 = exec("df /dev/sda2 --output=pcent | tail -n 1 | tr -d ' '");
 	ofstream hddfile;
 	hddfile.open(TMP_FOLDER"/hdd");
-	hddfile << "  \x06[H] \x01" << delLast(disk);
+	hddfile << "  \x06[H] \x01" << delLast(disk2) << " " << delLast(disk3);
 	hddfile.close();
 }
 
 void net(){
-	//TODO get wireless info
-	///proc/net/tcp
-	//use the second columnm, local_address, the ip address is here but in hex
-	//and in reverse order. 0201A8C0 -> 192 168 1 2
-	string ipaddr=exec("ip addr show dev wlp4s0 | awk '/inet / {print $2}'");
-	if (ipaddr != "") {
-		ipaddr = delLast(ipaddr);
-	}
-	string signal_tmp;
-
-	ifstream wireless("/proc/net/wireless");
-	while (getline(wireless, signal_tmp)) {
-		if (signal_tmp.find(INTERFACE) != string::npos) {
-		signal_tmp = Get(signal_tmp, 2);
-			signal_tmp = delLast(signal_tmp);
-			break;
+	if (testTimeNow(2400, "net", arg)) {
+		//TODO get wireless info
+		///proc/net/tcp
+		//use the second columnm, local_address, the ip address is here but in hex
+		//and in reverse order. 0201A8C0 -> 192 168 1 2
+		string ipaddr=exec("ip addr show dev wlp4s0 | awk '/inet / {print $2}'");
+		if (ipaddr != "") {
+			ipaddr = delLast(ipaddr);
 		}
+		string signal_tmp;
+
+		ifstream wireless("/proc/net/wireless");
+		while (getline(wireless, signal_tmp)) {
+			if (signal_tmp.find(INTERFACE) != string::npos) {
+				signal_tmp = Get(signal_tmp, 2);
+				signal_tmp = delLast(signal_tmp);
+				break;
+			}
+		}
+
+		int signal_int;
+
+		signal_int = atoi(signal_tmp.c_str());
+
+		string signal;
+		if (signal_int < 30) {
+			signal = "\x07" + signal_tmp + "%\x01";
+		}else{
+			signal = signal_tmp + "%";
+		}
+		ofstream netfile;
+		netfile.open(TMP_FOLDER"/net");
+		netfile << "  \x06[I] \x01(" << ipaddr << ")  \x06[W] \x01" << signal;
+		netfile.close();
 	}
-
-	int signal_int;
-
-	signal_int = atoi(signal_tmp.c_str());
-
-	string signal;
-	if (signal_int < 30) {
-		signal = "\x07" + signal_tmp + "%\x01";
-	}else{
-		signal = signal_tmp + "%";
-	}
-	ofstream netfile;
-	netfile.open(TMP_FOLDER"/net");
-	netfile << "  \x06[I] \x01(" << ipaddr << ")  \x06[W] \x01" << signal;
-	netfile.close();
 
 }
 
@@ -304,9 +321,11 @@ void date(){
 	int days = seconds / 60 / 60 / 24;
 
 	ostringstream uptime;
-	if (days == 0) {
+	if (hours == 0) {
+		uptime << minutes << "m ";
+	} else if (days == 0) {
 		uptime << hours << "h " << minutes << "m ";
-	}else if (days > 7) {
+	}else if (days > 10) {
 		uptime << "\x03" << days << "d \x01" << hours << "h " << minutes << "m ";
 	}else{
 		uptime << days << "d " << hours << "h " << minutes << "m";
@@ -319,19 +338,19 @@ void date(){
 	int day = now->tm_mday;
 	string month_long;
 	switch(month){
-		case 1: month_long = "Jan"; break;
-		case 2: month_long = "Feb"; break;
-		case 3: month_long = "Mar"; break;
-		case 4: month_long = "Apr"; break;
-		case 5: month_long = "May"; break;
-		case 6: month_long = "Jun"; break;
-		case 7: month_long = "Jul"; break;
-		case 8: month_long = "Aug"; break;
-		case 9: month_long = "Sep"; break;
+		case 1:  month_long = "Jan"; break;
+		case 2:  month_long = "Feb"; break;
+		case 3:  month_long = "Mar"; break;
+		case 4:  month_long = "Apr"; break;
+		case 5:  month_long = "May"; break;
+		case 6:  month_long = "Jun"; break;
+		case 7:  month_long = "Jul"; break;
+		case 8:  month_long = "Aug"; break;
+		case 9:  month_long = "Sep"; break;
 		case 10: month_long = "Oct"; break;
 		case 11: month_long = "Nov"; break;
 		case 12: month_long = "Dec"; break;
-		default: month_long = "Unknown"; break;
+		default: month_long = "Unk"; break;
 	}
 	ostringstream dateNow;
 	dateNow << day << " " << month_long << "'" << year;

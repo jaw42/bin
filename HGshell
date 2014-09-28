@@ -1,0 +1,27 @@
+#!/bin/sh
+clear
+while true; do
+  w="`stty size | sed -e 's/.* //'`"
+  h="`stty size | sed -e 's/ .*//'`"
+  # Clear entry line
+  printf '\e[1H'
+  for x in `seq 1 "$w"`; do printf ' '; done
+  # Entry-output barrier
+  printf '\e[2H'
+  for x in `seq 1 "$w"`; do printf '-'; done
+  # Output-dir barrier
+  printf "\e[`expr "$h" - 1`H"
+  for x in `seq 1 "$w"`; do printf '-'; done
+  # Clear dir line
+  printf "\e[${h}H"
+  for x in `seq 1 "$w"`; do printf ' '; done
+  # Print dir
+  printf "\e[${h}H"
+  pwd | tr -d '\r\n'
+  printf '\e[1H'
+  printf "$PS1" | sed -e "s/\\u/${USER}/g; s/\\h/${HOSTNAME}/g; s|\\[wW]|${PWD}|g;"
+  read cmd || break
+  clear
+  printf '\e[3H'
+  eval "$cmd"
+done

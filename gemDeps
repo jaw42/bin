@@ -1,5 +1,8 @@
 #!/bin/bash
 
+hash dot 2> /dev/null || { echo >&2 "Command \"dot\" required but not found.
+Provided by the \"graphviz\" package" ; exit 1; }
+
 gem list \
     | cut -d\  -f1 \
     | xargs gem dep \

@@ -1,1 +1,3 @@
 dwmstatus.o
+*.o
+ImageJ/
