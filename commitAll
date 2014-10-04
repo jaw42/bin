@@ -48,7 +48,7 @@ getGitRepos() {
 
 pullAll() {
 	if $pullAll; then
-		git pull 2>&1 | sed 's/^/\t/'
+		git pull origin master 2>&1 | sed 's/^/\t/'
 	fi
 }
 
