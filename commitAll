@@ -48,14 +48,14 @@ getGitRepos() {
 
 pullAll() {
 	if $pullAll; then
-		git pull origin master 2>&1 | sed 's/^/\t/'
+		git pull --color=always origin master 2>&1 | sed 's/^/\t/'
 	fi
 }
 
 pushAll() {
 	if $pushAll; then
 		if [[ $1 -gt 0 ]]; then
-			git push 2>&1 | sed 's/^/\t/'
+			git push --color=always 2>&1 | sed 's/^/\t/'
 		fi
 	fi
 }
