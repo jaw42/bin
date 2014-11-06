@@ -4,7 +4,7 @@
 # Filename: commitAll
 
 set -o nounset
-# set -o errexit
+set -o errexit
 
 verbose=true
 justList=false
@@ -12,8 +12,9 @@ pullAll=false
 pushAll=false
 commit=false
 list=""
-ignore=("Osaka")
-include=()
+ignore=("Osaka", "TLPs")
+include=("JoshWainwright")
+customcmd=""
 
 verbose() {
 	set +u
@@ -63,7 +64,7 @@ pushAll() {
 currentDir=$(pwd)
 cd ~/
 
-while getopts "Vlducx:i:" opt; do
+while getopts "Vlducx:i:r:" opt; do
 	case "$opt" in
 		V)
 			verbose=false
@@ -85,6 +86,9 @@ while getopts "Vlducx:i:" opt; do
 			;;
 		i)
 			include+=("$OPTARG")
+			;;
+		r)
+			customcmd=("$OPTARG")
 			;;
 		*)
 			echo "Flag "$opt" not recognised."
@@ -116,21 +120,24 @@ for gitDir in $(echo $list); do
 
 		if [[ "$numberLines" != "0" ]]; then
 			verbose  "\tChanged $numberLines"
+			git status --ignore-submodules --short | sed 's/^/\t/'
 			addNewline=true
 		fi
 
 		if $commit; then
 			git gui
 		fi
+
+	fi
+	if [[ "x$customcmd" != "x" ]]; then
+		eval "$customcmd" | sed 's/^/\t\t/'
 	fi
 
-	if $verbose; then
-
-		numberAhead=$(git log --branches --not --remotes --oneline 2> /dev/null | wc -l)
-		if [[ "$numberAhead" -ne 0 ]]; then
-			verbose "\tAhead: $numberAhead"
-			addNewline=true
-		fi
+	numberAhead=$(git log --branches --not --remotes --oneline 2> /dev/null | wc -l)
+	if [[ "$numberAhead" -ne 0 ]]; then
+		verbose "\tAhead: $numberAhead"
+		git log --color=always --branches --not --remotes --oneline --decorate | sed 's/^/\t/'
+		addNewline=true
 	fi
 
 	pullAll
