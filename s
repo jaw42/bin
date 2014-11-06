@@ -45,7 +45,7 @@ usegrep() {
 	if [[ $f = "files" ]]; then
 		find . | grep $i $v "$@"
 	else
-		grep --recursive $i $v "$@"
+		grep -E -n --recursive $i $v "$@"
 	fi
 }
 
