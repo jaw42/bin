@@ -16,6 +16,11 @@ verbose() {
 	set -u
 }
 
+useloc() {
+	cmd="locate $i $r \"$@\""
+}
+
+
 usegit() {
 	verbose "git"
 	if [[ $f = "files" ]]; then
@@ -76,6 +81,8 @@ shift $((OPTIND-1))
 
 if git rev-parse --git-dir > /dev/null 2>&1; then
 	usegit "$@"
+elif [ "$f" == "files" ] && hash locate 2> /dev/null; then
+	useloc "$@"
 elif hash ag 2> /dev/null; then
 	useag "$@"
 elif hash ack 2> /dev/null; then
