@@ -2,9 +2,11 @@
 set -o nounset
 set -o errexit
 
+cmd=""
 verbose=false
 i=""
 s=""
+r=""
 v=""
 f=""
 
@@ -22,45 +24,56 @@ useloc() {
 
 
 usegit() {
-	verbose "git"
+	if [[ "x$r" != "x" ]]; then
+		r="-E"
+	fi
+
 	if [[ $f = "files" ]]; then
-		git ls-files | \grep $i $v "$@"
+		cmd="git ls-files | \grep $i $v $r \"$@\""
 	else
-		git grep $i $v "$@"
+		cmd="git grep $i $v $r \"$@\""
 	fi
 }
 useag() {
-	verbose "ag"
 	if [[ $f = "files" ]]; then
-		ag $i $s $v -g "$@"
+		cmd="ag $i $s $v -g \"$@\" ."
 	else
-		ag $i $s $v "$@"
+		cmd="ag $i $s $v \"$@\" ."
 	fi
 }
 useack() {
-	verbose "ack"
+	if [[ "x$r" != "x" ]]; then
+		r="-E"
+	fi
+
 	if [[ $f = "files" ]]; then
-		find . | grep $i $v "$@"
+		cmd="find . | grep $i $v $r \"$@\""
 	else
-		ack $i $s $v "$@"
+		cmd="ack $i $s $v \"$@\""
 	fi
 }
 usegrep() {
-	verbose "grep"
+	if [[ "x$r" != "x" ]]; then
+		r="-E"
+	fi
+
 	if [[ $f = "files" ]]; then
-		find . | grep $i $v "$@"
+		cmd="find . | grep $i $v $r \"$@\""
 	else
-		grep -E -n --recursive $i $v "$@"
+		cmd="grep $r -n --recursive $i $v \"$@\""
 	fi
 }
 
-while getopts "isvfV" opt; do
+while getopts "isrvfV" opt; do
 	case "$opt" in
 		i)
 			i="--ignore-case"
 			;;
 		s)
 			s="--smart-case"
+			;;
+		r)
+			r="--regex"
 			;;
 		v)
 			v="--invert-match"
@@ -90,5 +103,8 @@ elif hash ack 2> /dev/null; then
 else
 	usegrep "$@"
 fi
+
+verbose "$cmd"
+eval "$cmd"
 
 # vim: ft=sh
