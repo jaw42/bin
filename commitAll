@@ -12,7 +12,7 @@ pullAll=false
 pushAll=false
 commit=false
 list=""
-ignore=("Osaka" "plugged" "TLPs")
+ignore=("Osaka" "TLPs")
 include=("JoshWainwright")
 customcmd=""
 
@@ -56,7 +56,7 @@ pullAll() {
 pushAll() {
 	if $pushAll; then
 		if [[ $1 -gt 0 ]]; then
-			git push --color=always 2>&1 | sed 's/^/\t/'
+			git -c colour.push=always push 2>&1 | sed 's/^/\t/'
 		fi
 	fi
 }
@@ -125,7 +125,7 @@ for gitDir in $(echo $list); do
 		fi
 
 		if $commit; then
-			git gui
+			git gui 2> /dev/null || zsh -i -c "gu"
 		fi
 
 	fi
