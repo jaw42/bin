@@ -4,11 +4,13 @@ set -o errexit
 
 cmd=""
 verbose=false
+dryrun=false
 i=""
 s=""
 r=""
 v=""
 f=""
+allow_locate=true
 
 usage() {
 	echo "File Search"
@@ -80,8 +82,11 @@ usegrep() {
 	fi
 }
 
-while getopts "isrvfV" opt; do
+while getopts "disrvflVh" opt; do
 	case "$opt" in
+		d)
+			dryrun=true
+			;;
 		i)
 			i="--ignore-case"
 			;;
@@ -97,12 +102,19 @@ while getopts "isrvfV" opt; do
 		f)
 			f="files"
 			;;
+		l)
+			allow_locate=false
+			;;
 		V)
 			verbose=true
 			;;
+		h)
+			usage
+			exit 0
+			;;
 		*)
 			echo "Flag "$opt" not recognised."
-			exit 0
+			exit 1
 			;;
 	esac
 done
@@ -110,7 +122,7 @@ shift $((OPTIND-1))
 
 if git rev-parse --git-dir > /dev/null 2>&1; then
 	usegit "$@"
-elif [ "$f" == "files" ] && hash locate 2> /dev/null; then
+elif [ "$f" == "files" ] && $allow_locate && hash locate 2> /dev/null; then
 	useloc "$@"
 elif hash ag 2> /dev/null; then
 	useag "$@"
@@ -120,7 +132,10 @@ else
 	usegrep "$@"
 fi
 
-verbose "$cmd"
-eval "$cmd"
-
-# vim: ft=sh
+if $dryrun; then
+	echo "**** Dry Run ****"
+	echo "$cmd"
+else
+	verbose "$cmd"
+	eval "$cmd"
+fi
