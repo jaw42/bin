@@ -1,19 +1,19 @@
 #!/bin/bash
 # Created:  Wed 23 Apr 2014 12:58 pm
 # Author:   Josh Wainwright
-# Filename: commitAll
+# Filename: amr (All My Repos)
 
 set -o nounset
 #set -o errexit
 
-verbose=true
+verbose=false
 justList=false
 pullAll=false
 pushAll=false
 commit=false
 list=""
 ignore=("Osaka" "plugged" "TLPs")
-include=("JoshWainwright|josh")
+include=("JoshWainwright" "josh")
 customcmd=""
 
 verbose() {
@@ -22,6 +22,26 @@ verbose() {
 		echo -e ${2} "$1"
 	fi
 	set -u
+}
+
+usage() {
+	b="\033[4m"
+	n="\033[0m"
+helptext="$(basename $0) [-hvlduc] [-x pattern] [-i pattern] [-r command]
+
+amr = ${b}A${n}ll ${b}M${n}y ${b}R${n}epos. Perform actions on all the repositories found on the local machine.
+
+	-h         Show this ${b}h${n}elp text.
+	-v         Be more ${b}v${n}erbose with output text.
+	-l         Don't perform any actions, simply ${b}l${n}ist the repos found.
+	-d         Pull ${b}d${n}own changes from remotes (git pull).
+	-u         Push ${b}u${n}p commits to remotes (git push).
+	-c         Interactively ${b}c${n}ommit local changes.
+	-x pattern E${b}x${n}clude any repos matching pattern.
+	-i pattern Only ${b}i${n}nclude repos that match patter.
+	-r command ${b}R${n}un the command provided within every repo found.
+"
+echo -e "$helptext"
 }
 
 getGitRepos() {
@@ -64,10 +84,14 @@ pushAll() {
 currentDir=$(pwd)
 cd ~/
 
-while getopts "Vlducx:i:r:" opt; do
+while getopts "hvlducx:i:r:" opt; do
 	case "$opt" in
-		V)
-			verbose=false
+		h)
+			usage
+			exit 0
+			;;
+		v)
+			verbose=true
 			;;
 		l)
 			justList=true
@@ -102,6 +126,14 @@ shift $((OPTIND-1))
 
 getGitRepos
 
+if $verbose; then
+	echo "Ignore List:"
+	printf -- '\t%s\n' "${ignore[@]}"
+	echo "Include List:"
+	printf -- '\t%s\n' "${include[@]}"
+	echo
+fi
+
 if $justList; then
 	echo "$list"
 	exit
@@ -113,13 +145,13 @@ for gitDir in $(echo $list); do
 	addNewline=false
 	cd $gitDir;
 
-	verbose "$gitDir"
+	echo "$gitDir"
 	if ! git diff --quiet --ignore-submodules HEAD &>/dev/null; then
 
 		numberLines=$(git status -s | wc -l);
 
 		if [[ "$numberLines" != "0" ]]; then
-			verbose  "\tChanged $numberLines"
+			echo -e "\tChanged $numberLines"
 			git -c color.status=always status --ignore-submodules --short | sed 's/^/\t/'
 			addNewline=true
 		fi
@@ -135,7 +167,7 @@ for gitDir in $(echo $list); do
 
 	numberAhead=$(git log --branches --not --remotes --oneline 2> /dev/null | wc -l)
 	if [[ "$numberAhead" -ne 0 ]]; then
-		verbose "\tAhead: $numberAhead"
+		echo -e "\tAhead: $numberAhead"
 		git log --color=always --branches --not --remotes --oneline --decorate | sed 's/^/\t/'
 		addNewline=true
 	fi
@@ -144,7 +176,7 @@ for gitDir in $(echo $list); do
 	pushAll $numberAhead
 
 	if $addNewline; then
-		verbose
+		echo
 	fi
 
 done <<< "$list"
