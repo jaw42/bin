@@ -10,6 +10,22 @@ r=""
 v=""
 f=""
 
+usage() {
+	echo "File Search"
+	echo "-----------"
+	echo "locate FILE"
+	echo "git ls-files | grep FILE"
+	echo "ag -g FILE"
+	echo "find . | grep FILE"
+	echo
+	echo "String Search"
+	echo "-------------"
+	echo "git grep STRING"
+	echo "ag STRING"
+	echo "ack STRING"
+	echo "grep -R STRING"
+}
+
 verbose() {
 	set +u
 	if $verbose; then
