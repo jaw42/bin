@@ -4,7 +4,7 @@
 # Filename: commitAll
 
 set -o nounset
-set -o errexit
+#set -o errexit
 
 verbose=true
 justList=false
@@ -12,8 +12,8 @@ pullAll=false
 pushAll=false
 commit=false
 list=""
-ignore=("Osaka" "TLPs")
-include=("JoshWainwright")
+ignore=("Osaka" "plugged" "TLPs")
+include=("JoshWainwright|josh")
 customcmd=""
 
 verbose() {
@@ -49,7 +49,7 @@ getGitRepos() {
 
 pullAll() {
 	if $pullAll; then
-		git pull origin master 2>&1 | sed 's/^/\t/'
+		git -c color.pull=always pull origin master 2>&1 | sed 's/^/\t/'
 	fi
 }
 
