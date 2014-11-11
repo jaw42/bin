@@ -13,19 +13,40 @@ f=""
 allow_locate=true
 
 usage() {
-	echo "File Search"
-	echo "-----------"
-	echo "locate FILE"
-	echo "git ls-files | grep FILE"
-	echo "ag -g FILE"
-	echo "find . | grep FILE"
-	echo
-	echo "String Search"
-	echo "-------------"
-	echo "git grep STRING"
-	echo "ag STRING"
-	echo "ack STRING"
-	echo "grep -R STRING"
+	b="\033[4m"
+	n="\033[0m"
+helptext="$(basename $0) [-disrvflVh] [PATTERN|FILE]
+
+s - ${b}S${n}earch, using the best tools availible, for text or files.
+
+Options:
+	-d  ${b}d${n}ryrun, don't do anything, just show the command that would be run
+	-i  case-${b}i${n}nsensitive search*
+	-s  ${b}s${n}mart-case search*
+	-r  ${b}r${n}egular-expression based search*
+	-v  in${b}v${n}ert matches*
+	-f  ${b}f${n}ilename search
+	-l  allow ${b}l${n}ocate to be used
+	-V  ${b}V${n}erbose output
+	-h  show this ${b}h${n}elp text
+
+	(*options are subject to the feature being availible in the underlying command.)
+
+Search Methods:
+	File Search
+	-----------
+	locate FILE
+	git ls-files | grep FILE
+	ag -g FILE
+	find . | grep FILE
+
+	String Search
+	-------------
+	git grep STRING
+	ag STRING
+	ack STRING
+	grep -R STRING"
+echo -e "$helptext"
 }
 
 verbose() {
