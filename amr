@@ -12,9 +12,10 @@ pullAll=false
 pushAll=false
 commit=false
 list=""
-ignore=("Osaka" "plugged" "TLPs")
-include=("JoshWainwright" "josh")
+ignore=("Osaka" "plugged" "trunk")
+include=("home")
 customcmd=""
+use_locate=true
 
 verbose() {
 	set +u
@@ -45,7 +46,7 @@ echo -e "$helptext"
 }
 
 getGitRepos() {
-	if hash locate 2>/dev/null; then
+	if hash locate 2>/dev/null && $use_locate; then
 		list=$(dirname $(locate -br '\.git$'))
 	else
 		verbose "Command locate not availible. Using find instead."
@@ -84,7 +85,7 @@ pushAll() {
 currentDir=$(pwd)
 cd ~/
 
-while getopts "hvlducx:i:r:" opt; do
+while getopts "hvlducx:i:r:n" opt; do
 	case "$opt" in
 		h)
 			usage
@@ -113,6 +114,9 @@ while getopts "hvlducx:i:r:" opt; do
 			;;
 		r)
 			customcmd=("$OPTARG")
+			;;
+		n)
+			use_locate=false
 			;;
 		*)
 			echo "Flag "$opt" not recognised."
