@@ -10,7 +10,7 @@ s=""
 r=""
 v=""
 f=""
-allow_locate=true
+allow_locate=false
 
 usage() {
 	b="\033[4m"
@@ -124,7 +124,7 @@ while getopts "disrvflVh" opt; do
 			f="files"
 			;;
 		l)
-			allow_locate=false
+			allow_locate=true
 			;;
 		V)
 			verbose=true
