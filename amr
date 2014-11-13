@@ -15,6 +15,7 @@ list=""
 ignore=("Osaka" "plugged" "trunk")
 include=("home")
 customcmd=""
+cmd_always=false
 use_locate=true
 
 verbose() {
@@ -40,7 +41,8 @@ amr = ${b}A${n}ll ${b}M${n}y ${b}R${n}epos. Perform actions on all the repositor
 	-c         Interactively ${b}c${n}ommit local changes.
 	-x pattern E${b}x${n}clude any repos matching pattern.
 	-i pattern Only ${b}i${n}nclude repos that match patter.
-	-r command ${b}R${n}un the command provided within every repo found.
+	-r command ${b}R${n}un the command provided within every repo found that has changes.
+	-a         ${b}A${n}lways run the command, even for repos without changes.
 "
 echo -e "$helptext"
 }
@@ -85,7 +87,7 @@ pushAll() {
 currentDir=$(pwd)
 cd ~/
 
-while getopts "hvlducx:i:r:n" opt; do
+while getopts "hvlducx:i:r:an" opt; do
 	case "$opt" in
 		h)
 			usage
@@ -114,6 +116,9 @@ while getopts "hvlducx:i:r:n" opt; do
 			;;
 		r)
 			customcmd=("$OPTARG")
+			;;
+		a)
+			cmd_always=true
 			;;
 		n)
 			use_locate=false
@@ -150,6 +155,7 @@ for gitDir in $(echo $list); do
 	cd $gitDir;
 
 	echo "$gitDir"
+	numberLines="0"
 	if ! git diff --quiet --ignore-submodules HEAD &>/dev/null; then
 
 		numberLines=$(git status -s | wc -l);
@@ -165,8 +171,11 @@ for gitDir in $(echo $list); do
 		fi
 
 	fi
+
 	if [[ "x$customcmd" != "x" ]]; then
-		eval "$customcmd" | sed 's/^/\t\t/'
+		if [[ "$numberLines" != "0" ]] || $cmd_always; then
+			eval "$customcmd" | sed 's/^/\t\t/'
+		fi
 	fi
 
 	numberAhead=$(git log --branches --not --remotes --oneline 2> /dev/null | wc -l)
