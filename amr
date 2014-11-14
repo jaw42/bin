@@ -7,14 +7,14 @@ set -o nounset
 #set -o errexit
 
 verbose=false
-justList=false
-pullAll=false
-pushAll=false
+just_list=false
+pull_all=false
+push_all=false
 commit=false
 list=""
 ignore=("Osaka" "plugged" "trunk")
 include=("home")
-customcmd=""
+custom_cmd=""
 cmd_always=false
 use_locate=true
 
@@ -47,7 +47,7 @@ amr = ${b}A${n}ll ${b}M${n}y ${b}R${n}epos. Perform actions on all the repositor
 echo -e "$helptext"
 }
 
-getGitRepos() {
+get_git_repos() {
 	if hash locate 2>/dev/null && $use_locate; then
 		list=$(dirname $(locate -br '\.git$'))
 	else
@@ -70,21 +70,21 @@ getGitRepos() {
 
 }
 
-pullAll() {
-	if $pullAll; then
+pull_all() {
+	if $pull_all; then
 		git -c color.pull=always pull origin master 2>&1 | sed 's/^/\t/'
 	fi
 }
 
-pushAll() {
-	if $pushAll; then
+push_all() {
+	if $push_all; then
 		if [[ $1 -gt 0 ]]; then
 			git -c colour.push=always push 2>&1 | sed 's/^/\t/'
 		fi
 	fi
 }
 
-currentDir=$(pwd)
+current_dir=$(pwd)
 cd ~/
 
 while getopts "hvlducx:i:r:an" opt; do
@@ -97,13 +97,13 @@ while getopts "hvlducx:i:r:an" opt; do
 			verbose=true
 			;;
 		l)
-			justList=true
+			just_list=true
 			;;
 		d)
-			pullAll=true
+			pull_all=true
 			;;
 		u)
-			pushAll=true
+			push_all=true
 			;;
 		c)
 			commit=true
@@ -115,7 +115,7 @@ while getopts "hvlducx:i:r:an" opt; do
 			include+=("$OPTARG")
 			;;
 		r)
-			customcmd=("$OPTARG")
+			custom_cmd=("$OPTARG")
 			;;
 		a)
 			cmd_always=true
@@ -133,7 +133,7 @@ shift $((OPTIND-1))
 
 #### Start script ####
 
-getGitRepos
+get_git_repos
 
 if $verbose; then
 	echo "Ignore List:"
@@ -143,55 +143,53 @@ if $verbose; then
 	echo
 fi
 
-if $justList; then
+if $just_list; then
 	echo "$list"
 	exit
 fi
 
-# while read -r gitDir; do
-for gitDir in $(echo $list); do
+# while read -r git_dir; do
+for git_dir in $(echo $list); do
 
-	addNewline=false
-	cd $gitDir;
+	add_nl=false
+	cd $git_dir;
 
-	echo "$gitDir"
-	numberLines="0"
 	if ! git diff --quiet --ignore-submodules HEAD &>/dev/null; then
+	echo "$git_dir"
 
-		numberLines=$(git status -s | wc -l);
-
-		if [[ "$numberLines" != "0" ]]; then
-			echo -e "\tChanged $numberLines"
+		if [[ "$number_lines" != "0" ]]; then
+			echo -e "\tChanged $number_lines"
 			git -c color.status=always status --ignore-submodules --short | sed 's/^/\t/'
-			addNewline=true
+			add_nl=true
 		fi
 
 		if $commit; then
 			git gui 2> /dev/null || zsh -i -c "gu"
+			sleep 2s
 		fi
 
 	fi
 
-	if [[ "x$customcmd" != "x" ]]; then
-		if [[ "$numberLines" != "0" ]] || $cmd_always; then
-			eval "$customcmd" | sed 's/^/\t\t/'
+	if [[ "x$custom_cmd" != "x" ]]; then
+		if [[ "$number_lines" != "0" ]] || $cmd_always; then
+			eval "$custom_cmd" | sed 's/^/\t\t/'
 		fi
 	fi
 
-	numberAhead=$(git log --branches --not --remotes --oneline 2> /dev/null | wc -l)
-	if [[ "$numberAhead" -ne 0 ]]; then
-		echo -e "\tAhead: $numberAhead"
+	number_ahead=$(git log --branches --not --remotes --oneline 2> /dev/null | wc -l)
+	if [[ "$number_ahead" -ne 0 ]]; then
+		echo -e "\tAhead: $number_ahead"
 		git log --color=always --branches --not --remotes --oneline --decorate | sed 's/^/\t/'
-		addNewline=true
+		add_nl=true
 	fi
 
-	pullAll
-	pushAll $numberAhead
+	pull_all
+	push_all $number_ahead
 
-	if $addNewline; then
+	if $add_nl; then
 		echo
 	fi
 
 done <<< "$list"
 
-cd $currentDir
+cd $current_dir
