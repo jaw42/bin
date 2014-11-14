@@ -154,8 +154,9 @@ for git_dir in $(echo $list); do
 	add_nl=false
 	cd $git_dir;
 
-	if ! git diff --quiet --ignore-submodules HEAD &>/dev/null; then
 	echo "$git_dir"
+	number_lines=$(git status --porcelain | wc -l);
+	if [[ $number_lines > 0 ]]; then
 
 		if [[ "$number_lines" != "0" ]]; then
 			echo -e "\tChanged $number_lines"
