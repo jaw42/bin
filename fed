@@ -2,6 +2,16 @@
 
 arg="$1"
 
+if ! hash openssl 2> /dev/null; then
+	echo "Openssl not found. Exiting."
+	exit 1
+fi
+
+if ! hash tar 2> /dev/null; then
+	echo "Tar not found. Exiting."
+	exit 1
+fi
+
 if [[ -d $arg ]]; then
 	echo "Creating encrypted archive..."
 	oldexists=false
