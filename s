@@ -13,8 +13,8 @@ f=""
 allow_locate=false
 
 usage() {
-	b="\033[4m"
-	n="\033[0m"
+	b="\033[4m" # Bold text
+	n="\033[0m" # Normal text
 helptext="$(basename $0) [-disrvflVh] [PATTERN|FILE]
 
 s - ${b}S${n}earch, using the best tools availible, for text or files.
