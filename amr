@@ -16,6 +16,7 @@ ignore=("Osaka" "plugged" "trunk")
 include=("home")
 custom_cmd=""
 cmd_always=false
+start_shell=false
 use_locate=true
 
 verbose() {
@@ -42,7 +43,8 @@ amr = ${b}A${n}ll ${b}M${n}y ${b}R${n}epos. Perform actions on all the repositor
 	-x pattern E${b}x${n}clude any repos matching pattern.
 	-i pattern Only ${b}i${n}nclude repos that match patter.
 	-r command ${b}R${n}un the command provided within every repo found that has changes.
-	-a         ${b}A${n}lways run the command, even for repos without changes.
+	-s         Open a ${b}s${n}hell within every repo with changes.
+	-a         ${b}A${n}lways run the command or shell, even for repos without changes.
 "
 echo -e "$helptext"
 }
@@ -87,7 +89,7 @@ push_all() {
 current_dir=$(pwd)
 cd ~/
 
-while getopts "hvlducx:i:r:an" opt; do
+while getopts "hvlducx:i:r:san" opt; do
 	case "$opt" in
 		h)
 			usage
@@ -116,6 +118,9 @@ while getopts "hvlducx:i:r:an" opt; do
 			;;
 		r)
 			custom_cmd=("$OPTARG")
+			;;
+		s)
+			start_shell=true
 			;;
 		a)
 			cmd_always=true
@@ -174,6 +179,12 @@ for git_dir in $(echo $list); do
 	if [[ "x$custom_cmd" != "x" ]]; then
 		if [[ "$number_lines" != "0" ]] || $cmd_always; then
 			eval "$custom_cmd" | sed 's/^/\t\t/'
+		fi
+	fi
+
+	if $start_shell; then
+		if [[ "$number_lines" != "0" ]] || $cmd_always; then
+			eval "$SHELL -i"
 		fi
 	fi
 
