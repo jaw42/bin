@@ -75,9 +75,9 @@ usegit() {
 }
 useag() {
 	if [[ $f = "files" ]]; then
-		cmd="ag $i $s $v -g \"$@\" ."
+		cmd="ag --hidden $i $s $v -g \"$@\" ."
 	else
-		cmd="ag $i $s $v \"$@\" ."
+		cmd="ag --hidden $i $s $v \"$@\" ."
 	fi
 }
 useack() {
