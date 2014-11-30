@@ -11,6 +11,7 @@ r=""
 v=""
 f=""
 allow_locate=false
+allow_git=true
 
 usage() {
 	b="\033[4m" # Bold text
@@ -103,6 +104,16 @@ usegrep() {
 	fi
 }
 
+checkgit() {
+	git rev-parse --git-dir > /dev/null 2>&1
+	return $?
+}
+
+checksvn() {
+	svn info > /dev/null 2>&1
+	return $?
+}
+
 while getopts "disrvflVh" opt; do
 	case "$opt" in
 		d)
@@ -141,14 +152,25 @@ while getopts "disrvflVh" opt; do
 done
 shift $((OPTIND-1))
 
-if git rev-parse --git-dir > /dev/null 2>&1; then
+if checksvn; then
+	allow_git=false
+fi
+
+if $allow_git && \
+	checkgit; then
 	usegit "$@"
-elif [ "$f" == "files" ] && $allow_locate && hash locate 2> /dev/null; then
+
+elif [ "$f" == "files" ] && \
+	$allow_locate && \
+	hash locate 2> /dev/null; then
 	useloc "$@"
+
 elif hash ag 2> /dev/null; then
 	useag "$@"
+
 elif hash ack 2> /dev/null; then
 	useack "$@"
+
 else
 	usegrep "$@"
 fi
