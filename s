@@ -154,6 +154,17 @@ else
 fi
 
 if $dryrun; then
+
+	verbose "verbose       : $verbose"
+	verbose "dryrun        : $dryrun"
+	verbose "ignore case i : $i"
+	verbose "smart case  s : $s"
+	verbose "regex       r : $r"
+	verbose "invert      v : $v"
+	verbose "file search f : $f"
+	verbose "allow_locate  : $allow_locate"
+	verbose "allow_git     : $allow_git"
+
 	echo "**** Dry Run ****"
 	echo "$cmd"
 else
