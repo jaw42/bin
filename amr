@@ -31,7 +31,7 @@ verbose() {
 usage() {
 	b="\033[4m"
 	n="\033[0m"
-helptext="$(basename $0) [-hvlduc] [-x pattern] [-i pattern] [-r command]
+helptext="$(basename "$0") [-hvlduc] [-x pattern] [-i pattern] [-r command]
 
 amr = ${b}A${n}ll ${b}M${n}y ${b}R${n}epos. Perform actions on all the repositories found on the local machine.
 
@@ -82,7 +82,9 @@ pull_all() {
 push_all() {
 	if $push_all; then
 		if [[ $1 -gt 0 ]]; then
-			git -c colour.push=always push 2>&1 | sed 's/^/\t/'
+			if [[ $(git remote | wc -l) -gt 0 ]]; then
+				git -c colour.push=always push 2>&1 | sed 's/^/\t/'
+			fi
 		fi
 	fi
 }
@@ -94,7 +96,7 @@ do_summary() {
 	BASE=$(git merge-base @ @\{u\} 2>/dev/null || echo xxx)
 
 	if [ $LOCAL = $REMOTE ]; then
-    	echo "Up-to-date"
+		:
 	elif [ $LOCAL = $BASE ]; then
     	echo "Need to pull"
 	elif [ $REMOTE = $BASE ]; then
@@ -105,7 +107,7 @@ do_summary() {
 }
 
 current_dir=$(pwd)
-cd ~/
+cd $HOME
 
 while getopts "hvlducx:i:r:sSan" opt; do
 	case "$opt" in
@@ -150,7 +152,7 @@ while getopts "hvlducx:i:r:sSan" opt; do
 			use_locate=false
 			;;
 		*)
-			echo "Flag "$opt" not recognised."
+			echo "Flag \"$opt\" not recognised."
 			exit 0
 			;;
 	esac
@@ -175,10 +177,11 @@ if $just_list; then
 fi
 
 # while read -r git_dir; do
-for git_dir in $(echo $list); do
-
+for git_dir in $list; do
+	
 	add_nl=false
-	cd $git_dir;
+	cd "$git_dir"
+
 	if $summary; then
 		do_summary
 		continue
@@ -186,7 +189,7 @@ for git_dir in $(echo $list); do
 
 	echo "$git_dir"
 	number_lines=$(git status --porcelain | wc -l);
-	if [[ $number_lines > 0 ]]; then
+	if [[ $number_lines -gt 0 ]]; then
 
 		if [[ "$number_lines" != "0" ]]; then
 			echo -e "\tChanged $number_lines"
@@ -229,4 +232,4 @@ for git_dir in $(echo $list); do
 
 done <<< "$list"
 
-cd $current_dir
+cd "$current_dir"
