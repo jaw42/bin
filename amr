@@ -18,6 +18,7 @@ custom_cmd=""
 cmd_always=false
 start_shell=false
 use_locate=true
+summary=false
 
 verbose() {
 	set +u
@@ -86,10 +87,27 @@ push_all() {
 	fi
 }
 
+do_summary() {
+	pwd
+	LOCAL=$(git rev-parse @)
+	REMOTE=$( (git ls-remote origin HEAD 2>/dev/null || echo xxx ) | cut -f1)
+	BASE=$(git merge-base @ @\{u\} 2>/dev/null || echo xxx)
+
+	if [ $LOCAL = $REMOTE ]; then
+    	echo "Up-to-date"
+	elif [ $LOCAL = $BASE ]; then
+    	echo "Need to pull"
+	elif [ $REMOTE = $BASE ]; then
+    	echo "Need to push"
+	else
+    	echo "Diverged"
+	fi
+}
+
 current_dir=$(pwd)
 cd ~/
 
-while getopts "hvlducx:i:r:san" opt; do
+while getopts "hvlducx:i:r:sSan" opt; do
 	case "$opt" in
 		h)
 			usage
@@ -121,6 +139,9 @@ while getopts "hvlducx:i:r:san" opt; do
 			;;
 		s)
 			start_shell=true
+			;;
+		S)
+			summary=true
 			;;
 		a)
 			cmd_always=true
@@ -158,6 +179,10 @@ for git_dir in $(echo $list); do
 
 	add_nl=false
 	cd $git_dir;
+	if $summary; then
+		do_summary
+		continue
+	fi
 
 	echo "$git_dir"
 	number_lines=$(git status --porcelain | wc -l);
