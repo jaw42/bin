@@ -1,0 +1,235 @@
+#!/bin/bash
+# Created:  Wed 23 Apr 2014 12:58 pm
+# Author:   Josh Wainwright
+# Filename: amr (All My Repos)
+
+set -o nounset
+#set -o errexit
+
+verbose=false
+just_list=false
+pull_all=false
+push_all=false
+commit=false
+list=""
+ignore=("Osaka" "plugged" "trunk")
+include=("home")
+custom_cmd=""
+cmd_always=false
+start_shell=false
+use_locate=true
+summary=false
+
+verbose() {
+	set +u
+	if $verbose; then
+		echo -e ${2} "$1"
+	fi
+	set -u
+}
+
+usage() {
+	b="\033[4m"
+	n="\033[0m"
+helptext="$(basename "$0") [-hvlduc] [-x pattern] [-i pattern] [-r command]
+
+amr = ${b}A${n}ll ${b}M${n}y ${b}R${n}epos. Perform actions on all the repositories found on the local machine.
+
+	-h         Show this ${b}h${n}elp text.
+	-v         Be more ${b}v${n}erbose with output text.
+	-l         Don't perform any actions, simply ${b}l${n}ist the repos found.
+	-d         Pull ${b}d${n}own changes from remotes (git pull).
+	-u         Push ${b}u${n}p commits to remotes (git push).
+	-c         Interactively ${b}c${n}ommit local changes.
+	-x pattern E${b}x${n}clude any repos matching pattern.
+	-i pattern Only ${b}i${n}nclude repos that match patter.
+	-r command ${b}R${n}un the command provided within every repo found that has changes.
+	-s         Open a ${b}s${n}hell within every repo with changes.
+	-a         ${b}A${n}lways run the command or shell, even for repos without changes.
+"
+echo -e "$helptext"
+}
+
+get_git_repos() {
+	if hash locate 2>/dev/null && $use_locate; then
+		list=$(dirname $(locate -br '\.git$'))
+	else
+		verbose "Command locate not availible. Using find instead."
+		list=$(find ~/ -name ".git" -exec dirname {} \; 2> /dev/null)
+	fi
+
+	for i in "${ignore[@]}"; do
+		list=$(sed "/${i}/d" <<< "$list")
+	done
+
+	if [[ ${#include[@]} -ne 0 ]]; then
+		local includeString=""
+		for i in "${include[@]}"; do
+			includeString+="$i""|"
+		done
+		includeString=${includeString%?}
+		list=$(egrep "$includeString" <<< "$list")
+	fi
+
+}
+
+pull_all() {
+	if $pull_all; then
+		git -c color.pull=always pull origin master 2>&1 | sed 's/^/\t/'
+	fi
+}
+
+push_all() {
+	if $push_all; then
+		if [[ $1 -gt 0 ]]; then
+			if [[ $(git remote | wc -l) -gt 0 ]]; then
+				git -c colour.push=always push 2>&1 | sed 's/^/\t/'
+			fi
+		fi
+	fi
+}
+
+do_summary() {
+	pwd
+	LOCAL=$(git rev-parse @)
+	REMOTE=$( (git ls-remote origin HEAD 2>/dev/null || echo xxx ) | cut -f1)
+	BASE=$(git merge-base @ @\{u\} 2>/dev/null || echo xxx)
+
+	if [ $LOCAL = $REMOTE ]; then
+		:
+	elif [ $LOCAL = $BASE ]; then
+    	echo "Need to pull"
+	elif [ $REMOTE = $BASE ]; then
+    	echo "Need to push"
+	else
+    	echo "Diverged"
+	fi
+}
+
+current_dir=$(pwd)
+cd $HOME
+
+while getopts "hvlducx:i:r:sSan" opt; do
+	case "$opt" in
+		h)
+			usage
+			exit 0
+			;;
+		v)
+			verbose=true
+			;;
+		l)
+			just_list=true
+			;;
+		d)
+			pull_all=true
+			;;
+		u)
+			push_all=true
+			;;
+		c)
+			commit=true
+			;;
+		x)
+			ignore+=("$OPTARG")
+			;;
+		i)
+			include+=("$OPTARG")
+			;;
+		r)
+			custom_cmd=("$OPTARG")
+			;;
+		s)
+			start_shell=true
+			;;
+		S)
+			summary=true
+			;;
+		a)
+			cmd_always=true
+			;;
+		n)
+			use_locate=false
+			;;
+		*)
+			echo "Flag \"$opt\" not recognised."
+			exit 0
+			;;
+	esac
+done
+shift $((OPTIND-1))
+
+#### Start script ####
+
+get_git_repos
+
+if $verbose; then
+	echo "Ignore List:"
+	printf -- '\t%s\n' "${ignore[@]}"
+	echo "Include List:"
+	printf -- '\t%s\n' "${include[@]}"
+	echo
+fi
+
+if $just_list; then
+	echo "$list"
+	exit
+fi
+
+# while read -r git_dir; do
+for git_dir in $list; do
+	
+	add_nl=false
+	cd "$git_dir"
+
+	if $summary; then
+		do_summary
+		continue
+	fi
+
+	echo "$git_dir"
+	number_lines=$(git status --porcelain | wc -l);
+	if [[ $number_lines -gt 0 ]]; then
+
+		if [[ "$number_lines" != "0" ]]; then
+			echo -e "\tChanged $number_lines"
+			git -c color.status=always status --ignore-submodules --short | sed 's/^/\t/'
+			add_nl=true
+		fi
+
+		if $commit; then
+			git gui 2> /dev/null || zsh -i -c "gu"
+			sleep 2s
+		fi
+
+	fi
+
+	if [[ "x$custom_cmd" != "x" ]]; then
+		if [[ "$number_lines" != "0" ]] || $cmd_always; then
+			eval "$custom_cmd" | sed 's/^/\t\t/'
+		fi
+	fi
+
+	if $start_shell; then
+		if [[ "$number_lines" != "0" ]] || $cmd_always; then
+			eval "$SHELL -i"
+		fi
+	fi
+
+	number_ahead=$(git log --branches --not --remotes --oneline 2> /dev/null | wc -l)
+	if [[ "$number_ahead" -ne 0 ]]; then
+		echo -e "\tAhead: $number_ahead"
+		git log --color=always --branches --not --remotes --oneline --decorate | sed 's/^/\t/'
+		add_nl=true
+	fi
+
+	pull_all
+	push_all $number_ahead
+
+	if $add_nl; then
+		echo
+	fi
+
+done <<< "$list"
+
+cd "$current_dir"
