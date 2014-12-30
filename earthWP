@@ -1,6 +1,7 @@
 #!/bin/bash
 
 dir=/home/josh/Pictures/Wallpapers
+mkdir -p $dir
 
   # | egrep "500px|imgur|flickr|squarespace" \
 
