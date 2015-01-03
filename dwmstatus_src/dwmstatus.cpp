@@ -11,6 +11,7 @@
 #include <ctime>
 #include <sstream>
 #include <sys/stat.h>
+#include <sys/time.h>
 
 #define TMP_FOLDER "/tmp/dwm_status_bar"
 #define INTERFACE "wlp4s0"
@@ -43,6 +44,7 @@ void date();
  *                                    Main                                    *
  ******************************************************************************/
 	string arg;
+	struct timeval tval_before, tval_after, tval_result;
 int main(int argc, char *argv[]){
 
 	if (argc == 1) {
@@ -51,6 +53,7 @@ int main(int argc, char *argv[]){
 		arg = argv[1];
 	}
 
+	gettimeofday(&tval_before, NULL);
 	mpd();
 	open();
 	pac();
@@ -58,6 +61,11 @@ int main(int argc, char *argv[]){
 	hdd();
 	net();
 	date();
+
+	gettimeofday(&tval_after, NULL);
+	timersub(&tval_after, &tval_before, &tval_result);
+	printf("\t: %ld.%06ld\n", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
+
 	checkFolders();
 	concatenate();
 	popen("xsetroot -name \"$(cat /tmp/dwm_status_bar/content)\"", "r");
@@ -108,11 +116,17 @@ string exec(string cmdstring) {
 
 bool testTimeNow(int duration, string prog, string arg){
 
-	if (arg == "now") {
+	gettimeofday(&tval_after, NULL);
+	timersub(&tval_after, &tval_before, &tval_result);
+	printf("\t: %ld.%06ld\n", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
+	gettimeofday(&tval_before, NULL);
+
+	if (duration == 0 || arg == "now") {
+		cout << prog << "\t\t";
 		return true;
 	}
 	int current = fmod(time(0),duration);
-	cout << prog << "\t" << duration << "\t" << current << endl;
+	cout << prog << "\t" << duration << "\t" << current;
 
 	if (current > 0 && current < 11) {
 		return true;
@@ -122,13 +136,16 @@ bool testTimeNow(int duration, string prog, string arg){
 }
 
 string delLast(string str){
+	if (str.length() == 0) {
+		return str;
+	}
 	return str.erase(str.length()-1);
 }
 
+// Returns the string that lies between the two deliminators, start_string and
+// end_string. eg substring("<p>this is as string</p>", "<p>", "</p>") would
+// return "this is a string".
 string substring(string text, string start_string, string end_string){
-//Returns the string that lies between the two deliminators, start_string and
-//end_string. eg substring("<p>this is as string is this</p>", "<p>", "</p>") would
-//return "this is a string is this".
 	string::size_type start_pos = 0;
 	string::size_type end_pos = 0;
 	string found_text;
@@ -172,7 +189,7 @@ string Get(const string & s, unsigned int n) {
  *                                   Items                                    *
  ******************************************************************************/
 void open(){
-	if (testTimeNow(300, "open", arg)) {
+	if (testTimeNow(600, "open", arg)) {
 		string opn = exec("lsof | wc -l");
 		ofstream openfile;
 		openfile.open (TMP_FOLDER"/open");
@@ -182,43 +199,44 @@ void open(){
 }
 
 void mpd(){
-	string mpcStatus = exec("mpc status");
+	testTimeNow(0, "mpd", arg);
+	string mpcStatus = exec("mpc status 2> /dev/null");
 	string stat = substring(mpcStatus, "[", "] ");
 
 	string stat_short;
-	if (stat == "playing") {
-		stat_short="> ";
-  	} else if (stat == "paused") {
-		stat_short="|| ";
-  	} else {
-		stat_short="_ ";
-  	}
+	string perc = "";
+	string cur = "";
+	if (stat != "") {
+		if (stat == "playing") {
+			stat_short="> ";
+  		} else if (stat == "paused") {
+			stat_short="|| ";
+  		}
 
-	//TODO implement cleaning of non printable characters
-	string curMessy = exec("mpc current -f '[[%artist% - ]%title%]|[%file%]' | head -n 1");
-	if (curMessy == "") {
-		curMessy = " ";
+		//TODO implement cleaning of non printable characters
+		string curMessy = exec("mpc current -f '[[%artist% - ]%title%]|[%file%]' | head -n 1");
+		cur = delLast(curMessy);
+		perc = substring(mpcStatus, "(", ")");
+		perc = delLast(perc);
 	}
-	string cur = curMessy;
-	string perc = substring(mpcStatus, "(", ")");
 
 	ofstream mpdfile;
 	mpdfile.open(TMP_FOLDER"/mpd");
-	mpdfile << "  \x08" << stat_short << delLast(perc) << " " << delLast(cur) << "\x01";
+	mpdfile << "  \x08" << stat_short << perc << " " << cur << "\x01";
 	mpdfile.close();
 }
 
 void mail(){
-	if (testTimeNow(120, "email", arg)) {
+	if (testTimeNow(120, "mail", arg)) {
 		string feed = exec("nice -n 19 curl -n --silent 'https://mail.google.com/mail/feed/atom'");
 
 		ofstream mailfile;
 		mailfile.open(TMP_FOLDER"/mail");
 		if (feed.find("fullcount") != string::npos) {
-			string newNo = substring(feed, "<fullcount>", "</fullcount>");
+			string newNum = substring(feed, "<fullcount>", "</fullcount>");
 
-			if (newNo != "0") {
-				mailfile << "  \x04[M] \x01" << newNo;
+			if (newNum != "0") {
+				mailfile << "  \x04[M] \x01" << newNum;
 			}else{
 				mailfile << "";
 			}
@@ -244,7 +262,7 @@ void mail(){
 }
 
 void pac(){
-	if (testTimeNow(120, "pacman", arg)) {
+	if (testTimeNow(120, "pman", arg)) {
 
 		string pacup = exec("pacman -Qqu");
 		int pup = count(pacup, '\n');
@@ -263,25 +281,31 @@ void pac(){
 }
 
 void hdd(){
-	//TODO read from /proc to get hdd infor
-	string disk3 = exec("df /dev/sda3 --output=pcent | tail -n 1 | tr -d ' '");
-	string disk2 = exec("df /dev/sda2 --output=pcent | tail -n 1 | tr -d ' '");
-	ofstream hddfile;
-	hddfile.open(TMP_FOLDER"/hdd");
-	hddfile << "  \x06[H] \x01" << delLast(disk2) << " " << delLast(disk3);
-	hddfile.close();
+	if (testTimeNow(600, "hdd", arg)) {
+		//TODO read from /proc to get hdd infor
+		string disk3 = exec("df /dev/sda3 --output=pcent | tail -n 1 | tr -d ' '");
+		string disk2 = exec("df /dev/sda2 --output=pcent | tail -n 1 | tr -d ' '");
+
+		ofstream hddfile;
+		hddfile.open(TMP_FOLDER"/hdd");
+		hddfile << "  \x06[H] \x01/ " << delLast(disk2) << " h " << delLast(disk3);
+		hddfile.close();
+	}
 }
 
 void net(){
-	if (testTimeNow(2400, "net", arg)) {
+	string ipaddr;
+	if (testTimeNow(3600, "ip ", arg)) {
 		//TODO get wireless info
 		///proc/net/tcp
 		//use the second columnm, local_address, the ip address is here but in hex
 		//and in reverse order. 0201A8C0 -> 192 168 1 2
-		string ipaddr=exec("ip addr show dev wlp4s0 | awk '/inet / {print $2}'");
-		if (ipaddr != "") {
-			ipaddr = delLast(ipaddr);
-		}
+		ipaddr = exec("ip addr show dev wlp4s0 | awk '/inet / {print $2}'");
+		ipaddr = delLast(ipaddr);
+	}
+
+	if (testTimeNow(600, "net", arg)) {
+
 		string signal_tmp;
 
 		ifstream wireless("/proc/net/wireless");
@@ -308,10 +332,10 @@ void net(){
 		netfile << "  \x06[I] \x01(" << ipaddr << ")  \x06[W] \x01" << signal;
 		netfile.close();
 	}
-
 }
 
 void date(){
+	testTimeNow(0, "date", arg);
 	int seconds;
 	ifstream uptimeFile("/proc/uptime");
 
