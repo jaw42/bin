@@ -42,6 +42,7 @@ void mpd();
 void mail();
 void pac();
 void hdd();
+void ipa();
 void net();
 void date();
 
@@ -64,6 +65,7 @@ int main(int argc, char *argv[]){
 	pac();
 	mail();
 	hdd();
+	ipa();
 	net();
 	date();
 
@@ -89,12 +91,13 @@ void checkFolders(){
 	}
 }
 
-void concatenate(){
-	string functions[7] = {"mpd", "open", "pac", "mail", "hdd", "net", "dte"};
+void concatenate() {
+	int f = 8;
+	string functions[f] = {"mpd", "open", "pac", "mail", "hdd", "ipa", "net", "dte"};
 
 	ofstream out(TMP_FOLDER"/content");
 	string line = "";
-	for (int i = 0; i < 7; i++) {
+	for (int i = 0; i < f; i++) {
 		stringstream filename;
 		filename << TMP_FOLDER"/" << functions[i];
 		ifstream in( filename.str().c_str() );
@@ -306,18 +309,24 @@ void hdd(){
 	}
 }
 
-void net(){
-	string ipaddr;
-	if (testTimeNow(3600, "ip ", arg)) {
+void ipa() {
+	if (testTimeNow(3600, "ipa", arg)) {
 		//TODO get wireless info
 		///proc/net/tcp
 		//use the second columnm, local_address, the ip address is here but in hex
 		//and in reverse order. 0201A8C0 -> 192 168 1 2
 		string ipcmd = "ip addr show dev "INTERFACE" | awk '/inet / {print $2}'";
-		ipaddr = exec(ipcmd);
+		string ipaddr = exec(ipcmd);
 		ipaddr = delLast(ipaddr);
-	}
 
+		ofstream ipafile;
+		ipafile.open(TMP_FOLDER"/ipa");
+		ipafile << "  \x06[I] \x01" << ipaddr;
+		ipafile.close();
+	}
+}
+
+void net() {
 	if (testTimeNow(600, "net", arg)) {
 
 		string signal_tmp;
@@ -343,7 +352,7 @@ void net(){
 		}
 		ofstream netfile;
 		netfile.open(TMP_FOLDER"/net");
-		netfile << "  \x06[I] \x01" << ipaddr << "  \x06[W] \x01" << signal;
+		netfile << "  \x06[W] \x01" << signal;
 		netfile.close();
 	}
 }
