@@ -59,7 +59,7 @@ verbose() {
 }
 
 useloc() {
-	cmd="locate $i $r \"$@\""
+	cmd="locate $i $r \"$@\" | grep \"$PWD\" | sed 's#'"$PWD"'/##'"
 }
 
 
