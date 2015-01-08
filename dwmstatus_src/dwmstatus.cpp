@@ -51,11 +51,11 @@ void date();
  ******************************************************************************/
 	string arg;
 	struct timeval tval_before, tval_after, tval_result;
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]) {
 
 	if (argc == 1) {
 		arg = "";
-	}else{
+	} else {
 		arg = argv[1];
 	}
 
@@ -83,9 +83,9 @@ int main(int argc, char *argv[]){
 /******************************************************************************
  *                                 Functions                                  *
  ******************************************************************************/
-void checkFolders(){
+void checkFolders() {
 	struct stat st;
-	if(stat(TMP_FOLDER,&st) == -1){
+	if(stat(TMP_FOLDER,&st) == -1) {
 		//	if(st.st_mode & (S_IFDIR != 0))
 		mkdir(TMP_FOLDER, 0777);
 	}
@@ -122,7 +122,7 @@ string exec(string cmdstring) {
 	return result;
 }
 
-bool testTimeNow(int duration, string prog, string arg){
+bool testTimeNow(int duration, string prog, string arg) {
 
 	gettimeofday(&tval_after, NULL);
 	timersub(&tval_after, &tval_before, &tval_result);
@@ -138,12 +138,12 @@ bool testTimeNow(int duration, string prog, string arg){
 
 	if (current > 0 && current < 11) {
 		return true;
-	}else{
+	} else {
 		return false;
 	}
 }
 
-string delLast(string str){
+string delLast(string str) {
 	if (str.length() == 0) {
 		return str;
 	}
@@ -153,7 +153,7 @@ string delLast(string str){
 // Returns the string that lies between the two deliminators, start_string and
 // end_string. eg substring("<p>this is as string</p>", "<p>", "</p>") would
 // return "this is a string".
-string substring(string text, string start_string, string end_string){
+string substring(string text, string start_string, string end_string) {
 	string::size_type start_pos = 0;
 	string::size_type end_pos = 0;
 	string found_text;
@@ -172,7 +172,7 @@ string substring(string text, string start_string, string end_string){
 	return " ";
 }
 
-int count(string String, char character){
+int count(string String, char character) {
 	int count = 0;
 	for (unsigned int i = 0; i < String.size(); ++i) {
 		if (String[i] == character) {
@@ -196,7 +196,7 @@ string Get(const string & s, unsigned int n) {
 /******************************************************************************
  *                                   Items                                    *
  ******************************************************************************/
-void open(){
+void open() {
 	if (testTimeNow(600, "open", arg)) {
 		string opn = exec("lsof | wc -l");
 		ofstream openfile;
@@ -206,7 +206,7 @@ void open(){
 	}
 }
 
-void mpd(){
+void mpd() {
 	testTimeNow(0, "mpd", arg);
 	string mpcStatus = exec("mpc status 2> /dev/null");
 	string stat = substring(mpcStatus, "[", "] ");
@@ -234,7 +234,7 @@ void mpd(){
 	mpdfile.close();
 }
 
-void mail(){
+void mail() {
 	if (testTimeNow(120, "mail", arg)) {
 		ofstream mailfile;
 		mailfile.open(TMP_FOLDER"/mail");
@@ -246,10 +246,10 @@ void mail(){
 
 			if (newNum != "0") {
 				mailfile << "  \x04[M] \x01" << newNum;
-			}else{
+			} else {
 				mailfile << "";
 			}
-		}else{
+		} else {
 			mailfile << "";
 		}
 #else
@@ -266,7 +266,7 @@ void mail(){
 	}
 }
 
-void pac(){
+void pac() {
 	if (testTimeNow(120, "pman", arg)) {
 
 		string pacup = exec("pacman -Qqu");
@@ -277,7 +277,7 @@ void pac(){
 
 		if (pup != 0) {
 			pacfile << "  \x04[P] \x01" << pup;
-		}else{
+		} else {
 			pacfile << "";
 		}
 
@@ -285,7 +285,7 @@ void pac(){
 	}
 }
 
-void hdd(){
+void hdd() {
 	if (testTimeNow(600, "hdd", arg)) {
 		//TODO read from /proc to get hdd infor
 		string disk1 = exec("df /dev/"DISKONE" --output=pcent | tail -n 1 | tr -d ' '");
@@ -347,7 +347,7 @@ void net() {
 		string signal;
 		if (signal_int < 30) {
 			signal = "\x07" + signal_tmp + "%\x01";
-		}else{
+		} else {
 			signal = signal_tmp + "%";
 		}
 		ofstream netfile;
@@ -357,7 +357,7 @@ void net() {
 	}
 }
 
-void date(){
+void date() {
 	testTimeNow(0, "date", arg);
 	int seconds;
 	ifstream uptimeFile("/proc/uptime");
@@ -372,9 +372,9 @@ void date(){
 		uptime << minutes << "m ";
 	} else if (days == 0) {
 		uptime << hours << "h " << minutes << "m ";
-	}else if (days > 10) {
+	} else if (days > 10) {
 		uptime << "\x03" << days << "d \x01" << hours << "h " << minutes << "m ";
-	}else{
+	} else {
 		uptime << days << "d " << hours << "h " << minutes << "m";
 	}
 
@@ -384,7 +384,7 @@ void date(){
 	int month = now->tm_mon + 1;
 	int day = now->tm_mday;
 	string month_long;
-	switch(month){
+	switch(month) {
 		case 1:  month_long = "Jan"; break;
 		case 2:  month_long = "Feb"; break;
 		case 3:  month_long = "Mar"; break;
@@ -409,20 +409,20 @@ void date(){
 	if (hour > 12) {
 		hour = hour - 12;
 		ampm = "pm";
-	}else{
+	} else {
 		ampm = "am";
 	}
 
 	ostringstream minPad;
 	if (minute < 10) {
 		minPad << "0" << minute;
-	}else{
+	} else {
 		minPad << minute;
 	}
 	ostringstream secPad;
 	if (second < 10) {
 		secPad << "0" << second;
-	}else{
+	} else {
 		secPad << second;
 	}
 
