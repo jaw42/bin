@@ -1,20 +1,25 @@
-//g++ -Wall -o send send.cpp
+//g++ -Wall -D{computer} -o send send.cpp
 
 #include <iostream>
-#include <string>
-#include <iomanip>
 #include <cmath>
-#include <math.h>
 #include <algorithm>
 #include <fstream>
-#include <stdio.h>
-#include <ctime>
 #include <sstream>
 #include <sys/stat.h>
 #include <sys/time.h>
 
 #define TMP_FOLDER "/tmp/dwm_status_bar"
-#define INTERFACE "wlp4s0"
+#define CURLMAIL
+
+#if defined(LAPTOP)
+#define INTERFACE  "wlan0"
+#define DISKONE    "sda7"
+#elif defined(DESKTOP)
+#define INTERFACE  "wlp4s0"
+#define DISKONE    "sda2"
+#define DISKTWO    "sda3"
+#define DISKTWOLAB "h"
+#endif
 
 using namespace std;
 
@@ -91,7 +96,7 @@ void concatenate(){
 	string line = "";
 	for (int i = 0; i < 7; i++) {
 		stringstream filename;
-		filename << TMP_FOLDER << "/" << functions[i];
+		filename << TMP_FOLDER"/" << functions[i];
 		ifstream in( filename.str().c_str() );
 		while (getline(in, line)) {
 			out << line;
@@ -214,7 +219,7 @@ void mpd(){
   		}
 
 		//TODO implement cleaning of non printable characters
-		string curMessy = exec("mpc current -f '[[%artist% - ]%title%]|[%file%]' | head -n 1");
+		string curMessy = exec("mpc current -f '[[%artist% - ]%title%]|[%file%]' 2> /dev/null| head -n 1");
 		cur = delLast(curMessy);
 		perc = substring(mpcStatus, "(", ")");
 		perc = delLast(perc);
@@ -228,10 +233,11 @@ void mpd(){
 
 void mail(){
 	if (testTimeNow(120, "mail", arg)) {
-		string feed = exec("nice -n 19 curl -n --silent 'https://mail.google.com/mail/feed/atom'");
-
 		ofstream mailfile;
 		mailfile.open(TMP_FOLDER"/mail");
+#ifdef CURLMAIL
+		string feed = exec("nice -n 19 curl -n --silent 'https://mail.google.com/mail/feed/atom'");
+
 		if (feed.find("fullcount") != string::npos) {
 			string newNum = substring(feed, "<fullcount>", "</fullcount>");
 
@@ -243,22 +249,18 @@ void mail(){
 		}else{
 			mailfile << "";
 		}
-		mailfile.close();
-	}
-/*	if (testTimeNow(120, "email", arg)) {
+#else
 		string number = exec("nice -n 19 find /home/josh/mail/gmail/INBOX/ -type f | grep -vE ',[^,]*S[^,]*$' | wc -l");
 		number = delLast(number);
-
-		ofstream mailfile;
-		mailfile.open(TMP_FOLDER"/mail");
 
 		if (number != "0") {
 			mailfile << "  \x04[M] \x01" << number;
 		} else {
 			mailfile << "";
 		}
+#endif
 		mailfile.close();
-	}*/
+	}
 }
 
 void pac(){
@@ -283,12 +285,23 @@ void pac(){
 void hdd(){
 	if (testTimeNow(600, "hdd", arg)) {
 		//TODO read from /proc to get hdd infor
-		string disk3 = exec("df /dev/sda3 --output=pcent | tail -n 1 | tr -d ' '");
-		string disk2 = exec("df /dev/sda2 --output=pcent | tail -n 1 | tr -d ' '");
+		string disk1 = exec("df /dev/"DISKONE" --output=pcent | tail -n 1 | tr -d ' '");
+#ifdef DISKTWO
+		string disk2 = exec("df /dev/"DISKTWO" --output=pcent | tail -n 1 | tr -d ' '");
+#endif
+#ifdef DISKTHR
+		string disk3 = exec("df /dev/"DISKTHR" --output=pcent | tail -n 1 | tr -d ' '");
+#endif
 
 		ofstream hddfile;
 		hddfile.open(TMP_FOLDER"/hdd");
-		hddfile << "  \x06[H] \x01/ " << delLast(disk2) << " h " << delLast(disk3);
+		hddfile << "  \x06[H] \x01/ " << delLast(disk1);
+#if defined(DISKTWO) && defined(DISKTWOLAB)
+		hddfile << " "DISKTWOLAB" " << delLast(disk2);
+#endif
+#if defined(DISKTHR) && defined(DISKTHRLAB)
+		hddfile << " "DISKTHRLAB" " << delLast(disk3);
+#endif
 		hddfile.close();
 	}
 }
@@ -300,7 +313,8 @@ void net(){
 		///proc/net/tcp
 		//use the second columnm, local_address, the ip address is here but in hex
 		//and in reverse order. 0201A8C0 -> 192 168 1 2
-		ipaddr = exec("ip addr show dev wlp4s0 | awk '/inet / {print $2}'");
+		string ipcmd = "ip addr show dev "INTERFACE" | awk '/inet / {print $2}'";
+		ipaddr = exec(ipcmd);
 		ipaddr = delLast(ipaddr);
 	}
 
@@ -329,7 +343,7 @@ void net(){
 		}
 		ofstream netfile;
 		netfile.open(TMP_FOLDER"/net");
-		netfile << "  \x06[I] \x01(" << ipaddr << ")  \x06[W] \x01" << signal;
+		netfile << "  \x06[I] \x01" << ipaddr << "  \x06[W] \x01" << signal;
 		netfile.close();
 	}
 }
