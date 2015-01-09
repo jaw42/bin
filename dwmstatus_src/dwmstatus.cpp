@@ -34,7 +34,7 @@ bool testTimeNow(int duration, string prog, string arg);
 string delLast(string str);
 string substring(string text, string start_string, string end_string);
 void concatenate();
-int count(string String, char character);
+int count(string str, char character);
 string Get(const string & s, unsigned int n);
 
 void open();
@@ -83,14 +83,24 @@ int main(int argc, char *argv[]) {
 /******************************************************************************
  *                                 Functions                                  *
  ******************************************************************************/
+/*
+ * Check that the required temporary folder exists and, if it doesn't, create
+ * it.
+ */
 void checkFolders() {
 	struct stat st;
 	if(stat(TMP_FOLDER,&st) == -1) {
-		//	if(st.st_mode & (S_IFDIR != 0))
+		// if(st.st_mode & (S_IFDIR != 0))
 		mkdir(TMP_FOLDER, 0777);
 	}
 }
 
+/*
+ * Open the output files for each of the functions, retreive their contents and
+ * append them all to a single output file to be used as the contents of the
+ * status bar. The order of the functions defined here determines the order of
+ * the items in the bar.
+ */
 void concatenate() {
 	int f = 8;
 	string functions[f] = {"mpd", "open", "pac", "mail", "hdd", "ipa", "net", "dte"};
@@ -108,6 +118,10 @@ void concatenate() {
 	out << "  ";
 }
 
+/*
+ * Interpret the given string as a shell command, run it and return the output
+ * as a string.
+ */
 string exec(string cmdstring) {
 	char* cmd = (char*)cmdstring.c_str();
 	FILE* pipe = popen(cmd, "r");
@@ -143,6 +157,10 @@ bool testTimeNow(int duration, string prog, string arg) {
 	}
 }
 
+/*
+ * Remove the last character (often a newline character) from the end of a
+ * string.
+ */
 string delLast(string str) {
 	if (str.length() == 0) {
 		return str;
@@ -150,9 +168,11 @@ string delLast(string str) {
 	return str.erase(str.length()-1);
 }
 
-// Returns the string that lies between the two deliminators, start_string and
-// end_string. eg substring("<p>this is as string</p>", "<p>", "</p>") would
-// return "this is a string".
+/*
+ * Returns the string that lies between the two deliminators, start_string and
+ * end_string. eg substring("<p>this is as string</p>", "<p>", "</p>") would
+ * return "this is a string".
+ */
 string substring(string text, string start_string, string end_string) {
 	string::size_type start_pos = 0;
 	string::size_type end_pos = 0;
@@ -172,10 +192,13 @@ string substring(string text, string start_string, string end_string) {
 	return " ";
 }
 
-int count(string String, char character) {
+/*
+ * Return a count of the number of occurances of character in the string str.
+ */
+int count(string str, char character) {
 	int count = 0;
-	for (unsigned int i = 0; i < String.size(); ++i) {
-		if (String[i] == character) {
+	for (unsigned int i = 0; i < str.size(); ++i) {
+		if (str[i] == character) {
 			count++;
 		}
 	}
@@ -196,6 +219,10 @@ string Get(const string & s, unsigned int n) {
 /******************************************************************************
  *                                   Items                                    *
  ******************************************************************************/
+/*
+ * Number of open files used by the operating system and running programs, as
+ * reported by lsof.
+ */
 void open() {
 	if (testTimeNow(600, "open", arg)) {
 		string opn = exec("lsof | wc -l");
@@ -206,6 +233,10 @@ void open() {
 	}
 }
 
+/*
+ * The currently playing song from mpd with artist and playing percentage. If
+ * no song is playing, or mpd is not running, then no output is created.
+ */
 void mpd() {
 	testTimeNow(0, "mpd", arg);
 	string mpcStatus = exec("mpc status 2> /dev/null");
@@ -234,11 +265,16 @@ void mpd() {
 	mpdfile.close();
 }
 
+/*
+ * Display the number of unread emails. Either use curl to get the value from
+ * the gmail web feed (CURLMAIL) or count the number from the relevant folder
+ * if an mbox directory is used (MBOXMAIL).
+ */
 void mail() {
 	if (testTimeNow(120, "mail", arg)) {
 		ofstream mailfile;
 		mailfile.open(TMP_FOLDER"/mail");
-#ifdef CURLMAIL
+#if defined(CURLMAIL)
 		string feed = exec("nice -n 19 curl -n --silent 'https://mail.google.com/mail/feed/atom'");
 
 		if (feed.find("fullcount") != string::npos) {
@@ -252,7 +288,7 @@ void mail() {
 		} else {
 			mailfile << "";
 		}
-#else
+#elif defined(MBOXMAIL)
 		string number = exec("nice -n 19 find /home/josh/mail/gmail/INBOX/ -type f | grep -vE ',[^,]*S[^,]*$' | wc -l");
 		number = delLast(number);
 
@@ -266,6 +302,11 @@ void mail() {
 	}
 }
 
+/*
+ * The number of availible updates as reported by pacman. This relies on an
+ * update to the pacman database being performed at regular intervals
+ * externally, eg via cron.
+ */
 void pac() {
 	if (testTimeNow(120, "pman", arg)) {
 
@@ -285,6 +326,9 @@ void pac() {
 	}
 }
 
+/*
+ * The percentage used of the hard disk paritions in use.
+ */
 void hdd() {
 	if (testTimeNow(600, "hdd", arg)) {
 		//TODO read from /proc to get hdd infor
