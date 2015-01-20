@@ -1,0 +1,49 @@
+#!/bin/bash
+# Created:  Mon 19 Jan 2015
+# Modified: Tue 20 Jan 2015
+# Author:   Josh Wainwright
+# Filename: massrename
+set -o nounset
+set -o errexit
+
+function escape_spaces() {
+	#sed -i 's/ /\\ /g' $1
+	sed -i -e 's/^/"/' -e 's/$/"/g' $1
+}
+
+list=$(mktemp)
+orig=$(mktemp)
+ren=$(mktemp)
+
+if [[ $# -eq 0 ]]; then
+	cat > $list
+else
+	find . -maxdepth 1 -type f > $list
+fi
+echo $TTY
+if [[ ! -s $list ]]; then
+	echo "No files to rename"
+	exit 1
+fi
+
+cp $list $orig
+
+KEY_TTY=/dev/`ps | grep $$ | tr -s '[:blank:]' | cut -d " " -f 3`
+# vim $list < $KEY_TTY > $KEY_TTY
+vim $list < /dev/pty0 > /dev/pty0
+
+lines_before=$(wc -l < $orig)
+lines_after=$(wc -l < $list)
+if [[ $lines_before -ne $lines_after ]]; then
+	echo "Don't delete or add lines!"
+	exit 1
+fi
+
+escape_spaces $orig
+escape_spaces $list
+sed -i 's/$/@#sep#@/' $orig
+paste -d '' $orig $list > $ren
+
+awk -F "@#sep#@" '$1 != $2 {printf "mv -v %s %s\n", $1, $2}' $ren | bash
+
+rm $ren $list $orig
