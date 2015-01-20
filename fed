@@ -1,47 +1,44 @@
 #!/bin/bash
 # folder encrypt/decrypt
+set -o nounset
+set -o errexit
+
+remove=true
+if [[ $1 == "-n" ]]; then
+	remove=false
+	shift
+fi
 
 arg="$1"
+tare="tar.gz"
 
-if ! hash openssl 2> /dev/null; then
-	echo "Openssl not found. Exiting."
-	exit 1
-fi
-
-if ! hash tar 2> /dev/null; then
-	echo "Tar not found. Exiting."
-	exit 1
-fi
+hash gpg || exit 1
+hash tar || exit 1
 
 if [[ -d $arg ]]; then
-	echo "Creating encrypted archive..."
-	oldexists=false
-	if [[ -f $arg.enc ]]; then
-		mv $arg.enc $arg.enc.old
-		oldexists=true
+	echo "Compressing"
+	trap "echo [Cleaning]; rm $arg.$tare" SIGINT
+	tar czf $arg.$tare $arg
+
+	echo "Encrypting"
+	trap "echo [Cleaning]; rm $arg.$tare*" SIGINT
+	gpg -e -r "Josh Wainwright" $arg.$tare
+
+	if $remove; then
+		echo "Cleaning"
+		[ $? -eq 0 ] && [ -f $arg.$tare ] && rm -r $arg $arg.$tare
 	fi
 
-	(tar --create --file - --posix --gzip -- $arg \
-		| openssl enc -e -aes256 -out $arg.enc) \
-		&& rm -rf "$arg" > /dev/null
+elif [[ "$arg" == *.gpg ]]; then
+	fname=${arg%.*}
+	echo "Decrypting"
+	gpg -o $fname -d $arg
 
-	if $oldexists; then
-		echo "Checking old file."
-		hash1=$(cat $arg.enc | md5sum)
-		hash2=$(cat $arg.enc.old | md5sum)
-		echo $hash1
-		echo $hash2
-		if [[ "$hash1" == "$hash2" ]]; then
-			echo "Nothing changed."
-			rm $arg.enc
-			mv $arg.enc.old $arg.enc
-		else
-			echo "Removing old file."
-			rm $arg.enc.old
-		fi
-	fi
+	echo "Decompressing"
+	tar xzf $fname
 
-elif [[ $arg == *.enc ]]; then
-	echo "Decrypting archive..."
-	openssl enc -d -aes256 -in $arg | tar --extract --file - --gzip
+	echo "Cleaning"
+	rm $fname
+else
+	>&2 echo "File or folder does not exist"
 fi
