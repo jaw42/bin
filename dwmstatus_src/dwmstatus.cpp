@@ -102,12 +102,12 @@ void checkFolders() {
  * the items in the bar.
  */
 void concatenate() {
-	int f = 8;
-	string functions[f] = {"mpd", "open", "pac", "mail", "hdd", "ipa", "net", "dte"};
+#define FUNCS 8
+	string functions[FUNCS] = {"mpd", "open", "pac", "mail", "hdd", "ipa", "net", "dte"};
 
 	ofstream out(TMP_FOLDER"/content");
 	string line = "";
-	for (int i = 0; i < f; i++) {
+	for (int i = 0; i < FUNCS; i++) {
 		stringstream filename;
 		filename << TMP_FOLDER"/" << functions[i];
 		ifstream in( filename.str().c_str() );
@@ -116,6 +116,7 @@ void concatenate() {
 		}
 	}
 	out << "  ";
+#undef FUNCS
 }
 
 /*
