@@ -24,9 +24,10 @@ if [[ -d $arg ]]; then
 	trap "echo [Cleaning]; rm $arg.$tare*" SIGINT
 	gpg -e -r "Josh Wainwright" $arg.$tare
 
+	rm $arg.$tare
 	if $remove; then
 		echo "Cleaning"
-		[ $? -eq 0 ] && [ -f $arg.$tare ] && rm -r $arg $arg.$tare
+		[ $? -eq 0 ] && [ -f $arg.$tare ] && rm -r $arg
 	fi
 
 elif [[ "$arg" == *.gpg ]]; then
