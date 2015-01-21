@@ -1,5 +1,6 @@
 #!/bin/bash
-# Created:  Wed 23 Apr 2014 12:58 pm
+# Created:  Wed 23 Apr 2014
+# Modified: Wed 21 Jan 2015
 # Author:   Josh Wainwright
 # Filename: amr (All My Repos)
 
@@ -63,12 +64,9 @@ get_git_repos() {
 	done
 
 	if [[ ${#include[@]} -ne 0 ]]; then
-		local includeString=""
 		for i in "${include[@]}"; do
-			includeString+="$i""|"
+			list=$(grep $i <<< "$list")
 		done
-		includeString=${includeString%?}
-		list=$(egrep "$includeString" <<< "$list")
 	fi
 
 }
@@ -177,6 +175,7 @@ if $just_list; then
 fi
 
 # while read -r git_dir; do
+TTY=$(tty)
 for git_dir in $list; do
 	
 	add_nl=false
@@ -212,7 +211,7 @@ for git_dir in $list; do
 
 	if $start_shell; then
 		if [[ "$number_lines" != "0" ]] || $cmd_always; then
-			eval "$SHELL -i"
+			eval "$SHELL -i" < $TTY > $TTY
 		fi
 	fi
 
