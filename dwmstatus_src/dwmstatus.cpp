@@ -14,11 +14,19 @@
 #if defined(LAPTOP)
 #define INTERFACE  "wlan0"
 #define DISKONE    "sda7"
+#define WIRELESS   1
+#define PACMAN     1
 #elif defined(DESKTOP)
 #define INTERFACE  "wlp4s0"
 #define DISKONE    "sda2"
 #define DISKTWO    "sda3"
 #define DISKTWOLAB "h"
+#define WIRELESS   1
+#define PACMAN     1
+#elif defined(VMBOX)
+#define INTERFACE  "eth0"
+#define DISKONE    "sda1"
+#define APTGET     1
 #endif
 
 using namespace std;
@@ -311,8 +319,13 @@ void mail() {
 void pac() {
 	if (testTimeNow(120, "pman", arg)) {
 
+#if defined(PACMAN)
 		string pacup = exec("pacman -Qqu");
 		int pup = count(pacup, '\n');
+#elif defined(APTGET)
+ 		string pacup = exec("/usr/lib/update-notifier/apt-check 2>&1");
+		int pup = atoi(pacup.c_str());
+#endif
 
 		ofstream pacfile;
 		pacfile.open(TMP_FOLDER"/pac");
@@ -372,6 +385,7 @@ void ipa() {
 }
 
 void net() {
+#if WIRELESS == 1
 	if (testTimeNow(600, "net", arg)) {
 
 		string signal_tmp;
@@ -400,6 +414,7 @@ void net() {
 		netfile << "  \x06[W] \x01" << signal;
 		netfile.close();
 	}
+#endif
 }
 
 void date() {
