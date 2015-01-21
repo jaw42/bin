@@ -4,7 +4,6 @@
 # Author:   Josh Wainwright
 # Filename: massrename
 set -o nounset
-set -o errexit
 
 function escape_spaces() {
 	#sed -i 's/ /\\ /g' $1
@@ -17,9 +16,9 @@ ren=$(mktemp)
 
 #if [ $# -eq 0 ]; then
 if read -t 0; then
-	cat > $list
+	cat | sort > $list
 else
-	find . -maxdepth 1 -type f > $list
+	find . -maxdepth 1 -type f | sort > $list
 fi
 
 echo "### Files to edit ###"
@@ -31,9 +30,11 @@ if [[ ! -s $list ]]; then
 	exit 1
 fi
 
+escape_spaces $list
 cp $list $orig
 
-hash procps && ps='procps'
+ps=ps
+hash procps 2> /dev/null && ps='procps'
 
 TTY="/dev/"$($ps -o tty=, -o pid= | grep $$ | cut -d " " -f 1)
 vim $list < $TTY > $TTY
@@ -45,8 +46,6 @@ if [[ $lines_before -ne $lines_after ]]; then
 	exit 1
 fi
 
-escape_spaces $orig
-escape_spaces $list
 sed -i 's/$/@#sep#@/' $orig
 paste -d '' $orig $list > $ren
 
