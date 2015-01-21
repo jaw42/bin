@@ -1,7 +1,15 @@
 #!/bin/bash
-# folder encrypt/decrypt
+# Created:  Mon 26 May 2014
+# Modified: Wed 21 Jan 2015
+# Author:   Josh Wainwright
+# Filename: fed (Folder Encrypt Decrypt)
 set -o nounset
-set -o errexit
+
+function echoerr() {
+	>&2 echo $@
+}
+
+[[ $# -eq 0 ]] && echoerr "Please provide a file to encrypt or decrypt" && exit 1
 
 remove=true
 if [[ $1 == "-n" ]]; then
@@ -12,8 +20,8 @@ fi
 arg="$1"
 tare="tar.gz"
 
-hash gpg || exit 1
-hash tar || exit 1
+! hash gpg 2> /dev/null && echoerr "Requires gpg" && exit 1
+! hash tar 2> /dev/null && echoerr "Requires tar" && exit 1
 
 if [[ -d $arg ]]; then
 	echo "Compressing"
@@ -40,6 +48,8 @@ elif [[ "$arg" == *.gpg ]]; then
 
 	echo "Cleaning"
 	rm $fname
+elif [[ -f $arg ]]; then
+	>&2 echoerr "For files, please use standard gpg"
 else
-	>&2 echo "File or folder does not exist"
+	>&2 echoerr "Folder does not exist"
 fi
