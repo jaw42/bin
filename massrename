@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Mon 19 Jan 2015
-# Modified: Tue 20 Jan 2015
+# Modified: Wed 21 Jan 2015
 # Author:   Josh Wainwright
 # Filename: massrename
 set -o nounset
@@ -22,6 +22,10 @@ else
 	find . -maxdepth 1 -type f > $list
 fi
 
+echo "### Files to edit ###"
+cat $list
+echo "#####################"
+
 if [[ ! -s $list ]]; then
 	echo "No files to rename"
 	exit 1
@@ -29,10 +33,9 @@ fi
 
 cp $list $orig
 
-for TTY in "/dev/pty" "/dev/pts/0"; do
-	[ -e $TTY ] && break
-done
+hash procps && ps='procps'
 
+TTY="/dev/"$($ps -o tty=, -o pid= | grep $$ | cut -d " " -f 1)
 vim $list < $TTY > $TTY
 
 lines_before=$(wc -l < $orig)
