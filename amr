@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Wed 23 Apr 2014
-# Modified: Wed 21 Jan 2015
+# Modified: Fri 23 Jan 2015
 # Author:   Josh Wainwright
 # Filename: amr (All My Repos)
 
@@ -24,7 +24,7 @@ summary=false
 verbose() {
 	set +u
 	if $verbose; then
-		echo -e ${2} "$1"
+		echo -e "$2" "$1"
 	fi
 	set -u
 }
@@ -73,7 +73,11 @@ get_git_repos() {
 
 pull_all() {
 	if $pull_all; then
-		git -c color.pull=always pull origin master 2>&1 | sed 's/^/\t/'
+		local gitoutput=$(git -c color.pull=always pull origin master 2>&1)
+		local uptodate="$(tail -1 <<< "$gitoutput")"
+		if $verbose || [[ "$uptodate" != *"Already up-to-date."* ]]; then
+			echo -e "\t${gitoutput//$'\n'/$'\n\t'}"
+		fi
 	fi
 }
 
@@ -171,13 +175,13 @@ fi
 
 if $just_list; then
 	echo "$list"
-	exit
+	exit 0
 fi
 
 # while read -r git_dir; do
 TTY=$(tty)
 for git_dir in $list; do
-	
+
 	add_nl=false
 	cd "$git_dir"
 
