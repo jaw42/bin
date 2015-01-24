@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Wed 23 Apr 2014
-# Modified: Fri 23 Jan 2015
+# Modified: Sat 24 Jan 2015
 # Author:   Josh Wainwright
 # Filename: amr (All My Repos)
 
@@ -49,6 +49,7 @@ amr = ${b}A${n}ll ${b}M${n}y ${b}R${n}epos. Perform actions on all the repositor
 	-r command ${b}R${n}un the command provided within every repo found that has changes.
 	-s         Open a ${b}s${n}hell within every repo with changes.
 	-a         ${b}A${n}lways run the command or shell, even for repos without changes.
+	-R         ${b}R${n}eset the include and ignore lists to empty.
 "
 echo -e "$helptext"
 }
@@ -61,9 +62,11 @@ get_git_repos() {
 		list=$(find ~/ -name ".git" -exec dirname {} \; 2> /dev/null)
 	fi
 
-	for i in "${ignore[@]}"; do
-		list=$(sed "/${i}/d" <<< "$list")
-	done
+	if [[ ${#ignore[@]} -ne 0 ]]; then
+		for i in "${ignore[@]}"; do
+			list=$(sed "/${i}/d" <<< "$list")
+		done
+	fi
 
 	if [[ ${#include[@]} -ne 0 ]]; then
 		for i in "${include[@]}"; do
@@ -115,7 +118,7 @@ do_summary() {
 current_dir=$(pwd)
 cd $HOME
 
-while getopts "hvlducx:i:r:sSan" opt; do
+while getopts "hvlducx:i:r:sSanR" opt; do
 	case "$opt" in
 		h)
 			usage
@@ -157,6 +160,10 @@ while getopts "hvlducx:i:r:sSan" opt; do
 		n)
 			use_locate=false
 			;;
+		R)
+			ignore=()
+			include=()
+			;;
 		*)
 			echo "Flag \"$opt\" not recognised."
 			exit 0
@@ -171,9 +178,9 @@ get_git_repos
 
 if $verbose; then
 	echo "Ignore List:"
-	printf -- '\t%s\n' "${ignore[@]}"
+	printf -- '\t%s\n' "${ignore[@]-}"
 	echo "Include List:"
-	printf -- '\t%s\n' "${include[@]}"
+	printf -- '\t%s\n' "${include[@]-}"
 	echo
 fi
 
