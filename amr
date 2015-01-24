@@ -20,6 +20,8 @@ cmd_always=false
 start_shell=false
 use_locate=true
 summary=false
+number_pulled=0
+number_pushed=0
 
 verbose() {
 	set +u
@@ -77,6 +79,7 @@ pull_all() {
 		local uptodate="$(tail -1 <<< "$gitoutput")"
 		if $verbose || [[ "$uptodate" != *"Already up-to-date."* ]]; then
 			echo -e "\t${gitoutput//$'\n'/$'\n\t'}"
+			number_pulled=$((number_pulled + 1))
 		fi
 	fi
 }
@@ -86,6 +89,7 @@ push_all() {
 		if [[ $1 -gt 0 ]]; then
 			if [[ $(git remote | wc -l) -gt 0 ]]; then
 				git -c colour.push=always push 2>&1 | sed 's/^/\t/'
+				number_pushed=$((number_pushed + 1))
 			fi
 		fi
 	fi
@@ -235,4 +239,10 @@ for git_dir in $list; do
 
 done <<< "$list"
 
+if $pull_all; then
+	echo "Number of repos pulled: $number_pulled"
+fi
+if $push_all; then
+	echo "Number of repos pushed: $number_pushed"
+fi
 cd "$current_dir"
