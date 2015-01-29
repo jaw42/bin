@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Wed 23 Apr 2014
-# Modified: Sat 24 Jan 2015
+# Modified: Thu 29 Jan 2015
 # Author:   Josh Wainwright
 # Filename: amr (All My Repos)
 
@@ -194,7 +194,11 @@ TTY=$(tty)
 for git_dir in $list; do
 
 	add_nl=false
-	cd "$git_dir"
+	cd "$git_dir" 2>&1 >/dev/null
+	if [ $? -ne 0 ]; then
+		echo "$git_dir: Folder not found."
+		continue
+	fi
 
 	if $summary; then
 		do_summary
