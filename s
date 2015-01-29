@@ -106,13 +106,14 @@ usegrep() {
 }
 useparallel() {
 	hash parallel 2>&1 >/dev/null || exit 1
-	local par_cmd="cd {}/..; git grep --color=always -I $i \"$@\""
 	if $allow_locate && $allow_git; then
 		local find_cmd="locate --regex \"$(pwd).*.git$\""
 	elif $allow_git;then
 		local find_cmd="find -name \"*.git\""
 	fi
-	exec $find_cmd | parallel $par_cmd
+	local par_cmd="cd \"{}/..\"; git grep --color=always -I $i \"$@\""
+	eval $find_cmd | parallel \"$par_cmd\"
+	# TODO
 	echo status $?
 }
 
