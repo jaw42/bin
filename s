@@ -1,6 +1,13 @@
 #!/bin/bash
+# Created:  Thu 07 Aug 2014
+# Modified: Fri 30 Jan 2015
+# Author:   Josh Wainwright
+# Filename: s (Search for files and text)
 set -o nounset
 set -o errexit
+function echoerr() {
+	>$2 echo $@
+}
 
 cmd=""
 verbose=false
@@ -160,7 +167,7 @@ while getopts "disrvflpVh" opt; do
 			exit 0
 			;;
 		*)
-			echo "Flag "$opt" not recognised."
+			echoerr "Flag "$opt" not recognised."
 			exit 1
 			;;
 	esac
