@@ -12,6 +12,7 @@ v=""
 f=""
 allow_locate=false
 allow_git=true
+allow_parallel=false
 
 usage() {
 	b="\033[4m" # Bold text
@@ -30,6 +31,9 @@ Options:
 	-l  allow ${b}l${n}ocate to be used
 	-V  ${b}V${n}erbose output
 	-h  show this ${b}h${n}elp text
+	-p  use ${b}p${n}arallel to search within multiple directories
+	    simultaneously. Currently only uses git to search so git must be
+	    installed.*
 
 (*options subject to the feature being availible in the underlying command.)
 
@@ -103,6 +107,14 @@ usegrep() {
 		cmd="grep $r -n --recursive $i $v \"$@\""
 	fi
 }
+useparallel() {
+	if $allow_locate; then
+		local find_cmd="dirname \$(locate -br '\.git$')"
+	else
+		local find_cmd="find ~/ -name \".git\" -exec dirname {} \; 2> /dev/null"
+	fi
+	cmd="$find_cmd | parallel \"cd {}; git grep --color=always -I $i '$@'\" 2> /dev/null"
+}
 
 checkgit() {
 	git rev-parse --git-dir > /dev/null 2>&1
@@ -114,7 +126,7 @@ checksvn() {
 	return $?
 }
 
-while getopts "disrvflVh" opt; do
+while getopts "disrvflpVh" opt; do
 	case "$opt" in
 		d)
 			dryrun=true
@@ -135,7 +147,10 @@ while getopts "disrvflVh" opt; do
 			f="files"
 			;;
 		l)
-			allow_locate=true
+			hash locate 2>&1 > /dev/null && allow_locate=true
+			;;
+		p)
+			hash parallel 2>&1 > /dev/null && allow_parallel=true
 			;;
 		V)
 			verbose=true
@@ -159,6 +174,9 @@ fi
 if $allow_git && \
 	checkgit; then
 	usegit "$@"
+
+elif $allow_parallel; then
+	useparallel "$@"
 
 elif [ "$f" == "files" ] && \
 	$allow_locate && \
@@ -186,6 +204,7 @@ if $dryrun; then
 	verbose "file search f : $f"
 	verbose "allow_locate  : $allow_locate"
 	verbose "allow_git     : $allow_git"
+	verbose "allow_parallel: $allow_parallel"
 
 	echo "**** Dry Run ****"
 	echo "$cmd"
