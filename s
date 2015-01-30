@@ -18,10 +18,10 @@ usage() {
 	n="\033[0m" # Normal text
 helptext="$(basename $0) [-disrvflVh] [PATTERN|FILE]
 
-s - ${b}S${n}earch, using the best tools availible, for text or files.
+Search, using the best tools availible, for text or files.
 
 Options:
-	-d  ${b}d${n}ryrun, don't do anything, just show the command that would be run
+	-d  ${b}d${n}ryrun, don't search, just show the command that would be run
 	-i  case-${b}i${n}nsensitive search*
 	-s  ${b}s${n}mart-case search*
 	-r  ${b}r${n}egular-expression based search*
@@ -31,7 +31,7 @@ Options:
 	-V  ${b}V${n}erbose output
 	-h  show this ${b}h${n}elp text
 
-	(*options are subject to the feature being availible in the underlying command.)
+(*options subject to the feature being availible in the underlying command.)
 
 Search Methods:
 	File Search
@@ -75,11 +75,11 @@ usegit() {
 	fi
 }
 useag() {
+	local ag_files=""
 	if [[ $f = "files" ]]; then
-		cmd="ag --hidden $i $s $v -g \"$@\" ."
-	else
-		cmd="ag --hidden $i $s $v \"$@\" ."
+		ag_files="-g"
 	fi
+	cmd="ag --nogroup --hidden $i $s $v $ag_files \"$@\" ."
 }
 useack() {
 	if [[ "x$r" != "x" ]]; then
@@ -190,6 +190,8 @@ if $dryrun; then
 	echo "**** Dry Run ****"
 	echo "$cmd"
 else
-	verbose "$cmd"
+	verbose "##"
+	verbose "# $cmd"
+	verbose "##"
 	eval "$cmd"
 fi
