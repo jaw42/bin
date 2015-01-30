@@ -31,8 +31,11 @@ Options:
 	-l  allow ${b}l${n}ocate to be used
 	-V  ${b}V${n}erbose output
 	-h  show this ${b}h${n}elp text
+	-p  use ${b}p${n}arallel to search within multiple directories
+	    simultaneously. Currently only uses git to search so git must be
+	    installed.*
 
-	(*options are subject to the feature being availible in the underlying command.)
+(*options are subject to feature being availible in the underlying command.)
 
 Search Methods:
 	File Search
@@ -105,16 +108,12 @@ usegrep() {
 	fi
 }
 useparallel() {
-	hash parallel 2>&1 >/dev/null || exit 1
-	if $allow_locate && $allow_git; then
-		local find_cmd="locate --regex \"$(pwd).*.git$\""
-	elif $allow_git;then
-		local find_cmd="find -name \"*.git\""
+	if $allow_locate; then
+		local find_cmd="dirname \$(locate -br '\.git$')"
+	else
+		local find_cmd="find ~/ -name \".git\" -exec dirname {} \; 2> /dev/null"
 	fi
-	local par_cmd="cd \"{}/..\"; git grep --color=always -I $i \"$@\""
-	eval $find_cmd | parallel \"$par_cmd\"
-	# TODO
-	echo status $?
+	cmd="$find_cmd | parallel \"cd {}; git grep --color=always -I $i '$@'\" 2> /dev/null"
 }
 
 checkgit() {
@@ -148,10 +147,10 @@ while getopts "disrvflpVh" opt; do
 			f="files"
 			;;
 		l)
-			allow_locate=true
+			hash locate 2>&1 > /dev/null && allow_locate=true
 			;;
 		p)
-			allow_parallel=true
+			hash parallel 2>&1 > /dev/null && allow_parallel=true
 			;;
 		V)
 			verbose=true
@@ -167,6 +166,7 @@ while getopts "disrvflpVh" opt; do
 	esac
 done
 shift $((OPTIND-1))
+
 
 if checksvn; then
 	allow_git=false
