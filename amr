@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Wed 23 Apr 2014
-# Modified: Thu 29 Jan 2015
+# Modified: Sun 01 Feb 2015
 # Author:   Josh Wainwright
 # Filename: amr (All My Repos)
 
@@ -34,7 +34,7 @@ verbose() {
 usage() {
 	b="\033[4m"
 	n="\033[0m"
-helptext="$(basename "$0") [-hvlduc] [-x pattern] [-i pattern] [-r command]
+helptext="$(basename "$0") [-hvlducR] [-x pattern] [-i pattern] [-r command]
 
 amr = ${b}A${n}ll ${b}M${n}y ${b}R${n}epos. Perform actions on all the repositories found on the local machine.
 
@@ -45,7 +45,7 @@ amr = ${b}A${n}ll ${b}M${n}y ${b}R${n}epos. Perform actions on all the repositor
 	-u         Push ${b}u${n}p commits to remotes (git push).
 	-c         Interactively ${b}c${n}ommit local changes.
 	-x pattern E${b}x${n}clude any repos matching pattern.
-	-i pattern Only ${b}i${n}nclude repos that match patter.
+	-i pattern Only ${b}i${n}nclude repos that match pattern.
 	-r command ${b}R${n}un the command provided within every repo found that has changes.
 	-s         Open a ${b}s${n}hell within every repo with changes.
 	-a         ${b}A${n}lways run the command or shell, even for repos without changes.
