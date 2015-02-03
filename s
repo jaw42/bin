@@ -6,7 +6,7 @@
 set -o nounset
 set -o errexit
 function echoerr() {
-	>$2 echo $@
+	>&2 echo $@
 }
 
 cmd=""
