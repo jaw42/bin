@@ -17,6 +17,7 @@ s=""
 r=""
 v=""
 f=""
+o=""
 allow_locate=false
 allow_git=true
 allow_parallel=false
@@ -41,6 +42,7 @@ Options:
 	-p  use ${b}p${n}arallel to search within multiple directories
 	    simultaneously. Currently only uses git to search so git must be
 	    installed.*
+	-o  pass extra ${b}o${n}ptions to the selected search tool
 
 (*options subject to the feature being availible in the underlying command.)
 
@@ -80,9 +82,9 @@ usegit() {
 	fi
 
 	if [[ $f = "files" ]]; then
-		cmd="git ls-files | \grep $i $v $r \"$@\""
+		cmd="git ls-files | \grep $o $i $v $r \"$@\""
 	else
-		cmd="git grep $i $v $r \"$@\""
+		cmd="git grep $o $i $v $r \"$@\""
 	fi
 }
 useag() {
@@ -90,7 +92,7 @@ useag() {
 	if [[ $f = "files" ]]; then
 		ag_files="-g"
 	fi
-	cmd="ag --nogroup --hidden $i $s $v $ag_files \"$@\" ."
+	cmd="ag --nogroup --hidden $o $i $s $v $ag_files \"$@\" ."
 }
 useack() {
 	if [[ "x$r" != "x" ]]; then
@@ -98,9 +100,9 @@ useack() {
 	fi
 
 	if [[ $f = "files" ]]; then
-		cmd="find . | grep $i $v $r \"$@\""
+		cmd="find . | grep $o $i $v $r \"$@\""
 	else
-		cmd="ack $i $s $v \"$@\""
+		cmd="ack $o $i $s $v \"$@\""
 	fi
 }
 usegrep() {
@@ -109,9 +111,9 @@ usegrep() {
 	fi
 
 	if [[ $f = "files" ]]; then
-		cmd="find . | grep $i $v $r \"$@\""
+		cmd="find . | grep $o $i $v $r \"$@\""
 	else
-		cmd="grep $r -n --recursive $i $v \"$@\""
+		cmd="grep $r -n --recursive $o $i $v \"$@\""
 	fi
 }
 useparallel() {
@@ -134,6 +136,7 @@ checksvn() {
 }
 
 while getopts "disrvflpVh" opt; do
+while getopts "disrvflpo:Vh" opt; do
 	case "$opt" in
 		d)
 			dryrun=true
@@ -158,6 +161,9 @@ while getopts "disrvflpVh" opt; do
 			;;
 		p)
 			hash parallel 2>&1 > /dev/null && allow_parallel=true
+			;;
+		o)
+			o="$OPTARG"
 			;;
 		V)
 			verbose=true
