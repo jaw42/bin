@@ -94,6 +94,18 @@ useag() {
 	fi
 	cmd="ag --nogroup --hidden $o $i $s $v $ag_files \"$@\" ."
 }
+usept() {
+	local pt_files=""
+	if [[ $f = "files" ]]; then
+		pt_files="-g"
+	fi
+	if [ ! -z $v ]; then 
+		allow_pt=false
+		search_tool "$@"
+	else
+		cmd="pt --nogroup $o $i $s $pt_files \"$@\" ."
+	fi
+}
 useack() {
 	if [[ "x$r" != "x" ]]; then
 		r="-E"
