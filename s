@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Thu 07 Aug 2014
-# Modified: Fri 30 Jan 2015
+# Modified: Tue 03 Feb 2015
 # Author:   Josh Wainwright
 # Filename: s (Search for files and text)
 set -o nounset
@@ -21,6 +21,9 @@ o=""
 allow_locate=false
 allow_git=true
 allow_parallel=false
+allow_pt=true
+allow_ag=true
+allow_ack=true
 
 usage() {
 	b="\033[4m" # Bold text
@@ -147,7 +150,30 @@ checksvn() {
 	return $?
 }
 
-while getopts "disrvflpVh" opt; do
+search_tool() {
+	if $allow_git && checkgit; then
+		usegit "$@"
+
+	elif $allow_parallel; then
+		useparallel "$@"
+
+	elif $allow_locate && [ "$f" == "files" ] && hash locate 2> /dev/null; then
+		useloc "$@"
+
+	elif $allow_pt && hash pt 2> /dev/null; then
+		usept "$@"
+
+	elif $allow_ag && hash ag 2> /dev/null; then
+		useag "$@"
+
+	elif $allow_ack && hash ack 2> /dev/null; then
+		useack "$@"
+
+	else
+		usegrep "$@"
+	fi
+}
+
 while getopts "disrvflpo:Vh" opt; do
 	case "$opt" in
 		d)
@@ -196,27 +222,7 @@ if checksvn; then
 	allow_git=false
 fi
 
-if $allow_git && \
-	checkgit; then
-	usegit "$@"
-
-elif $allow_parallel; then
-	useparallel "$@"
-
-elif [ "$f" == "files" ] && \
-	$allow_locate && \
-	hash locate 2> /dev/null; then
-	useloc "$@"
-
-elif hash ag 2> /dev/null; then
-	useag "$@"
-
-elif hash ack 2> /dev/null; then
-	useack "$@"
-
-else
-	usegrep "$@"
-fi
+search_tool "$@"
 
 if $dryrun; then
 
