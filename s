@@ -176,42 +176,18 @@ search_tool() {
 
 while getopts "disrvflpo:Vh" opt; do
 	case "$opt" in
-		d)
-			dryrun=true
-			;;
-		i)
-			i="--ignore-case"
-			;;
-		s)
-			s="--smart-case"
-			;;
-		r)
-			r="--regex"
-			;;
-		v)
-			v="--invert-match"
-			;;
-		f)
-			f="files"
-			;;
-		l)
-			hash locate 2>&1 > /dev/null && allow_locate=true
-			;;
-		p)
-			hash parallel 2>&1 > /dev/null && allow_parallel=true
-			;;
-		o)
-			o="$OPTARG"
-			;;
-		V)
-			verbose=true
-			;;
-		h)
-			usage
-			exit 0
-			;;
-		*)
-			echoerr "Flag "$opt" not recognised."
+		d) dryrun=true ;;
+		i) i="--ignore-case" ;;
+		s) s="--smart-case" ;;
+		r) r="--regex" ;;
+		v) v="--invert-match" ;;
+		f) f="files" ;;
+		l) hash locate 2>&1 > /dev/null && allow_locate=true ;;
+		p) hash parallel 2>&1 > /dev/null && allow_parallel=true ;;
+		o) o="$OPTARG" ;;
+		V) verbose=true ;;
+		h) usage && exit 0 ;;
+		*) echoerr "Flag "$opt" not recognised."
 			exit 1
 			;;
 	esac
