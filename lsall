@@ -10,10 +10,12 @@ function echoerr() {
 }
 
 ftype="-type f"
+filesfile=false
 verbose=false
-while getopts "dv" opt; do
+while getopts "dfv" opt; do
 	case "$opt" in
 		d) ftype="-type d" ;;
+		f) filesfile=true ;;
 		v) verbose=true ;;
 		*) echoerr "Flag "$opt" not recognised."
 			exit 1
@@ -21,17 +23,19 @@ while getopts "dv" opt; do
 	esac
 done
 shift $((OPTIND-1))
+
 path=${1:-.}
+eval $filesfile && path=$(pwd)
 
 cmd="find $path \
          \( \
             -name .svn -o -name .git -o -name .hg -o -name .bzr \
-         \)
+         \) \
        -prune -o \
          \( \
-            -path \"*/vim/tmp\" \
-            -path \"*/config/cygwin\" \
-         \) 
+            -path \"*/vim/tmp\" -o \
+            -path \"*/.config/cygwin\" \
+         \) \
        -prune -o \
          \( \
             -name .\#\*   -o -name \*.o     -o -name \*\~   -o -name \*.bin -o \
@@ -45,10 +49,13 @@ cmd="find $path \
             -name \*.pg   -o -name \*.tp    -o -name \*.vr  -o -name \*.cps -o \
             -name \*.fns  -o -name \*.kys   -o -name \*.pgs -o -name \*.tps -o \
             -name \*.vrs  -o -name \*.pyc   -o -name \*.pyo \
-          \)
+          \) \
        -prune -o \
        \( $ftype -print \)"
 
+if $filesfile; then
+	cmd="$cmd | sed \"s#^$HOME/#~/#\""
+fi
 if $verbose; then
 	echo $cmd
 else
