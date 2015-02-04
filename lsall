@@ -1,0 +1,56 @@
+#!/bin/bash
+# Created:  Wed 04 Feb 2015
+# Modified: Wed 04 Feb 2015
+# Author:   Josh Wainwright
+# Filename: lsall
+set -o nounset
+set -o errexit
+function echoerr() {
+	>&2 echo $@
+}
+
+ftype="-type f"
+verbose=false
+while getopts "dv" opt; do
+	case "$opt" in
+		d) ftype="-type d" ;;
+		v) verbose=true ;;
+		*) echoerr "Flag "$opt" not recognised."
+			exit 1
+			;;
+	esac
+done
+shift $((OPTIND-1))
+path=${1:-.}
+
+cmd="find $path \
+         \( \
+            -name .svn -o -name .git -o -name .hg -o -name .bzr \
+         \)
+       -prune -o \
+         \( \
+            -path \"*/vim/tmp\" \
+            -path \"*/config/cygwin\" \
+         \) 
+       -prune -o \
+         \( \
+            -name .\#\*   -o -name \*.o     -o -name \*\~   -o -name \*.bin -o \
+            -name \*.lbin -o -name \*.so    -o -name \*.a   -o -name \*.ln  -o \
+            -name \*.blg  -o -name \*.bbl   -o -name \*.elc -o -name \*.lof -o \
+            -name \*.glo  -o -name \*.idx   -o -name \*.lot -o -name \*.fmt -o \
+            -name \*.tfm  -o -name \*.class -o -name \*.fas -o -name \*.lib -o \
+            -name \*.fasl -o -name \*.ufsl  -o -name \*.fsl -o -name \*.dxl -o \
+            -name \*.la   -o -name \*.gmo   -o -name \*.mo  -o -name \*.toc -o \
+            -name \*.aux  -o -name \*.cp    -o -name \*.fn  -o -name \*.ky  -o \
+            -name \*.pg   -o -name \*.tp    -o -name \*.vr  -o -name \*.cps -o \
+            -name \*.fns  -o -name \*.kys   -o -name \*.pgs -o -name \*.tps -o \
+            -name \*.vrs  -o -name \*.pyc   -o -name \*.pyo \
+          \)
+       -prune -o \
+       \( $ftype -print \)"
+
+if $verbose; then
+	echo $cmd
+else
+	eval "$cmd"
+fi
