@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Thu 07 Aug 2014
-# Modified: Tue 03 Feb 2015
+# Modified: Wed 04 Feb 2015
 # Author:   Josh Wainwright
 # Filename: s (Search for files and text)
 set -o nounset
@@ -55,12 +55,14 @@ Search Methods:
 	locate FILE
 	git ls-files | grep FILE
 	ag -g FILE
+	pt -g FILE
 	find . | grep FILE
 
 	String Search
 	-------------
 	git grep STRING
 	ag STRING
+	pt STRING
 	ack STRING
 	grep -R STRING"
 echo -e "$helptext"
