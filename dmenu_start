@@ -1,0 +1,34 @@
+#!/bin/bash
+# Created:  Thu 05 Feb 2015
+# Modified: Thu 05 Feb 2015
+# Author:   Josh Wainwright
+# Filename: dmenu_start
+set -o nounset
+function echoerr() {
+	>&2 echo "$@"
+}
+
+progpath="/cygdrive/c/ProgramData/Microsoft/Windows/Start Menu/Programs/"
+binpath="/cygdrive/c/cygwin/bin/"
+homepath="/cygdrive/h/"
+
+list=$(${binpath}find "${progpath}" -type f -name "*.lnk")
+list="$list
++ /cygdrive/c/Windows/System32/cmd.exe"
+echo "$list"
+
+prog=$(echo "$list" \
+	| ${binpath}sed "s#$progpath##" \
+	| ${homepath}Tools/dmenu -i -l 20 \
+	| ${binpath}tr -d "\r" \
+	)
+
+if [ "x$prog" != "x" ]; then
+	if [[ "$prog" = '+'* ]]; then
+		prog=${prog/+ /}
+	else
+		prog="$progpath$prog"
+	fi
+	echo "$prog"
+	${binpath}cygstart -d /cygdrive/h/ "$prog"
+fi
