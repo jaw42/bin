@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Thu 07 Aug 2014
-# Modified: Wed 04 Feb 2015
+# Modified: Fri 06 Feb 2015
 # Author:   Josh Wainwright
 # Filename: s (Search for files and text)
 set -o nounset
@@ -40,12 +40,15 @@ Options:
 	-v  in${b}v${n}ert matches*
 	-f  ${b}f${n}ilename search
 	-l  allow ${b}l${n}ocate to be used
-	-V  ${b}V${n}erbose output
-	-h  show this ${b}h${n}elp text
+	-L  don't allow ${b}L${n}ocate to be used
+	-G  don't allow ${b}G${n}it to be used
 	-p  use ${b}p${n}arallel to search within multiple directories
 	    simultaneously. Currently only uses git to search so git must be
 	    installed.*
+	-P  don't allow ${b}P${n}arallel to be used
 	-o  pass extra ${b}o${n}ptions to the selected search tool
+	-V  ${b}V${n}erbose output
+	-h  show this ${b}h${n}elp text
 
 (*options subject to the feature being availible in the underlying command.)
 
@@ -176,7 +179,7 @@ search_tool() {
 	fi
 }
 
-while getopts "disrvflpo:Vh" opt; do
+while getopts "disrvflLGpPo:Vh" opt; do
 	case "$opt" in
 		d) dryrun=true ;;
 		i) i="--ignore-case" ;;
@@ -185,7 +188,10 @@ while getopts "disrvflpo:Vh" opt; do
 		v) v="--invert-match" ;;
 		f) f="files" ;;
 		l) hash locate 2>&1 > /dev/null && allow_locate=true ;;
+		L) allow_locate=false ;;
 		p) hash parallel 2>&1 > /dev/null && allow_parallel=true ;;
+		P) allow_parallel=false ;;
+		G) allow_git=false ;;
 		o) o="$OPTARG" ;;
 		V) verbose=true ;;
 		h) usage && exit 0 ;;
