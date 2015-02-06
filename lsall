@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Wed 04 Feb 2015
-# Modified: Wed 04 Feb 2015
+# Modified: Thu 05 Feb 2015
 # Author:   Josh Wainwright
 # Filename: lsall
 set -o nounset
@@ -24,10 +24,10 @@ while getopts "dfv" opt; do
 done
 shift $((OPTIND-1))
 
-path=${1:-.}
+path="${@:-.}"
 eval $filesfile && path=$(pwd)
 
-cmd="find $path \
+cmd="find "$path" \
          \( \
             -name .svn -o -name .git -o -name .hg -o -name .bzr \
          \) \
