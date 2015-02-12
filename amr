@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Wed 23 Apr 2014
-# Modified: Sun 01 Feb 2015
+# Modified: Thu 12 Feb 2015
 # Author:   Josh Wainwright
 # Filename: amr (All My Repos)
 
@@ -78,10 +78,11 @@ get_git_repos() {
 
 pull_all() {
 	if $pull_all; then
-		local gitoutput=$(git -c color.pull=always pull origin master 2>&1)
-		local uptodate="$(tail -1 <<< "$gitoutput")"
-		if $verbose || [[ "$uptodate" != *"Already up-to-date."* ]]; then
-			echo -e "\t${gitoutput//$'\n'/$'\n\t'}"
+		git fetch origin > /dev/null
+		local log=$(git log --color=always HEAD..origin/master --oneline)
+		if [ ! "$log" = "" ]; then
+			echo "$log"
+			git merge origin/master
 			number_pulled=$((number_pulled + 1))
 		fi
 	fi
