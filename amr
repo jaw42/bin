@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Wed 23 Apr 2014
-# Modified: Thu 12 Feb 2015
+# Modified: Fri 13 Feb 2015
 # Author:   Josh Wainwright
 # Filename: amr (All My Repos)
 
@@ -81,8 +81,8 @@ pull_all() {
 		git fetch origin > /dev/null
 		local log=$(git log --color=always HEAD..origin/master --oneline)
 		if [ ! "$log" = "" ]; then
-			echo "$log"
-			git merge origin/master
+			echo "$log" | sed 's/^/\t/'
+			git -c colour.merge=always merge origin/master | sed 's/^/\t/'
 			number_pulled=$((number_pulled + 1))
 		fi
 	fi
