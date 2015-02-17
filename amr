@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Wed 23 Apr 2014
-# Modified: Fri 13 Feb 2015
+# Modified: Tue 17 Feb 2015
 # Author:   Josh Wainwright
 # Filename: amr (All My Repos)
 
@@ -13,7 +13,7 @@ pull_all=false
 push_all=false
 commit=false
 list=""
-ignore=("Osaka" "plugged" "trunk")
+ignore=("Osaka" "plugged" "trunk" "repo_discount")
 include=("home")
 custom_cmd=""
 cmd_always=false
