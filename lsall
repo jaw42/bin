@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Wed 04 Feb 2015
-# Modified: Thu 05 Feb 2015
+# Modified: Mon 16 Feb 2015
 # Author:   Josh Wainwright
 # Filename: lsall
 set -o nounset
@@ -59,5 +59,5 @@ fi
 if $verbose; then
 	echo $cmd
 else
-	eval "$cmd"
+	eval "$cmd" | tee >(wc -l >&2)
 fi
