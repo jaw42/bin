@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Thu 07 Aug 2014
-# Modified: Fri 06 Feb 2015
+# Modified: Tue 17 Feb 2015
 # Author:   Josh Wainwright
 # Filename: s (Search for files and text)
 set -o nounset
@@ -21,7 +21,7 @@ o=""
 allow_locate=false
 allow_git=true
 allow_parallel=false
-allow_pt=true
+allow_pt=false
 allow_ag=true
 allow_ack=true
 
@@ -111,7 +111,7 @@ usept() {
 		allow_pt=false
 		search_tool "$@"
 	else
-		cmd="pt --nogroup $o $i $s $pt_files \"$@\" ."
+		cmd="pt --color --nogroup $o $i $s $pt_files \"$@\" ."
 	fi
 }
 useack() {
