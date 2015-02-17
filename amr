@@ -195,9 +195,9 @@ TTY=$(tty)
 for git_dir in $list; do
 
 	add_nl=false
-	cd "$git_dir" 2>&1 >/dev/null
+	cd "$git_dir" 2>/dev/null
 	if [ $? -ne 0 ]; then
-		echo "$git_dir: Folder not found."
+		printf '\033[0;31m%s: Folder not found\033[0m\n' "$git_dir"
 		continue
 	fi
 
