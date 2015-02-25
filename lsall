@@ -29,6 +29,7 @@ ftype="-type f"
 filesfile=false
 verbose=false
 maxdepth=""
+cntout=true
 while getopts "dfvhm:n" opt; do
 	case "$opt" in
 		d) ftype="-type d" ;;
@@ -36,6 +37,7 @@ while getopts "dfvhm:n" opt; do
 		v) verbose=true ;;
 		h) usage && exit 0 ;;
 		m) maxdepth="-maxdepth $OPTARG" ;;
+		n) cntout=false ;;
 		*) echoerr "Flag "$opt" not recognised."
 			exit 1
 			;;
@@ -77,6 +79,8 @@ if $filesfile; then
 fi
 if $verbose; then
 	echo $cmd
-else
+elif "$cntout"; then
 	eval "$cmd" | tee >(wc -l >&2)
+else
+	eval "$cmd"
 fi
