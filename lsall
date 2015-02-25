@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Wed 04 Feb 2015
-# Modified: Mon 16 Feb 2015
+# Modified: Wed 25 Feb 2015
 # Author:   Josh Wainwright
 # Filename: lsall
 set -o nounset
@@ -72,7 +72,7 @@ cmd="find "$path" "$maxdepth" \
             -name \*.vrs  -o -name \*.pyc   -o -name \*.pyo \
           \) \
        -prune -o \
-       \( $ftype -print \)"
+       \( $ftype -print \) | sed 's#^./##'"
 
 if $filesfile; then
 	cmd="$cmd | sed \"s#^$HOME/#~/#\""
