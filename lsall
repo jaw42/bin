@@ -9,14 +9,17 @@ function echoerr() {
 	>&2 echo $@
 }
 
+	-m depth Search only to a directory depth of depth.
 ftype="-type f"
 filesfile=false
 verbose=false
-while getopts "dfv" opt; do
+maxdepth=""
+while getopts "dfvhm:n" opt; do
 	case "$opt" in
 		d) ftype="-type d" ;;
 		f) filesfile=true ;;
 		v) verbose=true ;;
+		m) maxdepth="-maxdepth $OPTARG" ;;
 		*) echoerr "Flag "$opt" not recognised."
 			exit 1
 			;;
@@ -27,7 +30,7 @@ shift $((OPTIND-1))
 path="${@:-.}"
 eval $filesfile && path=$(pwd)
 
-cmd="find "$path" \
+cmd="find "$path" "$maxdepth" \
          \( \
             -name .svn -o -name .git -o -name .hg -o -name .bzr \
          \) \
