@@ -9,7 +9,22 @@ function echoerr() {
 	>&2 echo $@
 }
 
+function usage() {
+helptext="$(basename $0) [-dfvh] [-m depth]
+
+lsall = List All. List all files or directories under the current location,
+ignoring common version control specific files.
+
+	-h       Show this help text.
+	-v       Print the find command which would be used.
+	-d       List directories instead of files.
+	-f       Print files with \$HOME replaced with ~.
 	-m depth Search only to a directory depth of depth.
+	-n       Don't output a count of number of files.
+"
+printf "$helptext"
+}
+
 ftype="-type f"
 filesfile=false
 verbose=false
@@ -19,6 +34,7 @@ while getopts "dfvhm:n" opt; do
 		d) ftype="-type d" ;;
 		f) filesfile=true ;;
 		v) verbose=true ;;
+		h) usage && exit 0 ;;
 		m) maxdepth="-maxdepth $OPTARG" ;;
 		*) echoerr "Flag "$opt" not recognised."
 			exit 1
