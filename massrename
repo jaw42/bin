@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Mon 19 Jan 2015
-# Modified: Wed 21 Jan 2015
+# Modified: Fri 27 Feb 2015
 # Author:   Josh Wainwright
 # Filename: massrename
 set -o nounset
@@ -14,8 +14,9 @@ list=$(mktemp)
 orig=$(mktemp)
 ren=$(mktemp)
 
-#if [ $# -eq 0 ]; then
-if read -t 0; then
+if [ "$#" -eq 1 ]; then
+	cat "$1" | sort > $list
+elif read -t 0; then
 	cat | sort > $list
 else
 	find . -maxdepth 1 -type f | sort > $list
