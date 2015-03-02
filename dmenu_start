@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Thu 05 Feb 2015
-# Modified: Mon 09 Feb 2015
+# Modified: Sat 28 Feb 2015
 # Author:   Josh Wainwright
 # Filename: dmenu_start
 set -o nounset
@@ -15,7 +15,8 @@ homepath="/cygdrive/h/"
 list=$(${binpath}find "${progpath}" -type f -name "*.lnk")
 list="$list
 + /cygdrive/c/Windows/System32/cmd.exe
-+ /cygdrive/h/.config/cygwin/setup-x86_64.exe"
++ /cygdrive/h/.config/cygwin/setup-x86_64.exe
++ /cygdrive/c/Program Files (x86)/mp3DirectCut/mp3DirectCut.exe"
 echo "$list"
 
 prog=$(echo "$list" \
