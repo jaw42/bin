@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Mon 26 May 2014
-# Modified: Wed 21 Jan 2015
+# Modified: Mon 09 Mar 2015
 # Author:   Josh Wainwright
 # Filename: fed (Folder Encrypt Decrypt)
 set -o nounset
@@ -31,11 +31,12 @@ if [[ -d $arg ]]; then
 	echo "Encrypting"
 	trap "echo [Cleaning]; rm $arg.$tare*" SIGINT
 	gpg -e -r "Josh Wainwright" $arg.$tare
+	gpg_good=$?
 
 	rm $arg.$tare
 	if $remove; then
 		echo "Cleaning"
-		[ $? -eq 0 ] && [ -f $arg.$tare ] && rm -r $arg
+		[ $gpg_good -eq 0 ] && [ -f $arg.$tare ] && rm -r $arg
 	fi
 
 elif [[ "$arg" == *.gpg ]]; then
@@ -53,3 +54,5 @@ elif [[ -f $arg ]]; then
 else
 	>&2 echoerr "Folder does not exist"
 fi
+
+exit 0
