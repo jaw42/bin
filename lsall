@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Wed 04 Feb 2015
-# Modified: Wed 25 Feb 2015
+# Modified: Mon 09 Mar 2015
 # Author:   Josh Wainwright
 # Filename: lsall
 set -o nounset
@@ -55,7 +55,8 @@ cmd="find "$path" "$maxdepth" \
        -prune -o \
          \( \
             -path \"*/vim/tmp\" -o \
-            -path \"*/.config/cygwin\" \
+            -path \"*/.config/cygwin\" -o \
+            -path '*\$Recycle.Bin*' \
          \) \
        -prune -o \
          \( \
