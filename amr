@@ -31,6 +31,16 @@ verbose() {
 	set -u
 }
 
+countlines() {
+	local out=$(eval $@)
+	local newl=${out//[^$'\n']}
+	local numl=${#newl}
+	if ! [ -z "$out" ]; then
+		numl=$((numl + 1))
+	fi
+	printf $numl
+}
+
 usage() {
 	b="\033[4m"
 	n="\033[0m"
@@ -91,7 +101,7 @@ pull_all() {
 push_all() {
 	if $push_all; then
 		if [[ $1 -gt 0 ]]; then
-			if [[ $(git remote | wc -l) -gt 0 ]]; then
+			if [[ $(countlines git remote) -gt 0 ]]; then
 				git -c colour.push=always push 2>&1 | sed 's/^/\t/'
 				number_pushed=$((number_pushed + 1))
 			fi
@@ -207,7 +217,7 @@ for git_dir in $list; do
 	fi
 
 	echo "$git_dir"
-	number_lines=$(git status --porcelain | wc -l);
+	number_lines=$(countlines git status --porcelain)
 	if [[ $number_lines -gt 0 ]]; then
 
 		if [[ "$number_lines" != "0" ]]; then
@@ -235,7 +245,7 @@ for git_dir in $list; do
 		fi
 	fi
 
-	number_ahead=$(git log --branches --not --remotes --oneline 2> /dev/null | wc -l)
+	number_ahead=$(countlines git log --branches --not --remotes --oneline 2> /dev/null)
 	if [[ "$number_ahead" -ne 0 ]]; then
 		echo -e "\tAhead: $number_ahead"
 		git log --color=always --branches --not --remotes --oneline --decorate | sed 's/^/\t/'
