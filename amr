@@ -14,7 +14,7 @@ push_all=false
 commit=false
 list=""
 ignore=("Osaka" "plugged" "trunk" "repo_discount" "repo_parallel")
-include=("home")
+include=("home|~")
 custom_cmd=""
 cmd_always=false
 start_shell=false
@@ -65,7 +65,11 @@ echo -e "$helptext"
 }
 
 get_git_repos() {
-	if hash locate 2>/dev/null && $use_locate; then
+	if [ -e ~/.folders ]; then
+		verbose "Using .folders file to locate git repos."
+		list=$(dirname $(grep -E "\.git$" .folders))
+	elif hash locate 2>/dev/null && $use_locate; then
+		verbose "Using locate to locate git repos."
 		list=$(dirname $(locate -br '\.git$'))
 	else
 		verbose "Command locate not availible. Using find instead."
@@ -83,7 +87,6 @@ get_git_repos() {
 			list=$(grep -E $i <<< "$list")
 		done
 	fi
-
 }
 
 pull_all() {
