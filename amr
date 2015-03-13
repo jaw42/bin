@@ -225,11 +225,12 @@ for git_dir in $list; do
 	fi
 
 	echo "$git_dir"
-	number_lines=$(countlines git status --porcelain)
+	status_output=$(git -c color.status=always status --ignore-submodules --short)
+	number_lines=$(countlines -v $status_output)
 	if [[ $number_lines -gt 0 ]]; then
 
-		echo -e "\tChanged $number_lines"
-		git -c color.status=always status --ignore-submodules --short | sed 's/^/\t/'
+		printf "\tChanged %s\n" "$number_lines"
+		echo "$status_output" | sed 's/^/\t/'
 		add_nl=true
 
 		if $commit; then
