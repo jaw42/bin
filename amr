@@ -32,7 +32,12 @@ verbose() {
 }
 
 countlines() {
-	local out=$(eval $@)
+	if [ "$1" == "-v" ]; then
+		shift
+		local out="$@"
+	else
+		local out=$(eval $@)
+	fi
 	local newl=${out//[^$'\n']}
 	local numl=${#newl}
 	if ! [ -z "$out" ]; then
