@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Wed 23 Apr 2014
-# Modified: Thu 12 Mar 2015
+# Modified: Fri 13 Mar 2015
 # Author:   Josh Wainwright
 # Filename: amr (All My Repos)
 
@@ -223,11 +223,9 @@ for git_dir in $list; do
 	number_lines=$(countlines git status --porcelain)
 	if [[ $number_lines -gt 0 ]]; then
 
-		if [[ "$number_lines" != "0" ]]; then
-			echo -e "\tChanged $number_lines"
-			git -c color.status=always status --ignore-submodules --short | sed 's/^/\t/'
-			add_nl=true
-		fi
+		echo -e "\tChanged $number_lines"
+		git -c color.status=always status --ignore-submodules --short | sed 's/^/\t/'
+		add_nl=true
 
 		if $commit; then
 			git gui 2> /dev/null || zsh -i -c "gu"
@@ -250,17 +248,15 @@ for git_dir in $list; do
 
 	number_ahead=$(countlines git log --branches --not --remotes --oneline 2> /dev/null)
 	if [[ "$number_ahead" -ne 0 ]]; then
-		echo -e "\tAhead: $number_ahead"
-		git log --color=always --branches --not --remotes --oneline --decorate | sed 's/^/\t/'
+		printf "\tAhead:\n" "$number_ahead"
+		git log --color=always --branches --not --remotes --oneline | sed 's/^/\t/'
 		add_nl=true
 	fi
 
 	pull_all
 	push_all $number_ahead
 
-	if $add_nl; then
-		echo
-	fi
+	eval $add_nl && echo
 
 done <<< "$list"
 
