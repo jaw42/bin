@@ -11,7 +11,6 @@ verbose=false
 just_list=false
 pull_all=false
 push_all=false
-commit=false
 list=""
 ignore=("Osaka" "plugged" "trunk" "repo_discount" "repo_parallel")
 include=("home|~")
@@ -58,7 +57,6 @@ amr = ${b}A${n}ll ${b}M${n}y ${b}R${n}epos. Perform actions on all the repositor
 	-l         Don't perform any actions, simply ${b}l${n}ist the repos found.
 	-d         Pull ${b}d${n}own changes from remotes (git pull).
 	-u         Push ${b}u${n}p commits to remotes (git push).
-	-c         Interactively ${b}c${n}ommit local changes.
 	-x pattern E${b}x${n}clude any repos matching pattern.
 	-i pattern Only ${b}i${n}nclude repos that match pattern.
 	-r command ${b}R${n}un the command provided within every repo found that has changes.
@@ -137,7 +135,7 @@ do_summary() {
 current_dir=$(pwd)
 cd $HOME
 
-while getopts "hvlducx:i:r:sSanR" opt; do
+while getopts "hvldux:i:r:sSanR" opt; do
 	case "$opt" in
 		h)
 			usage
@@ -154,9 +152,6 @@ while getopts "hvlducx:i:r:sSanR" opt; do
 			;;
 		u)
 			push_all=true
-			;;
-		c)
-			commit=true
 			;;
 		x)
 			ignore+=("$OPTARG")
@@ -232,11 +227,6 @@ for git_dir in $list; do
 		printf "\tChanged %s\n" "$number_lines"
 		echo "$status_output" | sed 's/^/\t/'
 		add_nl=true
-
-		if $commit; then
-			git gui 2> /dev/null || zsh -i -c "gu"
-			sleep 2s
-		fi
 
 	fi
 
