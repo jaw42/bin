@@ -27,17 +27,17 @@ def run(cmd, fail=1):
 	p_status = p.wait()
 	if fail:
 		if p_status == 0:
-			return output
+			return output.decode("utf-8")
 		else:
 			raise OSError
 	else:
-		return output
+		return output.decode("utf-8")
 # end function run
 
 # function verbose
-def verbose(string):
+def verbose(pnt_str):
 	if isverbose:
-		print string
+		print(pnt_str)
 # end function verbose
 
 # function indent
@@ -77,8 +77,8 @@ def get_git_repos():
 # function pull_all
 def pull_all():
 	if ispull_all:
-		run("git fetch origin")
-		log = run("git log --color=always HEAD..origin/master --oneline")
+		run("git fetch origin", 0)
+		log = run("git log --color=always HEAD..origin/master --oneline", 0)
 		if log != "":
 			indent(log)
 			indent(run("git -c color.merge=always merge origin/master"))
