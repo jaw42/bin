@@ -89,7 +89,7 @@ def pull_all():
 # function push_all
 def push_all():
 	if ispush_all:
-		if run("git remote").replace("\n") > 0:
+		if run("git remote").count("\n") > 0:
 			indent(run("git -c color.push=always push"))
 			global number_pushed
 			number_pushed = number_pushed + 1
