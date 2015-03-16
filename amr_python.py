@@ -184,6 +184,7 @@ for git_dir in get_git_repos():
 		print("\tAhead: %s" %  (number_ahead) )
 		indent(ahead_output, 1)
 		push_all()
+		add_nl = True
 
 	pull_all()
 
