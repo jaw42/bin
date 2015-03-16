@@ -119,10 +119,10 @@ def options(argv):
 			ispush_all = True
 		elif opt in ["-x", "--ignore"]:
 			global ignore
-			ignore.add(arg)
+			ignore.append(arg)
 		elif opt in ["-i", "--include"]:
 			global include
-			include.add(arg)
+			include.append(arg)
 		elif opt in ["-r", "--run"]:
 			global custom_cmd
 			custom_cmd = arg
@@ -143,15 +143,15 @@ def options(argv):
 options(sys.argv[1:])
 
 if isverbose:
-	print "Ignore List:"
-	for ig in ignore: print "\t%s" % ig
-	print "Include List:"
-	for ig in include: print "\t%s" % ig
-	print
+	print("Ignore List:")
+	for ig in ignore: print("\t%s" % ig)
+	print("Include List:")
+	for ig in include: print("\t%s" % ig)
+	print()
 
 if just_list:
 	for git_dir in get_git_repos():
-		print git_dir
+		print(git_dir)
 	sys.exit(0)
 
 current_dir = os.getcwd()
@@ -161,14 +161,14 @@ for git_dir in get_git_repos():
 	try:
 		os.chdir(git_dir)
 	except OSError:
-		print "\033[0;31m%s: Folder not found.\033[0m" % git_dir
+		print("\033[0;31m%s: Folder not found.\033[0m" % git_dir)
 
-	print "%s" % git_dir
+	print("%s" % git_dir)
 	status_output = run("git -c color.status=always status --ignore-submodules --short")
 	number_lines = status_output.count("\n")
 
 	if number_lines > 0:
-		print "\tChanged %s" % number_lines
+		print("\tChanged %s" % number_lines)
 		indent(status_output, 1)
 		add_nl = True
 
@@ -188,11 +188,11 @@ for git_dir in get_git_repos():
 
 	pull_all()
 
-	if add_nl: print
+	if add_nl: print()
 
 if ispull_all:
-	print "Number of repos pulled: %s" % number_pulled
+	print("Number of repos pulled: %s" % number_pulled)
 if ispush_all:
-	print "Number of repos pushed: %s" % number_pushed
+	print("Number of repos pushed: %s" % number_pushed)
 
 os.chdir(current_dir)
