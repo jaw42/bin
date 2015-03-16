@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/python
 # Created:  Mon 16 Mar 2015
 # Modified: Mon 16 Mar 2015
 # Author:   Josh Wainwright
