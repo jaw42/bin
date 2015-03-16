@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Wed 23 Apr 2014
-# Modified: Fri 13 Mar 2015
+# Modified: Mon 16 Mar 2015
 # Author:   Josh Wainwright
 # Filename: amr (All My Repos)
 
@@ -242,10 +242,12 @@ for git_dir in $list; do
 		fi
 	fi
 
-	number_ahead=$(countlines git log --branches --not --remotes --oneline 2> /dev/null)
-	if [[ "$number_ahead" -ne 0 ]]; then
-		printf "\tAhead:\n" "$number_ahead"
-		git log --color=always --branches --not --remotes --oneline | sed 's/^/\t/'
+	ahead_output=$(git log --color=always --branches --not --remotes --oneline 2> /dev/null)
+	number_ahead=$(countlines -v $ahead_output)
+	if [[ "$number_ahead" -gt 0 ]]; then
+		printf "\tAhead %s\n" "$number_ahead"
+		# git log --color=always --branches --not --remotes --oneline | sed 's/^/\t/'
+		printf "$ahead_output" | sed 's/^/\t/'
 		add_nl=true
 	fi
 
