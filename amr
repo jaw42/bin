@@ -1,267 +1,198 @@
-#!/bin/bash
-# Created:  Wed 23 Apr 2014
+#!/usr/bin/python
+# Created:  Mon 16 Mar 2015
 # Modified: Mon 16 Mar 2015
 # Author:   Josh Wainwright
-# Filename: amr (All My Repos)
+# Filename: amr_python.py
 
-set -o nounset
-#set -o errexit
+import os.path
+import sys, getopt
+import subprocess
 
-verbose=false
-just_list=false
-pull_all=false
-push_all=false
-list=""
-ignore=("Osaka" "plugged" "trunk" "repo_discount" "repo_parallel")
-include=("home|~")
-custom_cmd=""
-cmd_always=false
-start_shell=false
-use_locate=true
-summary=false
-number_pulled=0
-number_pushed=0
+isverbose = False
+just_list = False
+ignore=set(["plugged", "trunk", "repo_discount", "repo_parallel"])
+include=["home"]
+ispull_all = False
+ispush_all = False
+number_pulled = 0
+number_pushed = 0
+cmd_always = False
+start_shell = False
 
-verbose() {
-	set +u
-	if $verbose; then
-		echo -e "$2" "$1"
-	fi
-	set -u
-}
+# function run
+def run(cmd, fail=1):
+	cmd = cmd.split(' ')
+	p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=False)
+	(output, err) = p.communicate()
+	p_status = p.wait()
+	if fail:
+		if p_status == 0:
+			return output.decode("utf-8")
+		else:
+			raise OSError
+	else:
+		return output.decode("utf-8")
+# end function run
 
-countlines() {
-	if [ "$1" == "-v" ]; then
-		shift
-		local out="$@"
-	else
-		local out=$(eval $@)
-	fi
-	local newl=${out//[^$'\n']}
-	local numl=${#newl}
-	if ! [ -z "$out" ]; then
-		numl=$((numl + 1))
-	fi
-	printf $numl
-}
+# function verbose
+def verbose(pnt_str):
+	if isverbose:
+		print(pnt_str)
+# end function verbose
 
-usage() {
-	b="\033[4m"
-	n="\033[0m"
-helptext="$(basename "$0") [-hvlducR] [-x pattern] [-i pattern] [-r command]
+# function indent
+def indent(var, num=1):
+	tabs = '\t' * int(num)
+	var = var.replace("\n", "\n"+tabs).rstrip()
+	print("%s%s" % (tabs, var))
 
-amr = ${b}A${n}ll ${b}M${n}y ${b}R${n}epos. Perform actions on all the repositories found on the local machine.
+# function get_git_repos
+def get_git_repos():
+	git_list = []
+	home_path = os.path.expanduser("~/")
+	if os.path.isfile(home_path + ".folders"):
+		verbose("Using .folders file to locate git repos.")
+		git_list = run("grep -E \.git$ " + home_path + ".folders", 0).split()
+	else:
+		try:
+			verbose("Using locate to locate git repos.")
+			git_list = run("locate -br \.git$").split()
+		except:
+			verbose("Command locate not availible. Using find instead.")
+			git_list = run("find " + home_path + " -name .git").split()
 
-	-h         Show this ${b}h${n}elp text.
-	-v         Be more ${b}v${n}erbose with output text.
-	-l         Don't perform any actions, simply ${b}l${n}ist the repos found.
-	-d         Pull ${b}d${n}own changes from remotes (git pull).
-	-u         Push ${b}u${n}p commits to remotes (git push).
-	-x pattern E${b}x${n}clude any repos matching pattern.
-	-i pattern Only ${b}i${n}nclude repos that match pattern.
-	-r command ${b}R${n}un the command provided within every repo found that has changes.
-	-s         Open a ${b}s${n}hell within every repo with changes.
-	-a         ${b}A${n}lways run the command or shell, even for repos without changes.
-	-R         ${b}R${n}eset the include and ignore lists to empty.
-"
-echo -e "$helptext"
-}
+	# only include each item if it doesn't match an item in ignore
+	for ig_str in ignore:
+		git_list = [ g for g in git_list if not ig_str in g ]
 
-get_git_repos() {
-	if [ -e ~/.folders ]; then
-		verbose "Using .folders file to locate git repos."
-		list=$(dirname $(grep -E "\.git$" .folders))
-	elif hash locate 2>/dev/null && $use_locate; then
-		verbose "Using locate to locate git repos."
-		list=$(dirname $(locate -br '\.git$'))
-	else
-		verbose "Command locate not availible. Using find instead."
-		list=$(find ~/ -name ".git" -exec dirname {} \; 2> /dev/null)
-	fi
+	# only include each item if it matches an item in include
+	for inc_str in include:
+		git_list = [ g for g in git_list if inc_str in g ]
 
-	if [[ ${#ignore[@]} -ne 0 ]]; then
-		for i in "${ignore[@]}"; do
-			list=$(sed "/${i}/d" <<< "$list")
-		done
-	fi
+	git_list = [ os.path.dirname(g) for g in git_list ]
 
-	if [[ ${#include[@]} -ne 0 ]]; then
-		for i in "${include[@]}"; do
-			list=$(grep -E $i <<< "$list")
-		done
-	fi
-}
+	return git_list
+# end function get_git_repos
 
-pull_all() {
-	if $pull_all; then
-		git fetch origin > /dev/null
-		local log=$(git log --color=always HEAD..origin/master --oneline)
-		if [ ! "$log" = "" ]; then
-			echo "$log" | sed 's/^/\t/'
-			git -c colour.merge=always merge origin/master | sed 's/^/\t/'
-			number_pulled=$((number_pulled + 1))
-		fi
-	fi
-}
+# function pull_all
+def pull_all():
+	if ispull_all:
+		run("git fetch origin", 0)
+		log = run("git log --color=always HEAD..origin/master --oneline", 0)
+		if log != "":
+			indent(log)
+			indent(run("git -c color.merge=always merge origin/master"))
+			global number_pulled
+			number_pulled = number_pulled + 1
+# end function pull_all
 
-push_all() {
-	if $push_all; then
-		if [[ $1 -gt 0 ]]; then
-			if [[ $(countlines git remote) -gt 0 ]]; then
-				git -c colour.push=always push 2>&1 | sed 's/^/\t/'
-				number_pushed=$((number_pushed + 1))
-			fi
-		fi
-	fi
-}
+# function push_all
+def push_all():
+	if ispush_all:
+		if run("git remote").count("\n") > 0:
+			indent(run("git -c color.push=always push"))
+			global number_pushed
+			number_pushed = number_pushed + 1
 
-do_summary() {
-	pwd
-	LOCAL=$(git rev-parse @)
-	REMOTE=$( (git ls-remote origin HEAD 2>/dev/null || echo xxx ) | cut -f1)
-	BASE=$(git merge-base @ @\{u\} 2>/dev/null || echo xxx)
+# function options
+def options(argv):
+	try:
+		opts, args = getopt.getopt(argv, "hvldux:i:r:sSaR")
+	except getopt.GetoptError:
+		usage()
+		sys.exit(0)
+	for opt, arg in opts:
+		if opt in ["-h", "--help"]:
+			usage()
+			sys.exit(0)
+		elif opt in ["-v", "--verbose"]:
+			global isverbose
+			isverbose = True
+		elif opt in ["-l", "--list"]:
+			global just_list
+			just_list = True
+		elif opt in ["-d", "--pull"]:
+			global ispull_all
+			ispull_all = True
+		elif opt in ["-u", "--push"]:
+			global ispush_all
+			ispush_all = True
+		elif opt in ["-x", "--ignore"]:
+			global ignore
+			ignore.append(arg)
+		elif opt in ["-i", "--include"]:
+			global include
+			include.append(arg)
+		elif opt in ["-r", "--run"]:
+			global custom_cmd
+			custom_cmd = arg
+		elif opt in ["-s", "--shell"]:
+			global start_shell
+			start_shell = True
+		elif opt in ["-S", "--summary"]:
+			global summary
+			summary = True
+		elif opt in ["-a", "--always"]:
+			global cmd_always
+			cmd_always = True
+		elif opt in ["-R", "--reset"]:
+			ignore = []
+			include = []
+# end function options
 
-	if [ $LOCAL = $REMOTE ]; then
-		:
-	elif [ $LOCAL = $BASE ]; then
-    	echo "Need to pull"
-	elif [ $REMOTE = $BASE ]; then
-    	echo "Need to push"
-	else
-    	echo "Diverged"
-	fi
-}
+options(sys.argv[1:])
 
-current_dir=$(pwd)
-cd $HOME
+if isverbose:
+	print("Ignore List:")
+	for ig in ignore: print("\t%s" % ig)
+	print("Include List:")
+	for ig in include: print("\t%s" % ig)
+	print()
 
-while getopts "hvldux:i:r:sSanR" opt; do
-	case "$opt" in
-		h)
-			usage
-			exit 0
-			;;
-		v)
-			verbose=true
-			;;
-		l)
-			just_list=true
-			;;
-		d)
-			pull_all=true
-			;;
-		u)
-			push_all=true
-			;;
-		x)
-			ignore+=("$OPTARG")
-			;;
-		i)
-			include+=("$OPTARG")
-			;;
-		r)
-			custom_cmd=("$OPTARG")
-			;;
-		s)
-			start_shell=true
-			;;
-		S)
-			summary=true
-			;;
-		a)
-			cmd_always=true
-			;;
-		n)
-			use_locate=false
-			;;
-		R)
-			ignore=()
-			include=()
-			;;
-		*)
-			echo "Flag \"$opt\" not recognised."
-			exit 0
-			;;
-	esac
-done
-shift $((OPTIND-1))
+if just_list:
+	for git_dir in get_git_repos():
+		print(git_dir)
+	sys.exit(0)
 
-#### Start script ####
+current_dir = os.getcwd()
 
-get_git_repos
+for git_dir in get_git_repos():
+	add_nl = False
+	try:
+		os.chdir(git_dir)
+	except OSError:
+		print("\033[0;31m%s: Folder not found.\033[0m" % git_dir)
 
-if $verbose; then
-	echo "Ignore List:"
-	printf -- '\t%s\n' "${ignore[@]-}"
-	echo "Include List:"
-	printf -- '\t%s\n' "${include[@]-}"
-	echo
-fi
+	print("%s" % git_dir)
+	status_output = run("git -c color.status=always status --ignore-submodules --short")
+	number_lines = status_output.count("\n")
 
-if $just_list; then
-	echo "$list"
-	exit 0
-fi
+	if number_lines > 0:
+		print("\tChanged %s" % number_lines)
+		indent(status_output, 1)
+		add_nl = True
 
-# while read -r git_dir; do
-TTY=$(tty)
-for git_dir in $list; do
+	# custom command
+	# start shall
+	if start_shell:
+		if number_lines != 0 or cmd_always:
+			subprocess.call(['zsh', '-i'])
 
-	add_nl=false
-	cd "$git_dir" 2>/dev/null
-	if [ $? -ne 0 ]; then
-		printf '\033[0;31m%s: Folder not found\033[0m\n' "$git_dir"
-		continue
-	fi
+	ahead_output = run("git log --color=always --branches --not --remotes --oneline")
+	number_ahead = ahead_output.count("\n")
+	if number_ahead > 0:
+		print("\tAhead: %s" %  (number_ahead) )
+		indent(ahead_output, 1)
+		push_all()
+		add_nl = True
 
-	if $summary; then
-		do_summary
-		continue
-	fi
+	pull_all()
 
-	echo "$git_dir"
-	status_output=$(git -c color.status=always status --ignore-submodules --short)
-	number_lines=$(countlines -v $status_output)
-	if [[ $number_lines -gt 0 ]]; then
+	if add_nl: print()
 
-		printf "\tChanged %s\n" "$number_lines"
-		echo "$status_output" | sed 's/^/\t/'
-		add_nl=true
+if ispull_all:
+	print("Number of repos pulled: %s" % number_pulled)
+if ispush_all:
+	print("Number of repos pushed: %s" % number_pushed)
 
-	fi
-
-	if [[ "x$custom_cmd" != "x" ]]; then
-		if [[ "$number_lines" != "0" ]] || $cmd_always; then
-			eval "$custom_cmd" | sed 's/^/\t\t/'
-		fi
-	fi
-
-	if $start_shell; then
-		if [[ "$number_lines" != "0" ]] || $cmd_always; then
-			eval "$SHELL -i" < $TTY > $TTY
-		fi
-	fi
-
-	ahead_output=$(git log --color=always --branches --not --remotes --oneline 2> /dev/null)
-	number_ahead=$(countlines -v $ahead_output)
-	if [[ "$number_ahead" -gt 0 ]]; then
-		printf "\tAhead %s\n" "$number_ahead"
-		# git log --color=always --branches --not --remotes --oneline | sed 's/^/\t/'
-		printf "$ahead_output" | sed 's/^/\t/'
-		add_nl=true
-	fi
-
-	pull_all
-	push_all $number_ahead
-
-	eval $add_nl && echo
-
-done <<< "$list"
-
-if $pull_all; then
-	echo "Number of repos pulled: $number_pulled"
-fi
-if $push_all; then
-	echo "Number of repos pushed: $number_pushed"
-fi
-cd "$current_dir"
+os.chdir(current_dir)
