@@ -137,6 +137,29 @@ def options(argv):
 			include = []
 # end function options
 
+# function usage
+def usage():
+	b = "\033[4m"
+	n = "\033[0m"
+helptext = """amr [-hvlducR] [-x pattern] [-i pattern] [-r command]
+
+amr = All My Repos. Perform actions on all the repositories found on the local machine.
+
+	-h         Show this help text.
+	-v         Be more verbose with output text.
+	-l         Don't perform any actions, simply list the repos found.
+	-d         Pull down changes from remotes (git pull).
+	-u         Push up commits to remotes (git push).
+	-x pattern Exclude any repos matching pattern.
+	-i pattern Only include repos that match pattern.
+	-r command Run the command provided within every repo found that has changes.
+	-s         Open a shell within every repo with changes.
+	-a         Always run the command or shell, even for repos without changes.
+	-R         Reset the include and ignore lists to empty.
+"""
+print helptext
+# end function usage
+
 options(sys.argv[1:])
 
 if isverbose:
