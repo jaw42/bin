@@ -89,7 +89,7 @@ def pull_all():
 # function push_all
 def push_all():
 	if ispush_all:
-		if run("git remote").replace("\n") > 0:
+		if run("git remote").count("\n") > 0:
 			indent(run("git -c color.push=always push"))
 			global number_pushed
 			number_pushed = number_pushed + 1
@@ -123,9 +123,6 @@ def options(argv):
 		elif opt in ["-i", "--include"]:
 			global include
 			include.add(arg)
-		elif opt in ["-r", "--run"]:
-			global custom_cmd
-			custom_cmd = arg
 		elif opt in ["-s", "--shell"]:
 			global start_shell
 			start_shell = True
@@ -172,8 +169,6 @@ for git_dir in get_git_repos():
 		indent(status_output, 1)
 		add_nl = True
 
-	# custom command
-	# start shall
 	if start_shell:
 		if number_lines != 0 or cmd_always:
 			subprocess.call(['zsh', '-i'])
