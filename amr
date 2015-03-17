@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # Created:  Mon 16 Mar 2015
-# Modified: Mon 16 Mar 2015
+# Modified: Tue 17 Mar 2015
 # Author:   Josh Wainwright
 # Filename: amr_python.py
 
@@ -18,6 +18,7 @@ number_pulled = 0
 number_pushed = 0
 cmd_always = False
 start_shell = False
+custom_cmd = ""
 
 # function run
 def run(cmd, fail=1):
@@ -140,6 +141,29 @@ def options(argv):
 			include = []
 # end function options
 
+# function usage
+def usage():
+	b = "\033[4m"
+	n = "\033[0m"
+	helptext = """amr [-hvlducR] [-x pattern] [-i pattern] [-r command]
+	
+amr = All My Repos. Perform actions on all the repositories found on the local machine.
+
+	-h         Show this help text.
+	-v         Be more verbose with output text.
+	-l         Don't perform any actions, simply list the repos found.
+	-d         Pull down changes from remotes (git pull).
+	-u         Push up commits to remotes (git push).
+	-x pattern Exclude any repos matching pattern.
+	-i pattern Only include repos that match pattern.
+	-r command Run the command provided within every repo found that has changes.
+	-s         Open a shell within every repo with changes.
+	-a         Always run the command or shell, even for repos without changes.
+	-R         Reset the include and ignore lists to empty.
+"""
+	print helptext
+# end function usage
+
 options(sys.argv[1:])
 
 if isverbose:
@@ -147,7 +171,7 @@ if isverbose:
 	for ig in ignore: print("\t%s" % ig)
 	print("Include List:")
 	for ig in include: print("\t%s" % ig)
-	print()
+	print("")
 
 if just_list:
 	for git_dir in get_git_repos():
@@ -172,8 +196,10 @@ for git_dir in get_git_repos():
 		indent(status_output, 1)
 		add_nl = True
 
-	# custom command
-	# start shall
+	if custom_cmd != "":
+		if number_lines != 0 or cmd_always:
+			subprocess.call(custom_cmd.split())
+
 	if start_shell:
 		if number_lines != 0 or cmd_always:
 			subprocess.call(['zsh', '-i'])
@@ -188,7 +214,7 @@ for git_dir in get_git_repos():
 
 	pull_all()
 
-	if add_nl: print()
+	if add_nl: print("")
 
 if ispull_all:
 	print("Number of repos pulled: %s" % number_pulled)
