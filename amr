@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # Created:  Mon 16 Mar 2015
-# Modified: Tue 17 Mar 2015
+# Modified: Wed 18 Mar 2015
 # Author:   Josh Wainwright
 # Filename: amr_python.py
 
@@ -10,7 +10,7 @@ import subprocess
 
 isverbose = False
 just_list = False
-ignore=set(["plugged", "trunk", "repo_discount", "repo_parallel"])
+ignore=set(["Osaka", "plugged", "trunk", "repo_discount", "repo_parallel"])
 include=["home"]
 ispull_all = False
 ispush_all = False
