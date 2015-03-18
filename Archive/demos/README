@@ -1,0 +1,80 @@
+Demos
+=====
+Here are a number of demo scripts that show interesting behaviour or
+demonstrate some purpose. Often they show the difference in performance or time
+for different methods of doing the same thing.
+
+`shell_true_false.py`
+---------------------
+
+	Python can start an external command using the `subprocess.Popen(...)`
+	command. This takes an optional argument `shell` which is either `True` or
+	`False`.
+
+	When true, the shell is used to run the command, ie `sh -c cmd`, when
+	false, the command is run directly but the command must be passed as a list
+	with the command name itself as the first element and arguments after.
+
+	This script shows the effect of shell being true vs false.
+
+	**Linux**
+	```
+	Shell is True
+	99
+	Average time: 0.00100619530678
+	Shell is False
+	99
+	Average time: 0.00113763618469
+	```
+
+	**Cygwin**
+	```
+	Shell is True
+	99
+	Average time: 0.0242535800934
+	Shell is False
+	99
+	Average time: 0.0195034759045
+	```
+
+	Interestingly, `shell=True` takes a shorter time under Linux, but a longer
+	time under cygwin.
+
+`builtin_extern.sh`
+-------------------
+
+	This script compares the effect of using bash builtin string manipulation
+	vs using calls to external programs. This is primarily aimed at showing the
+	effect of calling many external programs when running under cygwin since
+	the overhead of `fork()`ing there is much higher.
+
+	The script counts the number of newlines in a string, first by replacing
+	everything not a newline with nothing then counting the number of
+	characters and second by piping the string to `wc -l`.
+
+	**Linux**
+	```
+	1000 : 6
+	real    0m0.125s
+	user    0m0.040s
+	sys     0m0.008s
+	1000 : 6
+	real    0m1.853s
+	user    0m0.048s
+	sys     0m0.064s
+	```
+
+	**Cygwin**
+	```
+	1000 : 6
+	real    0m0.076s
+	user    0m0.062s
+	sys     0m0.000s
+	1000 : 6
+	real    0m43.631s
+	user    0m6.101s
+	sys     0m16.383s
+	```
+
+	The difference between builtin vs external calls is much smaller under
+	Linux, but is still noticable.

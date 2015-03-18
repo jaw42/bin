@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Thu 12 Mar 2015
-# Modified: Fri 13 Mar 2015
+# Modified: Wed 18 Mar 2015
 # Author:   Josh Wainwright
 # Filename: testingcygwin.sh
 
@@ -25,13 +25,13 @@ for i in {1..1000}; do
 	if ! [ -z "$var" ]; then
 		res=$((res + 1))
 	fi
-	printf "%s " "${res}"
+	printf "%-5s: %s\r" "$i" "${res}"
 done
 )
 
 time (
 for i in {1..1000}; do
 	res="$(echo "$var" | wc -l)"
-	printf "%s " "${res}"
+	printf "%-5s: %s\r" "$i" "${res}"
 done
 )
