@@ -146,7 +146,7 @@ def usage():
 	b = "\033[4m"
 	n = "\033[0m"
 	helptext = """amr [-hvlducR] [-x pattern] [-i pattern] [-r command]
-	
+
 amr = All My Repos. Perform actions on all the repositories found on the local machine.
 
 	-h         Show this help text.
@@ -161,7 +161,7 @@ amr = All My Repos. Perform actions on all the repositories found on the local m
 	-a         Always run the command or shell, even for repos without changes.
 	-R         Reset the include and ignore lists to empty.
 """
-	print helptext
+	print(helptext)
 # end function usage
 
 options(sys.argv[1:])
