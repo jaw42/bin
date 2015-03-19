@@ -6,7 +6,7 @@
 
 import os.path
 import sys, getopt
-import subprocess
+from subprocess import PIPE, STDOUT, Popen, call
 
 isverbose = False
 just_list = False
@@ -23,7 +23,7 @@ custom_cmd = ""
 # function run
 def run(cmd, fail=1):
 	cmd = cmd.split(' ')
-	p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=False)
+	p = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=False)
 	(output, err) = p.communicate()
 	p_status = p.wait()
 	if fail:
@@ -198,11 +198,11 @@ for git_dir in get_git_repos():
 
 	if custom_cmd != "":
 		if number_lines != 0 or cmd_always:
-			subprocess.call(custom_cmd.split())
+			call(custom_cmd.split())
 
 	if start_shell:
 		if number_lines != 0 or cmd_always:
-			subprocess.call(['zsh', '-i'])
+			call(['zsh', '-i'])
 
 	ahead_output = run("git log --color=always --branches --not --remotes --oneline")
 	number_ahead = ahead_output.count("\n")
