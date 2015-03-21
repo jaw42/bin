@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Wed 04 Feb 2015
-# Modified: Fri 13 Mar 2015
+# Modified: Sat 21 Mar 2015
 # Author:   Josh Wainwright
 # Filename: lsall
 set -o nounset
@@ -10,10 +10,10 @@ function echoerr() {
 }
 
 function usage() {
-helptext="$(basename $0) [-dfvh] [-m depth]
+helptext="$(basename $0) [-dfvh] [-m depth] [DIR]
 
-lsall = List All. List all files or directories under the current location,
-ignoring common version control specific files.
+lsall = List All. List all files or directories under the current location, or
+the location specified by DIR, ignoring common version control specific files.
 
 	-h       Show this help text.
 	-v       Print the find command which would be used.
