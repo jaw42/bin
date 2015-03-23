@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # Created:  Mon 16 Mar 2015
-# Modified: Wed 18 Mar 2015
+# Modified: Mon 23 Mar 2015
 # Author:   Josh Wainwright
 # Filename: amr_python.py
 
@@ -83,8 +83,8 @@ def pull_all():
 		if log != "":
 			indent(log)
 			indent(run("git -c color.merge=always merge origin/master"))
-			global number_pulled
-			number_pulled = number_pulled + 1
+			return 1
+	return 0
 # end function pull_all
 
 # function push_all
@@ -92,8 +92,8 @@ def push_all():
 	if ispush_all:
 		if run("git remote").count("\n") > 0:
 			indent(run("git -c color.push=always push"))
-			global number_pushed
-			number_pushed = number_pushed + 1
+			return 1
+	return 0
 
 # function options
 def options(argv):
@@ -209,10 +209,11 @@ for git_dir in get_git_repos():
 	if number_ahead > 0:
 		print("\tAhead: %s" %  (number_ahead) )
 		indent(ahead_output, 1)
-		push_all()
+		number_pushed += push_all()
 		add_nl = True
 
-	pull_all()
+	number_pulled += pull_all()
+	if number_pulled > 0: add_nl = True
 
 	if add_nl: print("")
 
