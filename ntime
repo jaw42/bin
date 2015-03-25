@@ -1,0 +1,33 @@
+#!/bin/bash
+# Created:  Tue 24 Mar 2015
+# Modified: Tue 24 Mar 2015
+# Author:   Josh Wainwright
+# Filename: ntime
+
+set -o nounset
+function echoerr() {
+	>&2 echo $@
+}
+
+num=10
+cmd=""
+
+if [ $# -gt 1 ]; then
+	num="$1"
+	shift
+	cmd="$@"
+else
+	echoerr "Wrong number of args"
+	exit 1
+fi
+
+start_t=$(date +%s%3N)
+
+for ((i=1;i<=num;i++)); do
+	eval "$cmd"
+done
+
+end_t=$(date +%s%3N)
+
+av_t=$(echo "scale=5; ($end_t - $start_t)/$num" | bc -l )
+>&2 printf "Av time: %s ms\n" "$av_t"
