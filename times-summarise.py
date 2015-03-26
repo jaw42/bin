@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Created:  Thu 19 Mar 2015
-# Modified: Wed 25 Mar 2015
+# Modified: Thu 26 Mar 2015
 # Author:   Josh Wainwright
 # Filename: times-summarise.py
 
@@ -85,6 +85,9 @@ def s2h(a):
 def updatefile():
 	lnum = 0
 	for line in lines:
+		printexisting = True
+		if line.startswith('#:') and printexisting: print(line.rstrip())
+
 		if line == '\n': pass
 		elif line.startswith('#: Range'   ) : line = '#: ' + strav[0] + '\n'
 		elif line.startswith('#: Day'     ) : line = '#: ' + strav[1] + '\n'
@@ -134,9 +137,10 @@ strav.append("Hours D  " + av[5].rjust(8))
 strav.append("Hours W  " + av[6].rjust(8))
 strav.append("Hours L  " + av[7].rjust(8))
 
-for i in range(0, 6):
-	print(strav[i])
-
-print("Sal w/d/h %7.2f / %.2f / %.2f" % (sal_week, sal_day, sal_hour))
-
 updatefile()
+print("")
+
+for i in range(0, 6):
+	print("  " + strav[i])
+
+print("  Sal w/d/h %7.2f / %.2f / %.2f" % (sal_week, sal_day, sal_hour))
