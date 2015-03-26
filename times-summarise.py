@@ -14,15 +14,16 @@ def loop():
 	t_total  = [0] * 5
 	t_length = [0] * 5
 	lnum = 0
-	prevday = '01'
+	prevmonth = '01'
 	for line in lines:
 		if line == '\n' or line.startswith('#'): continue
 
 		lnum += 1
 		cols = line.split(', ')
-		day = cols[0][4:6]
+		month = cols[0][4:6]
 		year = cols[0][:4]
 		if day != prevday:
+		if month != prevmonth:
 			global addedlines
 			length = [ l+1 if l==0 else l for l in length ]
 			addedlines.append([lnum, "## " + str(length[1]).rjust(2) + " " +\
@@ -32,8 +33,7 @@ def loop():
 					secs2ts(total[4]/length[4])])
 			total  = [0] * 5
 			length = [0] * 5
-		prevday = day
-		print(day + " " + str(t_length) + " " + str(t_total))
+		prevmonth = month
 
 		for i in range(1,5):
 			try:
