@@ -22,7 +22,6 @@ def loop():
 		cols = line.split(', ')
 		month = cols[0][4:6]
 		year = cols[0][:4]
-		if day != prevday:
 		if month != prevmonth:
 			global addedlines
 			length = [ l+1 if l==0 else l for l in length ]
@@ -59,13 +58,12 @@ def updatefile():
 	lnum = 0
 	for line in lines:
 		if line == '\n': pass
-		elif line.startswith('#: Day Range'  ) : line = '#: ' + strav[0] + '\n'
-		elif line.startswith('#: Arrive'     ) : line = '#: ' + strav[1] + '\n'
-		elif line.startswith('#: Lunch Start') : line = '#: ' + strav[2] + '\n'
-		elif line.startswith('#: Lunch End'  ) : line = '#: ' + strav[3] + '\n'
-		elif line.startswith('#: Leave'      ) : line = '#: ' + strav[4] + '\n'
-		elif line.startswith('#: Working Day') : line = '#: ' + strav[5] + '\n'
-		elif line.startswith('#: Lunch Break') : line = '#: ' + strav[6] + '\n'
+		elif line.startswith('#: Range'   ) : line = '#: ' + strav[0] + '\n'
+		elif line.startswith('#: Day'     ) : line = '#: ' + strav[1] + '\n'
+		elif line.startswith('#: Lunch'   ) : line = '#: ' + strav[2] + '\n'
+		elif line.startswith('#: Hours D' ) : line = '#: ' + strav[3] + '\n'
+		elif line.startswith('#: Hours W' ) : line = '#: ' + strav[4] + '\n'
+		elif line.startswith('#: Hours L' ) : line = '#: ' + strav[5] + '\n'
 		elif line.startswith('## '): continue
 		elif line.startswith('#'): pass
 		else:
@@ -87,20 +85,23 @@ writefile = open('times.txt.tmp', 'w')
 lines = readfile.readlines()
 addedlines = []
 
-av = loop()
-av.append(secs2ts(av[4] - av[1])[-7:])
-av.append(secs2ts(av[3] - av[2])[-5:])
+av = loop()                            # 0-4
+av.append(secs2ts(av[4] - av[1])[-7:]) # 5
+av.append(secs2ts((av[4]-av[1])*5))    # 6
+av.append(secs2ts(av[3] - av[2])[-5:]) # 7
+
+for i in range(1,5):
+	av[i] = secs2ts(av[i])
 
 strav = []
-strav.append("Day Range   " +     str(av[0]).rjust(10))
-strav.append("Arrive      " + secs2ts(av[1]).rjust(10))
-strav.append("Lunch Start " + secs2ts(av[2]).rjust(10))
-strav.append("Lunch End   " + secs2ts(av[3]).rjust(10))
-strav.append("Leave       " + secs2ts(av[4]).rjust(10))
-strav.append("Working Day " +          av[5].rjust(10))
-strav.append("Lunch Break " +          av[6].rjust(10))
+strav.append("Range    " + str(av[0]).rjust(8))
+strav.append("Day      " + av[1].rjust(8) + " -> " + av[4].rjust(8))
+strav.append("Lunch    " + av[2].rjust(8) + " -> " + av[3].rjust(8))
+strav.append("Hours D  " + av[5].rjust(8))
+strav.append("Hours W  " + av[6].rjust(8))
+strav.append("Hours L  " + av[7].rjust(8))
 
-for i in range(0, 7):
+for i in range(0, 6):
 	print(strav[i])
 
 updatefile()
