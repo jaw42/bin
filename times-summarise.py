@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 # Created:  Thu 19 Mar 2015
-# Modified: Mon 23 Mar 2015
+# Modified: Wed 25 Mar 2015
 # Author:   Josh Wainwright
 # Filename: times-summarise.py
 
 import os
 from os.path import expanduser
 
+# The main loop, goes through data file and keeps a total of each column.
 def loop():
+
+	# Initialise arrays to empty
 	retval   = []
 	total    = [0] * 5
 	length   = [0] * 5
@@ -16,24 +19,41 @@ def loop():
 	lnum = 0
 	prevmonth = '01'
 	for line in lines:
+
+		# Reading the file results in lines that only contain newline
+		# ignore these and comments.
 		if line == '\n' or line.startswith('#'): continue
 
 		lnum += 1
+
+		# Columns are: Date | day start | lunch start | lunch end | day end
 		cols = line.split(', ')
 		month = cols[0][4:6]
 		year = cols[0][:4]
+
+		# The cur and prev value will be different if the month changed
 		if month != prevmonth:
 			global addedlines
+
+			# For array increase 0 to 1 to avoid div by 0 errors.
 			length = [ l+1 if l==0 else l for l in length ]
+
+			# Keep an array of lines that will be added at the end of each
+			# month. Referenced with the line number of non comments only.
 			addedlines.append([lnum, "## " + str(length[1]).rjust(2) + " " +\
 					secs2ts(total[1]/length[1]) + ", " + \
 					secs2ts(total[2]/length[2]) + ", " + \
 					secs2ts(total[3]/length[3]) + ", " + \
 					secs2ts(total[4]/length[4])])
+
+			# Reset values ready for the following month.
 			total  = [0] * 5
 			length = [0] * 5
 		prevmonth = month
 
+		# For each of the columns, except date, increment the totals.
+		# Try since the last line is likely not finished so there will be fewer
+		# columns in that line, hence an IndexError
 		for i in range(1,5):
 			try:
 				ts = cols[i]
@@ -43,19 +63,25 @@ def loop():
 				t_length[i] += 1
 			except: IndexError
 
+	# Return value - contains the information. First value
 	retval.append(t_length[1])
 	for i in range(1,5):
 		retval.append(t_total[i] / t_length[i])
 	return retval
 
+# Convert a number of seconds to timestamp format HH:MM:SS.
 def secs2ts(s):
 	return '{:0>2}:{:0>2}:{:0>2}'.format(s/3600, (s%3600)/60, s%60)
 
+# Convert a timestamp format HHMMSS to a number of seconds.
 def str2secs(a):
 	return int(a[0:2])*3600 + int(a[2:4])*60 + int(a[4:6])
 
+# Convert a number of seconds to a number of hours.
 def s2h(a):
 	return a * 0.000278
+
+# Write the results back to the file.
 def updatefile():
 	lnum = 0
 	for line in lines:
