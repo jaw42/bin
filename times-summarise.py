@@ -54,6 +54,8 @@ def secs2ts(s):
 def str2secs(a):
 	return int(a[0:2])*3600 + int(a[2:4])*60 + int(a[4:6])
 
+def s2h(a):
+	return a * 0.000278
 def updatefile():
 	lnum = 0
 	for line in lines:
@@ -90,6 +92,11 @@ av.append(secs2ts(av[4] - av[1])[-7:]) # 5
 av.append(secs2ts((av[4]-av[1])*5))    # 6
 av.append(secs2ts(av[3] - av[2])[-5:]) # 7
 
+sal_year = 26000
+sal_week = sal_year / (52-5)
+sal_day = sal_week / 5
+sal_hour = sal_day / s2h(av[4] - av[1])
+
 for i in range(1,5):
 	av[i] = secs2ts(av[i])
 
@@ -103,5 +110,7 @@ strav.append("Hours L  " + av[7].rjust(8))
 
 for i in range(0, 6):
 	print(strav[i])
+
+print("Sal w/d/h %7.2f / %.2f / %.2f" % (sal_week, sal_day, sal_hour))
 
 updatefile()
