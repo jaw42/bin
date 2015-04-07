@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # Created:  Mon 16 Mar 2015
-# Modified: Mon 23 Mar 2015
+# Modified: Tue 07 Apr 2015
 # Author:   Josh Wainwright
 # Filename: amr_python.py
 
@@ -8,17 +8,19 @@ import os.path
 import sys, getopt
 from subprocess import PIPE, STDOUT, Popen, call
 
-isverbose = False
-just_list = False
-ignore=set(["Osaka", "plugged", "trunk", "repo_discount", "repo_parallel"])
-include=["home"]
-ispull_all = False
-ispush_all = False
+isverbose     = False
+just_list     = False
+ignore        = set(["Osaka", "plugged", "trunk", "repo_discount", "repo_parallel"])
+include       = ["home"]
+ispull_all    = False
+ispush_all    = False
 number_pulled = 0
+repos_pulled  = []
 number_pushed = 0
-cmd_always = False
-start_shell = False
-custom_cmd = ""
+repos_pushed  = []
+cmd_always    = False
+start_shell   = False
+custom_cmd    = ""
 
 # function run
 def run(cmd, fail=1):
@@ -214,15 +216,21 @@ for git_dir in get_git_repos():
 		indent(ahead_output, 1)
 		number_pushed += push_all()
 		add_nl = True
+		repos_pushed.append(git_dir)
 
-	number_pulled += pull_all()
-	if number_pulled > 0: add_nl = True
+	num_pulled_cur = pull_all()
+	number_pulled += num_pulled_cur
+	if num_pulled_cur > 0:
+		add_nl = True
+		repos_pulled.append(git_dir)
 
 	if add_nl: print("")
 
 if ispull_all:
 	print("Number of repos pulled: %s" % number_pulled)
+	for p in repos_pulled: print('\t' + p)
 if ispush_all:
 	print("Number of repos pushed: %s" % number_pushed)
+	for p in repos_pushed: print('\t' + p)
 
 os.chdir(current_dir)
