@@ -116,9 +116,11 @@ def options(argv):
 		elif opt in ["-d", "--pull"]:
 			global ispull_all
 			ispull_all = True
+			just_list = False
 		elif opt in ["-u", "--push"]:
 			global ispush_all
 			ispush_all = True
+			just_list = False
 		elif opt in ["-x", "--ignore"]:
 			global ignore
 			ignore.append(arg)
