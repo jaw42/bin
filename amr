@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # Created:  Mon 16 Mar 2015
-# Modified: Tue 07 Apr 2015
+# Modified: Thu 09 Apr 2015
 # Author:   Josh Wainwright
 # Filename: amr_python.py
 
@@ -227,10 +227,10 @@ for git_dir in get_git_repos():
 	if add_nl: print("")
 
 if ispull_all:
-	print("Number of repos pulled: %s" % number_pulled)
+	print("%s repos pulled:" % number_pulled)
 	for p in repos_pulled: print('\t' + p)
 if ispush_all:
-	print("Number of repos pushed: %s" % number_pushed)
+	print("%s repos pushed:" % number_pushed)
 	for p in repos_pushed: print('\t' + p)
 
 os.chdir(current_dir)

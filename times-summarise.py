@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # Created:  Thu 19 Mar 2015
-# Modified: Fri 27 Mar 2015
+# Modified: Thu 09 Apr 2015
 # Author:   Josh Wainwright
 # Filename: times-summarise.py
 
 import os
+import time
 from os.path import expanduser
 
 # The main loop, goes through data file and keeps a total of each column.
@@ -89,13 +90,14 @@ def updatefile():
 		if line.startswith('#:') and printexisting: print(line.rstrip())
 
 		if line == '\n': pass
-		elif line.startswith('#: Range'     ) : line = '#: ' + strav[0] + '\n'
-		elif line.startswith('#: Day'       ) : line = '#: ' + strav[1] + '\n'
-		elif line.startswith('#: Lunch'     ) : line = '#: ' + strav[2] + '\n'
-		elif line.startswith('#: Hours D'   ) : line = '#: ' + strav[3] + '\n'
-		elif line.startswith('#: Hours W'   ) : line = '#: ' + strav[4] + '\n'
-		elif line.startswith('#: Hours L'   ) : line = '#: ' + strav[5] + '\n'
-		elif line.startswith('#: Sal w/d/h' ) : line = '#: ' + strav[6] + '\n'
+		elif line.startswith('#: Date'      ) : line = '#: ' + strav[0] + '\n'
+		elif line.startswith('#: Range'     ) : line = '#: ' + strav[1] + '\n'
+		elif line.startswith('#: Day'       ) : line = '#: ' + strav[2] + '\n'
+		elif line.startswith('#: Lunch'     ) : line = '#: ' + strav[3] + '\n'
+		elif line.startswith('#: Hours D'   ) : line = '#: ' + strav[4] + '\n'
+		elif line.startswith('#: Hours W'   ) : line = '#: ' + strav[5] + '\n'
+		elif line.startswith('#: Hours L'   ) : line = '#: ' + strav[6] + '\n'
+		elif line.startswith('#: Sal w/d/h' ) : line = '#: ' + strav[7] + '\n'
 		elif line.startswith('## '): continue
 		elif line.startswith('#'): pass
 		else:
@@ -131,6 +133,7 @@ for i in range(1,5):
 	av[i] = secs2ts(av[i])
 
 strav = []
+strav.append("Date   " + time.strftime("%Y-%m-%d"))
 strav.append("Range    " + str(av[0]).rjust(8))
 strav.append("Day      " + av[1] + " -> " + av[4])
 strav.append("Lunch    " + av[2] + " -> " + av[3])
@@ -142,5 +145,5 @@ strav.append("Sal w/d/h {:7.2f} / {:.2f} / {:.2f}".format(sal_week, sal_day, sal
 updatefile()
 print("")
 
-for i in range(0, 7):
+for i in range(0, 8):
 	print("  " + strav[i])
