@@ -5,12 +5,15 @@
 # Filename: amr_python.py
 
 import os.path
-import sys, getopt, time
+import sys
+import getopt
+import time
 from subprocess import PIPE, STDOUT, Popen, call
 
 isverbose       = False
 just_list       = False
-ignore          = set(["Osaka", "plugged", "trunk", "repo_discount", "repo_parallel"])
+ignore          = set(["Osaka", "plugged", "trunk", "repo_discount",
+                       "repo_parallel"])
 include         = []
 ispull_all      = False
 ispush_all      = False
@@ -61,7 +64,7 @@ def get_git_repos():
 		verbose("Using .folders file to locate git repos.")
 		moddays = (time.time() - os.path.getmtime(folders)) / (60*60*24)
 		if moddays > 8:
-			print("Database is more than 8 days old (actual age is %s days)" \
+			print("Database is more than 8 days old (actual age is %s days)"
 					% int(moddays))
 		git_list = run("grep -E \.git$ " + folders).output.split()
 	else:
@@ -74,7 +77,7 @@ def get_git_repos():
 
 	# only include each item if it doesn't match an item in ignore
 	for ig_str in ignore:
-		git_list = [ g for g in git_list if not ig_str in g ]
+		git_list = [ g for g in git_list if ig_str not in g ]
 
 	# only include each item if it matches an item in include
 	for inc_str in include:
@@ -228,7 +231,7 @@ for git_dir in get_git_repos():
 	ahead_output = run(log_cmd).output
 	number_ahead = ahead_output.count("\n")
 	if number_ahead > 0:
-		print("\tAhead: %s" %  (number_ahead) )
+		print("\tAhead: %s" % (number_ahead) )
 		indent(ahead_output)
 		if push_all() > 0:
 			add_nl = True

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Created:  Thu 19 Mar 2015
-# Modified: Thu 09 Apr 2015
+# Modified: Fri 10 Apr 2015
 # Author:   Josh Wainwright
 # Filename: times-summarise.py
 
@@ -41,11 +41,11 @@ def loop():
 
 			# Keep an array of lines that will be added at the end of each
 			# month. Referenced with the line number of non comments only.
-			addedlines.append([lnum, "## " + str(length[1]).rjust(2) + " " +\
-					secs2ts(total[1]/length[1]) + ", " + \
-					secs2ts(total[2]/length[2]) + ", " + \
-					secs2ts(total[3]/length[3]) + ", " + \
-					secs2ts(total[4]/length[4])])
+			addedlines.append([lnum, "## " + str(length[1]).rjust(2) + " " +
+								secs2ts(total[1]/length[1]) + ", " +
+								secs2ts(total[2]/length[2]) + ", " +
+								secs2ts(total[3]/length[3]) + ", " +
+								secs2ts(total[4]/length[4])])
 
 			# Reset values ready for the following month.
 			total  = [0] * 5
@@ -55,7 +55,7 @@ def loop():
 		# For each of the columns, except date, increment the totals.
 		# Try since the last line is likely not finished so there will be fewer
 		# columns in that line, hence an IndexError
-		for i in range(1,5):
+		for i in range(1, 5):
 			try:
 				ts = cols[i]
 				total[i]    += int(str2secs(ts))
@@ -66,7 +66,7 @@ def loop():
 
 	# Return value - contains the information. First value
 	retval.append(t_length[1])
-	for i in range(1,5):
+	for i in range(1, 5):
 		retval.append(t_total[i] / t_length[i])
 	return retval
 
@@ -129,7 +129,7 @@ sal_week = sal_year / (52-5)
 sal_day = sal_week / 5
 sal_hour = sal_day / s2h(av[4] - av[1])
 
-for i in range(1,5):
+for i in range(1, 5):
 	av[i] = secs2ts(av[i])
 
 strav = []
@@ -140,7 +140,8 @@ strav.append("Lunch    " + av[2] + " -> " + av[3])
 strav.append("Hours D  " + av[5].rjust(8))
 strav.append("Hours W  " + av[6])
 strav.append("Hours L  " + av[7].rjust(8))
-strav.append("Sal w/d/h {:7.2f} / {:.2f} / {:.2f}".format(sal_week, sal_day, sal_hour))
+strav.append("Sal w/d/h {:7.2f} / {:.2f} / {:.2f}".
+				format(sal_week, sal_day, sal_hour))
 
 updatefile()
 print("")
