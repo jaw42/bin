@@ -1,13 +1,17 @@
 #!/bin/bash
 # Created:  Fri 13 Feb 2015
-# Modified: Fri 13 Feb 2015
+# Modified: Fri 10 Apr 2015
 # Author:   Josh Wainwright
 # Filename: md.sh
 
 # Configuration for building  markdown (Discount)
 # ./configure.sh --enable-all-features --with-tabstops=4 --with-fenced-code --with-dl=Both --with-id-anchor
 
-hash markdown 2>&1 > /dev/null || exit 1
+exists() {
+	command -v "$@" > /dev/null
+}
+
+exists markdown || exit 1
 
 mdfile="$1"
 cssfile="${2:-}"

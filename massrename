@@ -10,6 +10,10 @@ function escape_spaces() {
 	sed -i -e 's/^/"/' -e 's/$/"/g' $1
 }
 
+exists() {
+	command -v "$@" > /dev/null
+}
+
 list=$(mktemp)
 orig=$(mktemp)
 ren=$(mktemp)
@@ -35,7 +39,7 @@ escape_spaces $list
 cp $list $orig
 
 ps=ps
-hash procps 2> /dev/null && ps='procps'
+exists procps && ps='procps'
 
 TTY="/dev/"$($ps -o tty=, -o pid= | grep $$ | cut -d " " -f 1)
 vim $list < $TTY > $TTY

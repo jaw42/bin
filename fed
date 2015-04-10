@@ -9,6 +9,9 @@ function echoerr() {
 	>&2 echo $@
 }
 
+exists() {
+	command -v "$@" > /dev/null
+}
 [[ $# -eq 0 ]] && echoerr "Please provide a file to encrypt or decrypt" && exit 1
 
 remove=true
@@ -20,8 +23,8 @@ fi
 arg="$1"
 tare="tar.gz"
 
-! hash gpg 2> /dev/null && echoerr "Requires gpg" && exit 1
-! hash tar 2> /dev/null && echoerr "Requires tar" && exit 1
+exists gpg || exit 1
+exists tar || exit 1
 
 if [[ -d $arg ]]; then
 	echo "Compressing"

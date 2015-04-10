@@ -9,6 +9,10 @@ function echoerr() {
 	>&2 echo $@
 }
 
+exists() {
+	command -v "$@" > /dev/null
+}
+
 cmd=""
 verbose=false
 dryrun=false
@@ -162,16 +166,16 @@ search_tool() {
 	elif $allow_parallel; then
 		useparallel "$@"
 
-	elif $allow_locate && [ "$f" == "files" ] && hash locate 2> /dev/null; then
+	elif $allow_locate && [ "$f" -eq "files" ] && exists locate; then
 		useloc "$@"
 
-	elif $allow_pt && hash pt 2> /dev/null; then
+	elif $allow_pt && exists pt; then
 		usept "$@"
 
-	elif $allow_ag && hash ag 2> /dev/null; then
+	elif $allow_ag && exists ag; then
 		useag "$@"
 
-	elif $allow_ack && hash ack 2> /dev/null; then
+	elif $allow_ack && exists ack; then
 		useack "$@"
 
 	else
