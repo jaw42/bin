@@ -28,15 +28,18 @@ def run(cmd, fail=1):
 	cmd = cmd.split(' ')
 	p = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=False)
 	(output, err) = p.communicate()
-	p_status = p.wait()
-	if fail:
-		if p_status == 0:
-			return output.decode("utf-8")
-		else:
-			print("Could not complete command: " + cmd)
-	else:
-		return output.decode("utf-8")
+	run_status = p.wait()
+	return RunObject(run_status, output.decode("utf-8"))
 # end function run
+
+# class RunObject
+class RunObject(object):
+	excode = 0
+	output = ""
+	def __init__(self, excode, output):
+		self.excode = excode
+		self.output = output
+# end class RunObject
 
 # function verbose
 def verbose(pnt_str):
@@ -60,10 +63,10 @@ def get_git_repos():
 	else:
 		try:
 			verbose("Using locate to locate git repos.")
-			git_list = run("locate -br \.git$").split()
+			git_list = run("locate -br \.git$").output.split()
 		except:
 			verbose("Command locate not availible. Using find instead.")
-			git_list = run("find " + home_path + " -name .git").split()
+			git_list = run("find " + home_path + " -name .git").output.split()
 
 	# only include each item if it doesn't match an item in ignore
 	for ig_str in ignore:
@@ -81,21 +84,28 @@ def get_git_repos():
 # function pull_all
 def pull_all():
 	if ispull_all:
-		run("git fetch origin", 0)
-		log = run("git log --color=always HEAD..origin/master --oneline", 0)
+		run("git fetch origin").output
+		log = run("git log --color=always HEAD..origin/master --oneline").output
 		if log != "":
 			indent(log)
-			indent(run("git -c color.merge=always merge origin/master"))
-			return 1
+			merge = run("git -c color.merge=always merge origin/master")
+			indent(merge.output)
+			run_status = merge.excode
+			if run_status == 0:
+				return 1
+			else:
+				return -1
 	return 0
 # end function pull_all
 
 # function push_all
 def push_all():
 	if ispush_all:
-		if run("git remote").count("\n") > 0:
-			indent(run("git -c color.push=always push"))
-			return 1
+		if run("git remote").output.count("\n") > 0:
+			push = run("git -c color.push=always push")
+			indent(push.output)
+			if push.excode == 0:
+				return 1
 	return 0
 
 # function options
@@ -209,14 +219,15 @@ for git_dir in get_git_repos():
 		if number_lines != 0 or cmd_always:
 			call(['zsh', '-i'])
 
-	ahead_output = run("git log --color=always --branches --not --remotes --oneline")
+	log_cmd = "git log --color=always --branches --not --remotes --oneline"
+	ahead_output = run(log_cmd).output
 	number_ahead = ahead_output.count("\n")
 	if number_ahead > 0:
 		print("\tAhead: %s" %  (number_ahead) )
-		indent(ahead_output, 1)
-		number_pushed += push_all()
-		add_nl = True
-		repos_pushed.append(git_dir)
+		indent(ahead_output)
+		if push_all() > 0:
+			add_nl = True
+			repos_pushed.append(git_dir)
 
 	num_pulled_cur = pull_all()
 	number_pulled += num_pulled_cur
