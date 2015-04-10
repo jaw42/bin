@@ -21,6 +21,7 @@ repos_pushed  = []
 cmd_always    = False
 start_shell   = False
 custom_cmd    = ""
+repos_conflict  = []
 
 # function run
 def run(cmd, fail=1):
@@ -239,6 +240,8 @@ for git_dir in get_git_repos():
 	if num_pulled_cur > 0:
 		add_nl = True
 		repos_pulled.append(git_dir)
+	elif num_pulled_cur < 0:
+		repos_conflict.append(git_dir)
 
 	if add_nl: print("")
 
@@ -248,5 +251,8 @@ if ispull_all:
 if ispush_all:
 	print("%s repos pushed:" % number_pushed)
 	for p in repos_pushed: print('\t' + p)
+if len(repos_conflict) > 0:
+	print("Merge conflicts:")
+	for p in repos_conflict: print('\t' + p)
 
 os.chdir(current_dir)
