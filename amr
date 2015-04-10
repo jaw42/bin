@@ -22,7 +22,7 @@ repos_pushed    = []
 repos_conflict  = []
 cmd_always      = False
 start_shell     = False
-custom_cmd      = ""
+custom_cmd      = []
 
 # function run
 def run(cmd):
@@ -148,7 +148,8 @@ def options(argv):
 			include.append(arg)
 		elif opt in ["-r", "--run"]:
 			global custom_cmd
-			custom_cmd = arg
+			# custom_cmd = arg
+			custom_cmd.append(arg)
 		elif opt in ["-s", "--shell"]:
 			global start_shell
 			start_shell = True
@@ -219,9 +220,10 @@ for git_dir in get_git_repos():
 		indent(status_output)
 		add_nl = True
 
-	if custom_cmd != "":
+	if len(custom_cmd) > 0:
 		if number_lines != 0 or cmd_always:
-			call(custom_cmd.split())
+			for cmd in custom_cmd:
+				call(cmd.split())
 
 	if start_shell:
 		if number_lines != 0 or cmd_always:
