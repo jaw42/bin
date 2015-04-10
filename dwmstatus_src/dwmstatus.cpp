@@ -57,8 +57,8 @@ void date();
 /******************************************************************************
  *                                    Main                                    *
  ******************************************************************************/
-	string arg;
-	struct timeval tval_before, tval_after, tval_result;
+string arg;
+struct timeval tval_before, tval_after, tval_result;
 int main(int argc, char *argv[]) {
 
 	if (argc == 1) {
@@ -134,12 +134,13 @@ void concatenate() {
 string exec(string cmdstring) {
 	char* cmd = (char*)cmdstring.c_str();
 	FILE* pipe = popen(cmd, "r");
-	if (!pipe) return "ERROR";
+	if (!pipe) { return "ERROR"; }
 	char buffer[128];
 	string result = "";
 	while(!feof(pipe)) {
-		if(fgets(buffer, 128, pipe) != NULL)
+		if(fgets(buffer, 128, pipe) != NULL) {
 			result += buffer;
+		}
 	}
 	pclose(pipe);
 	return result;
@@ -152,14 +153,14 @@ bool testTimeNow(int duration, string prog, string arg) {
 	printf("\t: %ld.%06ld\n", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
 	gettimeofday(&tval_before, NULL);
 
-	if (duration == 0 || arg == "now") {
+	if ((duration == 0) || (arg == "now")) {
 		cout << prog << "\t\t";
 		return true;
 	}
 	int current = fmod(time(0),duration);
 	cout << prog << "\t" << duration << "\t" << current;
 
-	if (current > 0 && current < 11) {
+	if ((current > 0) && (current < 11)) {
 		return true;
 	} else {
 		return false;
