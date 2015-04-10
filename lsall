@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Wed 04 Feb 2015
-# Modified: Sat 21 Mar 2015
+# Modified: Fri 10 Apr 2015
 # Author:   Josh Wainwright
 # Filename: lsall
 set -o nounset
@@ -46,7 +46,7 @@ done
 shift $((OPTIND-1))
 
 path="${@:-.}"
-eval $filesfile && path=$(pwd)
+eval $filesfile && path=$(pwd)"/"
 
 cmd="find "$path" "$maxdepth" \
          \( \
@@ -76,7 +76,7 @@ cmd="find "$path" "$maxdepth" \
        \( $ftype -print \)"
 
 if [ "$ftype" == "-type d" ]; then
-	cmd="($cmd; find $path $maxdepth -name \".git\" -type d)"
+	cmd="($cmd; find "$path" "$maxdepth" -name \".git\" -type d)"
 fi
 
 cmd="$cmd | sed 's#^./##'"
