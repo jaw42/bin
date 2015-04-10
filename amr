@@ -5,7 +5,7 @@
 # Filename: amr_python.py
 
 import os.path
-import sys, getopt
+import sys, getopt, time
 from subprocess import PIPE, STDOUT, Popen, call
 
 isverbose     = False
@@ -57,9 +57,14 @@ def indent(var, num=1):
 def get_git_repos():
 	git_list = []
 	home_path = os.path.expanduser("~/")
-	if os.path.isfile(home_path + ".folders"):
+	folders = home_path + ".folders"
+	if os.path.isfile(folders):
 		verbose("Using .folders file to locate git repos.")
-		git_list = run("grep -E \.git$ " + home_path + ".folders", 0).split()
+		moddays = (time.time() - os.path.getmtime(folders)) / (60*60*24)
+		if moddays > 8:
+			print("Database is more than 8 days old (actual age is %s days)" \
+					% int(moddays))
+		git_list = run("grep -E \.git$ " + folders).output.split()
 	else:
 		try:
 			verbose("Using locate to locate git repos.")
