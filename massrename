@@ -1,11 +1,11 @@
 #!/bin/bash
 # Created:  Mon 19 Jan 2015
-# Modified: Fri 27 Feb 2015
+# Modified: Fri 10 Apr 2015
 # Author:   Josh Wainwright
 # Filename: massrename
 set -o nounset
 
-function escape_spaces() {
+escape_spaces() {
 	#sed -i 's/ /\\ /g' $1
 	sed -i -e 's/^/"/' -e 's/$/"/g' $1
 }
@@ -30,7 +30,7 @@ echo "### Files to edit ###"
 cat $list
 echo "#####################"
 
-if [[ ! -s $list ]]; then
+if [ ! -s "$list" ]; then
 	echo "No files to rename"
 	exit 1
 fi
@@ -46,7 +46,7 @@ vim $list < $TTY > $TTY
 
 lines_before=$(wc -l < $orig)
 lines_after=$(wc -l < $list)
-if [[ $lines_before -ne $lines_after ]]; then
+if [ "$lines_before" -ne "$lines_after" ]; then
 	echo "Don't delete or add lines!"
 	exit 1
 fi

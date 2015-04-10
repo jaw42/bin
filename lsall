@@ -5,11 +5,11 @@
 # Filename: lsall
 set -o nounset
 set -o errexit
-function echoerr() {
+echoerr() {
 	>&2 echo $@
 }
 
-function usage() {
+usage() {
 helptext="$(basename $0) [-dfvh] [-m depth] [DIR]
 
 lsall = List All. List all files or directories under the current location, or
@@ -75,7 +75,7 @@ cmd="find "$path" "$maxdepth" \
        -prune -o \
        \( $ftype -print \)"
 
-if [ "$ftype" == "-type d" ]; then
+if [ "$ftype" = "-type d" ]; then
 	cmd="($cmd; find "$path" "$maxdepth" -name \".git\" -type d)"
 fi
 

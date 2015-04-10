@@ -1,21 +1,23 @@
 #!/bin/bash
 # Created:  Mon 26 May 2014
-# Modified: Mon 09 Mar 2015
+# Modified: Fri 10 Apr 2015
 # Author:   Josh Wainwright
 # Filename: fed (Folder Encrypt Decrypt)
 set -o nounset
 
-function echoerr() {
+echoerr() {
 	>&2 echo $@
 }
 
 exists() {
 	command -v "$@" > /dev/null
 }
-[[ $# -eq 0 ]] && echoerr "Please provide a file to encrypt or decrypt" && exit 1
+
+
+[ "$#" -eq 0 ] && echoerr "Please provide a file to encrypt or decrypt" && exit 1
 
 remove=true
-if [[ $1 == "-n" ]]; then
+if [ "$1" = "-n" ]; then
 	remove=false
 	shift
 fi
@@ -26,7 +28,7 @@ tare="tar.gz"
 exists gpg || exit 1
 exists tar || exit 1
 
-if [[ -d $arg ]]; then
+if [ -d "$arg" ]; then
 	echo "Compressing"
 	trap "echo [Cleaning]; rm $arg.$tare" SIGINT
 	tar czf $arg.$tare $arg
@@ -52,10 +54,10 @@ elif [[ "$arg" == *.gpg ]]; then
 
 	echo "Cleaning"
 	rm $fname
-elif [[ -f $arg ]]; then
-	>&2 echoerr "For files, please use standard gpg"
+elif [ -f $arg ]; then
+	echoerr "For files, please use standard gpg"
 else
-	>&2 echoerr "Folder does not exist"
+	echoerr "Folder does not exist"
 fi
 
 exit 0

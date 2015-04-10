@@ -1,11 +1,11 @@
 #!/bin/bash
 # Created:  Tue 24 Mar 2015
-# Modified: Tue 24 Mar 2015
+# Modified: Fri 10 Apr 2015
 # Author:   Josh Wainwright
 # Filename: ntime
 
 set -o nounset
-function echoerr() {
+echoerr() {
 	>&2 echo $@
 }
 
@@ -23,7 +23,8 @@ fi
 
 start_t=$(date +%s%3N)
 
-for ((i=1;i<=num;i++)); do
+# for ((i=1;i<=num;i++)); do
+for i in $(seq 1 $num); do
 	eval "$cmd"
 done
 

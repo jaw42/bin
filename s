@@ -1,11 +1,13 @@
 #!/bin/bash
 # Created:  Thu 07 Aug 2014
-# Modified: Tue 17 Feb 2015
+# Modified: Fri 10 Apr 2015
 # Author:   Josh Wainwright
 # Filename: s (Search for files and text)
+
 set -o nounset
 set -o errexit
-function echoerr() {
+
+echoerr() {
 	>&2 echo $@
 }
 
@@ -72,13 +74,13 @@ Search Methods:
 	pt STRING
 	ack STRING
 	grep -R STRING"
-echo -e "$helptext"
+printf "$helptext"
 }
 
 verbose() {
 	set +u
 	if $verbose; then
-		echo -e ${2} "$1"
+		printf "$1\n"
 	fi
 	set -u
 }
@@ -89,11 +91,11 @@ useloc() {
 
 
 usegit() {
-	if [[ "x$r" != "x" ]]; then
+	if [ "x$r" != "x" ]; then
 		r="-E"
 	fi
 
-	if [[ $f = "files" ]]; then
+	if [ "x$f" = "xfiles" ]; then
 		cmd="git ls-files | \grep $o $i $v $r \"$@\""
 	else
 		cmd="git grep $o $i $v $r \"$@\""
@@ -101,14 +103,14 @@ usegit() {
 }
 useag() {
 	local ag_files=""
-	if [[ $f = "files" ]]; then
+	if [ "x$f" = "xfiles" ]; then
 		ag_files="-g"
 	fi
 	cmd="ag --nogroup --hidden $o $i $s $v $ag_files \"$@\" ."
 }
 usept() {
 	local pt_files=""
-	if [[ $f = "files" ]]; then
+	if [ "x$f" = "xfiles" ]; then
 		pt_files="-g"
 	fi
 	if [ ! -z $v ]; then 
@@ -119,22 +121,22 @@ usept() {
 	fi
 }
 useack() {
-	if [[ "x$r" != "x" ]]; then
+	if [ "x$r" != "x" ]; then
 		r="-E"
 	fi
 
-	if [[ $f = "files" ]]; then
+	if [ "x$f" = "xfiles" ]; then
 		cmd="find . | grep $o $i $v $r \"$@\""
 	else
 		cmd="ack $o $i $s $v \"$@\""
 	fi
 }
 usegrep() {
-	if [[ "x$r" != "x" ]]; then
+	if [ "x$r" != "x" ]; then
 		r="-E"
 	fi
 
-	if [[ $f = "files" ]]; then
+	if [ "x$f" = "xfiles" ]; then
 		cmd="find . | grep $o $i $v $r \"$@\""
 	else
 		cmd="grep $r -n --recursive $o $i $v \"$@\""
