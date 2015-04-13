@@ -15,6 +15,7 @@ just_list       = False
 ignore          = set(["Osaka", "plugged", "trunk", "repo_discount",
                        "repo_parallel"])
 include         = []
+summary         = False
 ispull_all      = False
 ispush_all      = False
 repos_pulled    = []
@@ -88,6 +89,23 @@ def get_git_repos():
 	return git_list
 # end function get_git_repos
 
+# function do_summary
+def do_summary(report = True):
+	hash_loc = run("git rev-parse @").output
+	hash_rem = run("git ls-remote origin HEAD").output.partition('\t')[0]
+	hash_bas = run("git merge-base @ @{u}").output
+
+	if   hash_loc == hash_rem: val = 0
+	elif hash_loc == hash_bas: val = 1
+	elif hash_rem == hash_bas: val = 2
+	else: val = 3
+
+	if report:
+		if   val == 1: indent("Need to pull")
+		elif val == 2: indent("Need to push")
+		elif val == 3: indent("Diverged")
+
+	return val
 # function pull_all
 def pull_all():
 	if ispull_all:
@@ -211,6 +229,11 @@ for git_dir in get_git_repos():
 		print("\033[0;31m%s: Folder not found.\033[0m" % git_dir)
 
 	print("%s" % git_dir)
+
+	if summary:
+		do_summary()
+		continue
+
 	stat_cmd = "git -c color.status=always status --ignore-submodules --short"
 	status_output = run(stat_cmd).output
 	number_lines = status_output.count("\n")
