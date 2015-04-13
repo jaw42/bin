@@ -52,6 +52,15 @@ def verbose(pnt_str):
 		print(pnt_str)
 # end function verbose
 
+# function countlines
+def countlines(string):
+	if not string:
+		return 0
+	elif string.count('\n') == 0:
+		return 1
+	else:
+		return string.count('\n')
+
 # function indent
 def indent(var, num=1):
 	tabs = '\t' * int(num)
@@ -236,7 +245,7 @@ for git_dir in get_git_repos():
 
 	stat_cmd = "git -c color.status=always status --ignore-submodules --short"
 	status_output = run(stat_cmd).output
-	number_lines = status_output.count("\n")
+	number_lines = countlines(status_output)
 
 	if number_lines > 0:
 		print("\tChanged %s" % number_lines)
@@ -254,12 +263,12 @@ for git_dir in get_git_repos():
 
 	log_cmd = "git log --color=always --branches --not --remotes --oneline"
 	ahead_output = run(log_cmd).output
-	number_ahead = ahead_output.count("\n")
+	number_ahead = countlines(ahead_output)
 	if number_ahead > 0:
 		print("\tAhead: %s" % (number_ahead) )
 		indent(ahead_output)
+		add_nl = True
 		if push_all() == 1:
-			add_nl = True
 			repos_pushed.append(git_dir)
 
 	if ispull_all and do_summary(False) == 1:
