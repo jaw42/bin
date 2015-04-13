@@ -125,7 +125,8 @@ def pull_all():
 # function push_all
 def push_all():
 	if ispush_all:
-		if run("git remote").output.count("\n") > 0:
+		remotes = run("git remote").output
+		if remotes:
 			push = run("git -c color.push=always push")
 			indent(push.output)
 			if push.excode == 0:
