@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # Created:  Mon 16 Mar 2015
-# Modified: Fri 10 Apr 2015
+# Modified: Mon 13 Apr 2015
 # Author:   Josh Wainwright
 # Filename: amr_python.py
 
@@ -32,7 +32,9 @@ def run(cmd):
 	p = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=False)
 	(output, err) = p.communicate()
 	run_status = p.wait()
-	return RunObject(run_status, output.decode("utf-8"))
+	output = output.decode("utf-8").encode('ascii','replace')
+	output = output.rstrip()
+	return RunObject(run_status, output)
 # end function run
 
 # class RunObject
@@ -106,21 +108,18 @@ def do_summary(report = True):
 		elif val == 3: indent("Diverged")
 
 	return val
+
 # function pull_all
 def pull_all():
-	if ispull_all:
-		run("git fetch origin").output
-		log = run("git log --color=always HEAD..origin/master --oneline").output
-		if log != "":
-			indent(log)
-			merge = run("git -c color.merge=always merge origin/master")
-			indent(merge.output)
-			run_status = merge.excode
-			if run_status == 0:
-				return 1
-			else:
-				return -1
-	return 0
+	run("git fetch origin").output
+	log = run("git log --color=always --oneline --graph HEAD..origin/master").output
+	indent(log)
+	merge = run("git -c color.merge=always merge origin/master")
+	indent(merge.output)
+	run_status = merge.excode
+	if run_status == 0:
+		return 1
+	return -1
 # end function pull_all
 
 # function push_all
@@ -258,16 +257,17 @@ for git_dir in get_git_repos():
 	if number_ahead > 0:
 		print("\tAhead: %s" % (number_ahead) )
 		indent(ahead_output)
-		if push_all() > 0:
+		if push_all() == 1:
 			add_nl = True
 			repos_pushed.append(git_dir)
 
-	num_pulled_cur = pull_all()
-	if num_pulled_cur > 0:
-		add_nl = True
-		repos_pulled.append(git_dir)
-	elif num_pulled_cur < 0:
-		repos_conflict.append(git_dir)
+	if ispull_all and do_summary(False) == 1:
+		num_pulled_cur = pull_all()
+		if num_pulled_cur == 1:
+			add_nl = True
+			repos_pulled.append(git_dir)
+		elif num_pulled_cur == -1:
+			repos_conflict.append(git_dir)
 
 	if add_nl: print("")
 
