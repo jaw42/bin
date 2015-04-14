@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # Created:  Mon 16 Mar 2015
-# Modified: Mon 13 Apr 2015
+# Modified: Tue 14 Apr 2015
 # Author:   Josh Wainwright
 # Filename: amr_python.py
 
@@ -32,7 +32,7 @@ def run(cmd):
 	p = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=False)
 	(output, err) = p.communicate()
 	run_status = p.wait()
-	output = output.decode("utf-8").encode('ascii','replace')
+	output = output.decode("utf-8")
 	output = output.rstrip()
 	return RunObject(run_status, output)
 # end function run
@@ -120,7 +120,7 @@ def do_summary(report = True):
 
 # function pull_all
 def pull_all():
-	run("git fetch origin").output
+	run("git fetch origin master").output
 	log = run("git log --color=always --oneline --graph HEAD..origin/master").output
 	indent(log)
 	merge = run("git -c color.merge=always merge origin/master")
@@ -234,6 +234,7 @@ for git_dir in get_git_repos():
 	add_nl = False
 	try:
 		os.chdir(git_dir)
+		verbose("[DEBUG] " + os.getcwd())
 	except OSError:
 		print("\033[0;31m%s: Folder not found.\033[0m" % git_dir)
 
