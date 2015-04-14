@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Created:  Thu 19 Mar 2015
-# Modified: Fri 10 Apr 2015
+# Modified: Mon 13 Apr 2015
 # Author:   Josh Wainwright
 # Filename: times-summarise.py
 
@@ -85,20 +85,31 @@ def s2h(a):
 # Write the results back to the file.
 def updatefile():
 	lnum = 0
+	replace = True
 	for line in lines:
 		printexisting = True
 		if line.startswith('#:') and printexisting: print(line.rstrip())
 
-		if line == '\n': pass
-		elif line.startswith('#: Date'      ) : line = '#: ' + strav[0] + '\n'
-		elif line.startswith('#: Range'     ) : line = '#: ' + strav[1] + '\n'
-		elif line.startswith('#: Day'       ) : line = '#: ' + strav[2] + '\n'
-		elif line.startswith('#: Lunch'     ) : line = '#: ' + strav[3] + '\n'
-		elif line.startswith('#: Hours D'   ) : line = '#: ' + strav[4] + '\n'
-		elif line.startswith('#: Hours W'   ) : line = '#: ' + strav[5] + '\n'
-		elif line.startswith('#: Hours L'   ) : line = '#: ' + strav[6] + '\n'
-		elif line.startswith('#: Sal w/d/h' ) : line = '#: ' + strav[7] + '\n'
+		if line.startswith('#: Date') :
+			month_old = 0
+			try:
+				month_old = int(line.split('-')[1])
+			except: IndexError
+			month_cur = int(time.strftime('%m'))
+			if (month_cur - month_old)%12 < 2:
+				replace = False
+			else:
+				line = '#: ' + strav[0] + '\n'
+		if replace:
+			if   line.startswith('#: Range'    ): line = '#: ' + strav[1] + '\n'
+			elif line.startswith('#: Day'      ): line = '#: ' + strav[2] + '\n'
+			elif line.startswith('#: Lunch'    ): line = '#: ' + strav[3] + '\n'
+			elif line.startswith('#: Hours D'  ): line = '#: ' + strav[4] + '\n'
+			elif line.startswith('#: Hours W'  ): line = '#: ' + strav[5] + '\n'
+			elif line.startswith('#: Hours L'  ): line = '#: ' + strav[6] + '\n'
+			elif line.startswith('#: Sal w/d/h'): line = '#: ' + strav[7] + '\n'
 		elif line.startswith('## '): continue
+		elif line == '\n': pass
 		elif line.startswith('#'): pass
 		else:
 			lnum += 1
