@@ -252,6 +252,7 @@ for git_dir in get_git_repos():
         verbose("[DEBUG] " + os.getcwd())
     except OSError:
         print("\033[0;31m%s: Folder not found.\033[0m" % git_dir)
+        continue
 
     print("%s" % git_dir)
 
