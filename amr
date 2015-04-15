@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # Created:  Mon 16 Mar 2015
-# Modified: Tue 14 Apr 2015
+# Modified: Wed 15 Apr 2015
 # Author:   Josh Wainwright
 # Filename: amr_python.py
 
@@ -10,192 +10,204 @@ import getopt
 import time
 from subprocess import PIPE, STDOUT, Popen, call
 
-isverbose       = False
-just_list       = False
-ignore          = set(["Osaka", "plugged", "trunk", "repo_discount",
-                       "repo_parallel"])
-include         = []
-summary         = False
-ispull_all      = False
-ispush_all      = False
-repos_pulled    = []
-repos_pushed    = []
-repos_conflict  = []
-cmd_always      = False
-start_shell     = False
-custom_cmd      = []
+isverbose = False
+just_list = False
+ignore = set(["Osaka", "plugged", "trunk", "repo_discount", "repo_parallel"])
+include = []
+summary = False
+ispull_all = False
+ispush_all = False
+repos_pulled = []
+repos_pushed = []
+repos_conflict = []
+cmd_always = False
+start_shell = False
+custom_cmd = []
+
 
 # function run
 def run(cmd):
-	verbose("[DEBUG] " + cmd)
-	cmd = cmd.split(' ')
-	p = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=False)
-	(output, err) = p.communicate()
-	run_status = p.wait()
-	output = output.decode("utf-8")
-	output = output.rstrip()
-	return RunObject(run_status, output)
+    verbose("[DEBUG] " + cmd)
+    cmd = cmd.split(' ')
+    p = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=False)
+    (output, err) = p.communicate()
+    run_status = p.wait()
+    output = output.decode("utf-8")
+    output = output.rstrip()
+    return RunObject(run_status, output)
 # end function run
+
 
 # class RunObject
 class RunObject(object):
-	excode = 0
-	output = ""
-	def __init__(self, excode, output):
-		self.excode = excode
-		self.output = output
+    excode = 0
+    output = ""
+
+    def __init__(self, excode, output):
+        self.excode = excode
+        self.output = output
 # end class RunObject
+
 
 # function verbose
 def verbose(pnt_str):
-	if isverbose:
-		print(pnt_str)
+    if isverbose:
+        print(pnt_str)
 # end function verbose
+
 
 # function countlines
 def countlines(string):
-	if not string:
-		return 0
-	elif string.count('\n') == 0:
-		return 1
-	else:
-		return string.count('\n')
+    if not string:
+        return 0
+    elif string.count('\n') == 0:
+        return 1
+    else:
+        return string.count('\n')
+
 
 # function indent
 def indent(var, num=1):
-	tabs = '\t' * int(num)
-	var = var.replace("\n", "\n"+tabs).rstrip()
-	print("%s%s" % (tabs, var))
+    tabs = '\t' * int(num)
+    var = var.replace("\n", "\n" + tabs).rstrip()
+    print("%s%s" % (tabs, var))
+
 
 # function get_git_repos
 def get_git_repos():
-	git_list = []
-	home_path = os.path.expanduser("~/")
-	folders = home_path + ".folders"
-	if os.path.isfile(folders):
-		verbose("Using .folders file to locate git repos.")
-		moddays = (time.time() - os.path.getmtime(folders)) / (60*60*24)
-		if moddays > 8:
-			print("Database is more than 8 days old (actual age is %s days)"
-					% int(moddays))
-		git_list = run("grep -E \.git$ " + folders).output.split()
-	else:
-		try:
-			verbose("Using locate to locate git repos.")
-			git_list = run("locate -br \.git$").output.split()
-		except:
-			verbose("Command locate not availible. Using find instead.")
-			git_list = run("find " + home_path + " -name .git").output.split()
+    git_list = []
+    home_path = os.path.expanduser("~/")
+    folders = home_path + ".folders"
+    if os.path.isfile(folders):
+        verbose("Using .folders file to locate git repos.")
+        moddays = (time.time() - os.path.getmtime(folders)) / (60 * 60 * 24)
+        if moddays > 8:
+            print("Database is more than 8 days old (actual age is %s days)" %
+                  int(moddays))
+        git_list = run("grep -E \.git$ " + folders).output.split()
+    else:
+        try:
+            verbose("Using locate to locate git repos.")
+            git_list = run("locate -br \.git$").output.split()
+        except:
+            verbose("Command locate not availible. Using find instead.")
+            git_list = run("find " + home_path + " -name .git").output.split()
 
-	# only include each item if it doesn't match an item in ignore
-	for ig_str in ignore:
-		git_list = [ g for g in git_list if ig_str not in g ]
+    # only include each item if it doesn't match an item in ignore
+    for ig_str in ignore:
+        git_list = [g for g in git_list if ig_str not in g]
 
-	# only include each item if it matches an item in include
-	for inc_str in include:
-		git_list = [ g for g in git_list if inc_str in g ]
+    # only include each item if it matches an item in include
+    for inc_str in include:
+        git_list = [g for g in git_list if inc_str in g]
 
-	git_list = [ os.path.dirname(g) for g in git_list ]
+    git_list = [os.path.dirname(g) for g in git_list]
 
-	return git_list
+    return git_list
 # end function get_git_repos
 
+
 # function do_summary
-def do_summary(report = True):
-	hash_loc = run("git rev-parse @").output
-	hash_rem = run("git ls-remote origin HEAD").output.partition('\t')[0]
-	hash_bas = run("git merge-base @ @{u}").output
+def do_summary(report=True):
+    hash_loc = run("git rev-parse @").output
+    hash_rem = run("git ls-remote origin HEAD").output.partition('\t')[0]
+    hash_bas = run("git merge-base @ @{u}").output
 
-	if   hash_loc == hash_rem: val = 0
-	elif hash_loc == hash_bas: val = 1
-	elif hash_rem == hash_bas: val = 2
-	else: val = 3
+    if hash_loc == hash_rem: val = 0
+    elif hash_loc == hash_bas: val = 1
+    elif hash_rem == hash_bas: val = 2
+    else: val = 3
 
-	if report:
-		if   val == 1: indent("Need to pull")
-		elif val == 2: indent("Need to push")
-		elif val == 3: indent("Diverged")
+    if report:
+        if val == 1: indent("Need to pull")
+        elif val == 2: indent("Need to push")
+        elif val == 3: indent("Diverged")
 
-	return val
+    return val
+
 
 # function pull_all
 def pull_all():
-	run("git fetch origin master").output
-	log = run("git log --color=always --oneline --graph HEAD..origin/master").output
-	indent(log)
-	merge = run("git -c color.merge=always merge origin/master")
-	indent(merge.output)
-	run_status = merge.excode
-	if run_status == 0:
-		return 1
-	return -1
+    run("git fetch origin master").output
+    log = run(
+        "git log --color=always --oneline --graph HEAD..origin/master").output
+    indent(log)
+    merge = run("git -c color.merge=always merge origin/master")
+    indent(merge.output)
+    run_status = merge.excode
+    if run_status == 0:
+        return 1
+    return -1
 # end function pull_all
+
 
 # function push_all
 def push_all():
-	if ispush_all:
-		remotes = run("git remote").output
-		if remotes:
-			push = run("git -c color.push=always push")
-			indent(push.output)
-			if push.excode == 0:
-				return 1
-	return 0
+    if ispush_all:
+        remotes = run("git remote").output
+        if remotes:
+            push = run("git -c color.push=always push")
+            indent(push.output)
+            if push.excode == 0:
+                return 1
+    return 0
+
 
 # function options
 def options(argv):
-	try:
-		opts, args = getopt.getopt(argv, "hvldux:i:r:sSaR")
-	except getopt.GetoptError:
-		usage()
-		sys.exit(0)
-	for opt, arg in opts:
-		if opt in ["-h", "--help"]:
-			usage()
-			sys.exit(0)
-		elif opt in ["-v", "--verbose"]:
-			global isverbose
-			isverbose = True
-		elif opt in ["-l", "--list"]:
-			global just_list
-			just_list = True
-		elif opt in ["-d", "--pull"]:
-			global ispull_all
-			ispull_all = True
-			just_list = False
-		elif opt in ["-u", "--push"]:
-			global ispush_all
-			ispush_all = True
-			just_list = False
-		elif opt in ["-x", "--ignore"]:
-			global ignore
-			ignore.append(arg)
-		elif opt in ["-i", "--include"]:
-			global include
-			include.append(arg)
-		elif opt in ["-r", "--run"]:
-			global custom_cmd
-			# custom_cmd = arg
-			custom_cmd.append(arg)
-		elif opt in ["-s", "--shell"]:
-			global start_shell
-			start_shell = True
-		elif opt in ["-S", "--summary"]:
-			global summary
-			summary = True
-		elif opt in ["-a", "--always"]:
-			global cmd_always
-			cmd_always = True
-		elif opt in ["-R", "--reset"]:
-			ignore = []
-			include = []
+    try:
+        opts, args = getopt.getopt(argv, "hvldux:i:r:sSaR")
+    except getopt.GetoptError:
+        usage()
+        sys.exit(0)
+    for opt, arg in opts:
+        if opt in ["-h", "--help"]:
+            usage()
+            sys.exit(0)
+        elif opt in ["-v", "--verbose"]:
+            global isverbose
+            isverbose = True
+        elif opt in ["-l", "--list"]:
+            global just_list
+            just_list = True
+        elif opt in ["-d", "--pull"]:
+            global ispull_all
+            ispull_all = True
+            just_list = False
+        elif opt in ["-u", "--push"]:
+            global ispush_all
+            ispush_all = True
+            just_list = False
+        elif opt in ["-x", "--ignore"]:
+            global ignore
+            ignore.append(arg)
+        elif opt in ["-i", "--include"]:
+            global include
+            include.append(arg)
+        elif opt in ["-r", "--run"]:
+            global custom_cmd
+            # custom_cmd = arg
+            custom_cmd.append(arg)
+        elif opt in ["-s", "--shell"]:
+            global start_shell
+            start_shell = True
+        elif opt in ["-S", "--summary"]:
+            global summary
+            summary = True
+        elif opt in ["-a", "--always"]:
+            global cmd_always
+            cmd_always = True
+        elif opt in ["-R", "--reset"]:
+            ignore = []
+            include = []
 # end function options
+
 
 # function usage
 def usage():
-	b = "\033[4m"
-	n = "\033[0m"
-	helptext = """amr [-hvlducR] [-x pattern] [-i pattern] [-r command]
+    b = "\033[4m"
+    n = "\033[0m"
+    helptext = """amr [-hvlducR] [-x pattern] [-i pattern] [-r command]
 
 amr = All My Repos. Perform actions on all repositories found on the machine.
 
@@ -211,85 +223,91 @@ amr = All My Repos. Perform actions on all repositories found on the machine.
 	-a         Always run the command or shell, even for repos without changes.
 	-R         Reset the include and ignore lists to empty.
 """
-	print(helptext)
+
+    print(helptext)
 # end function usage
 
 options(sys.argv[1:])
 
 if isverbose:
-	print("Ignore List:")
-	for ig in ignore: print("\t%s" % ig)
-	print("Include List:")
-	for ig in include: print("\t%s" % ig)
-	print("")
+    print("Ignore List:")
+    for ig in ignore:
+        print("\t%s" % ig)
+    print("Include List:")
+    for ig in include:
+        print("\t%s" % ig)
+    print("")
 
 if just_list:
-	for git_dir in get_git_repos():
-		print(git_dir)
-	sys.exit(0)
+    for git_dir in get_git_repos():
+        print(git_dir)
+    sys.exit(0)
 
 current_dir = os.getcwd()
 
 for git_dir in get_git_repos():
-	add_nl = False
-	try:
-		os.chdir(git_dir)
-		verbose("[DEBUG] " + os.getcwd())
-	except OSError:
-		print("\033[0;31m%s: Folder not found.\033[0m" % git_dir)
+    add_nl = False
+    try:
+        os.chdir(git_dir)
+        verbose("[DEBUG] " + os.getcwd())
+    except OSError:
+        print("\033[0;31m%s: Folder not found.\033[0m" % git_dir)
 
-	print("%s" % git_dir)
+    print("%s" % git_dir)
 
-	if summary:
-		do_summary()
-		continue
+    if summary:
+        do_summary()
+        continue
 
-	stat_cmd = "git -c color.status=always status --ignore-submodules --short"
-	status_output = run(stat_cmd).output
-	number_lines = countlines(status_output)
+    stat_cmd = "git -c color.status=always status --ignore-submodules --short"
+    status_output = run(stat_cmd).output
+    number_lines = countlines(status_output)
 
-	if number_lines > 0:
-		print("\tChanged %s" % number_lines)
-		indent(status_output)
-		add_nl = True
+    if number_lines > 0:
+        print("\tChanged %s" % number_lines)
+        indent(status_output)
+        add_nl = True
 
-	if len(custom_cmd) > 0:
-		if number_lines != 0 or cmd_always:
-			for cmd in custom_cmd:
-				call(cmd.split())
+    if len(custom_cmd) > 0:
+        if number_lines != 0 or cmd_always:
+            for cmd in custom_cmd:
+                call(cmd.split())
 
-	if start_shell:
-		if number_lines != 0 or cmd_always:
-			call(['zsh', '-i'])
+    if start_shell:
+        if number_lines != 0 or cmd_always:
+            call(['zsh', '-i'])
 
-	log_cmd = "git log --color=always --branches --not --remotes --oneline"
-	ahead_output = run(log_cmd).output
-	number_ahead = countlines(ahead_output)
-	if number_ahead > 0:
-		print("\tAhead: %s" % (number_ahead) )
-		indent(ahead_output)
-		add_nl = True
-		if push_all() == 1:
-			repos_pushed.append(git_dir)
+    log_cmd = "git log --color=always --branches --not --remotes --oneline"
+    ahead_output = run(log_cmd).output
+    number_ahead = countlines(ahead_output)
+    if number_ahead > 0:
+        print("\tAhead: %s" % (number_ahead))
+        indent(ahead_output)
+        add_nl = True
+        if push_all() == 1:
+            repos_pushed.append(git_dir)
 
-	if ispull_all and do_summary(False) == 1:
-		num_pulled_cur = pull_all()
-		if num_pulled_cur == 1:
-			add_nl = True
-			repos_pulled.append(git_dir)
-		elif num_pulled_cur == -1:
-			repos_conflict.append(git_dir)
+    if ispull_all and do_summary(False) == 1:
+        num_pulled_cur = pull_all()
+        if num_pulled_cur == 1:
+            add_nl = True
+            repos_pulled.append(git_dir)
+        elif num_pulled_cur == -1:
+            repos_conflict.append(git_dir)
 
-	if add_nl: print("")
+    if add_nl: print("")
 
 if len(repos_pulled) > 0:
-	print("Repos pulled:")
-	for p in repos_pulled: print('\t' + p)
+    print("Repos pulled:")
+    for p in repos_pulled:
+        print('\t' + p)
 if len(repos_pushed) > 0:
-	print("Repos pushed:")
-	for p in repos_pushed: print('\t' + p)
+    print("Repos pushed:")
+    for p in repos_pushed:
+        print('\t' + p)
 if len(repos_conflict) > 0:
-	print("Merge conflicts:")
-	for p in repos_conflict: print('\t' + p)
+    print("Merge conflicts:")
+    for p in repos_conflict:
+        print('\t' + p)
 
 os.chdir(current_dir)
