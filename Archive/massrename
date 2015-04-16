@@ -1,0 +1,59 @@
+#!/bin/bash
+# Created:  Mon 19 Jan 2015
+# Modified: Thu 16 Apr 2015
+# Author:   Josh Wainwright
+# Filename: massrename
+set -o nounset
+
+escape_spaces() {
+	#sed -i 's/ /\\ /g' $1
+	sed -i -e 's/^/"/' -e 's/$/"/g' $1
+}
+
+exists() {
+	command -v "$@" > /dev/null
+}
+
+list=$(mktemp)
+orig=$(mktemp)
+ren=$(mktemp)
+
+if [ "$#" -eq 1 ]; then
+	cat "$1" | sort > $list
+elif read -t 0; then
+	cat | sort > $list
+else
+	find . -maxdepth 1 -type f | sort > $list
+fi
+
+echo "### Files to edit ###"
+cat $list
+echo "#####################"
+
+if [ ! -s "$list" ]; then
+	echo "No files to rename"
+	exit 1
+fi
+
+escape_spaces $list
+cp $list $orig
+
+ps=ps
+exists procps && ps='procps'
+
+TTY="/dev/"$($ps -o tty=, -o pid= | grep $$ | cut -d " " -f 1)
+vim $list < $TTY > $TTY
+
+lines_before=$(wc -l < $orig)
+lines_after=$(wc -l < $list)
+if [ "$lines_before" -ne "$lines_after" ]; then
+	echo "Don't delete or add lines!"
+	exit 1
+fi
+
+sed -i 's/$/@#sep#@/' $orig
+paste -d '' $orig $list > $ren
+
+awk -F "@#sep#@" '$1 != $2 {printf "mv -v %s %s\n", $1, $2}' $ren | bash
+
+rm $ren $list $orig

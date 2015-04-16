@@ -1,59 +1,46 @@
-#!/bin/bash
-# Created:  Mon 19 Jan 2015
-# Modified: Fri 10 Apr 2015
+#!/bin/python
+# Created:  Thu 16 Apr 2015
+# Modified: Thu 16 Apr 2015
 # Author:   Josh Wainwright
-# Filename: massrename
-set -o nounset
+# Filename: massrename.py
 
-escape_spaces() {
-	#sed -i 's/ /\\ /g' $1
-	sed -i -e 's/^/"/' -e 's/$/"/g' $1
-}
+import sys
+import os
+import os.path
+import tempfile
 
-exists() {
-	command -v "$@" > /dev/null
-}
+if len(sys.argv) > 1:
+    listin = sys.argv[1:]
+elif not sys.stdin.isatty():
+    listin = sys.stdin.readlines()
+    listin = [f.rstrip() for f in listin]
+else:
+    listin = [f for f in os.listdir('.') if os.path.isfile(f)]
 
-list=$(mktemp)
-orig=$(mktemp)
-ren=$(mktemp)
+if len(listin) == 0:
+    print("No files to rename")
+    sys.exit(1)
 
-if [ "$#" -eq 1 ]; then
-	cat "$1" | sort > $list
-elif read -t 0; then
-	cat | sort > $list
-else
-	find . -maxdepth 1 -type f | sort > $list
-fi
+print("### Files to edit ###")
+for f in listin:
+    print(f)
+print("#####################")
 
-echo "### Files to edit ###"
-cat $list
-echo "#####################"
+tmpfile = tempfile.NamedTemporaryFile()
+for f in listin:
+    tmpfile.write(f + '\n')
+tmpfile.seek(0)
 
-if [ ! -s "$list" ]; then
-	echo "No files to rename"
-	exit 1
-fi
+os.system('vim ' + tmpfile.name)
 
-escape_spaces $list
-cp $list $orig
+listout = tmpfile.readlines()
+listout = [f.rstrip() for f in listout]
 
-ps=ps
-exists procps && ps='procps'
+if not len(listin) == len(listout):
+    print("Don't add or delete lines")
+    sys.exit(1)
 
-TTY="/dev/"$($ps -o tty=, -o pid= | grep $$ | cut -d " " -f 1)
-vim $list < $TTY > $TTY
-
-lines_before=$(wc -l < $orig)
-lines_after=$(wc -l < $list)
-if [ "$lines_before" -ne "$lines_after" ]; then
-	echo "Don't delete or add lines!"
-	exit 1
-fi
-
-sed -i 's/$/@#sep#@/' $orig
-paste -d '' $orig $list > $ren
-
-awk -F "@#sep#@" '$1 != $2 {printf "mv -v %s %s\n", $1, $2}' $ren | bash
-
-rm $ren $list $orig
+for i, o in zip(listin, listout):
+    if not i == o:
+        print(i + " -> " + o)
+        os.rename(i, o)
