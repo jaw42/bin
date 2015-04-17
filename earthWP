@@ -7,32 +7,38 @@ shas_file="$dir/wallpaper_shas"
 sites=("http://www.reddit.com/r/earthporn/top/?sort=top&t=week" \
 	"http://www.reddit.com/r/wallpapers/top/?sort=top&t=week" \
 	"http://www.reddit.com/r/spaceporn/top/?sort=top&t=week"
+	"http://www.reddit.com/r/cityporn/top/?sort=top&t=week"
+	"http://www.reddit.com/r/f1porn/top/?sort=top&t=week"
 )
-randomSite=${sites[$RANDOM % ${#sites[@]} ]}
-echo $randomSite
-urls=$(curl -s $randomSite\
-	| tr '"' '\n' \
-	| egrep '^http://.*\.(jpg)|(png)' \
-	| egrep -v 'reddit')
 
 while true; do
 
-	url=$(echo "$urls"\
-		| shuf -n1 \
-		| sed 's/\?.*$//g' \
-		| uniq)
+	randomSite=${sites[$RANDOM % ${#sites[@]} ]}
+	echo $randomSite
+	urls=$(curl -s $randomSite\
+		| tr '"' '\n' \
+		| egrep '^http://.*\.(jpg)|(png)' \
+		| egrep -v 'reddit')
 
-	ext="${url##*.}"
-	sha=$(cksum <<< "$url" | tr -d ' ')
+	while true; do
+		url=$(echo "$urls"\
+			| shuf -n1 \
+			| sed 's/\?.*$//g' \
+			| uniq)
 
-	grep -q $sha $shas_file && continue
+		ext="${url##*.}"
+		sha=$(cksum <<< "$url" | tr -d ' ')
+		echo $url
 
-	echo $sha >> $shas_file
+		grep -q $sha $shas_file || break
+	done
 
 	filename="$dir/$sha.$ext"
 	wget -nc "$url" -O "$filename"
 
 	feh --bg-fill "$filename"
+
+	echo $sha >> $shas_file
 
 	echo "Keep file $sha.$ext"
 	select yn in "Yes" "No"; do
