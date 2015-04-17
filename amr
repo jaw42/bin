@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # Created:  Mon 16 Mar 2015
-# Modified: Wed 15 Apr 2015
+# Modified: Fri 17 Apr 2015
 # Author:   Josh Wainwright
 # Filename: amr_python.py
 
@@ -12,7 +12,7 @@ from subprocess import PIPE, STDOUT, Popen, call
 
 isverbose = False
 just_list = False
-ignore = set(["Osaka", "plugged", "trunk", "repo_discount", "repo_parallel"])
+ignore = ["Osaka", "plugged", "trunk", "repo_discount", "repo_parallel"]
 include = []
 summary = False
 ispull_all = False
