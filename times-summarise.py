@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Created:  Thu 19 Mar 2015
-# Modified: Wed 15 Apr 2015
+# Modified: Mon 20 Apr 2015
 # Author:   Josh Wainwright
 # Filename: times-summarise.py
 
@@ -138,7 +138,7 @@ def updatefile():
     os.rename(writefile.name, readfile.name)
 
 
-readfile = open(expanduser('~') + '/Documents/Details/times.txt')
+readfile = open(expanduser('~') + '/Documents/Details/times/times.txt')
 writefile = open('times.txt.tmp', 'w')
 lines = readfile.readlines()
 addedlines = []
