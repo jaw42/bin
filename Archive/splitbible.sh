@@ -1,11 +1,12 @@
 #!/bin/bash
 # Created:  Wed 15 Apr 2015
-# Modified: Fri 17 Apr 2015
+# Modified: Wed 22 Apr 2015
 # Author:   Josh Wainwright
 # Filename: splitbible.sh
 
 if [ $# -ne 2 ]; then
-	echo "Wrong number of arguements"
+	echo "Wrong number of arguements."
+	echo "$(basename $0) bible dir"
 	exit 1
 fi
 
