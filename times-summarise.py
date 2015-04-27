@@ -93,7 +93,7 @@ def updatefile():
     lnum = 0
     replace = True
     for line in lines:
-        printexisting = True
+        global printexisting
         if line.startswith('#:') and printexisting: print(line.rstrip())
 
         if line.startswith('#: Date'):
@@ -138,6 +138,10 @@ def updatefile():
     os.rename(writefile.name, readfile.name)
 
 
+printexisting = True
+if len(sys.argv) > 1 and sys.argv[1] == "-n":
+    printexisting = False
+
 readfile = open(expanduser('~') + '/Documents/Details/times/times.txt')
 writefile = open('times.txt.tmp', 'w')
 lines = readfile.readlines()
@@ -167,8 +171,9 @@ strav.append("Hours L  " + av[7].rjust(8))
 strav.append(
     "Sal w/d/h {:7.2f} / {:.2f} / {:.2f}".format(sal_week, sal_day, sal_hour))
 
-updatefile()
-print("")
+if printexisting:
+    updatefile()
+    print("")
 
 for i in range(0, 8):
     print("  " + strav[i])
