@@ -161,15 +161,15 @@ for i in range(1, 5):
     av[i] = secs2ts(av[i])
 
 strav = []
-strav.append("Date   " + time.strftime("%Y-%m-%d"))
-strav.append("Range    " + str(av[0]).rjust(8))
-strav.append("Day      " + av[1] + " -> " + av[4])
-strav.append("Lunch    " + av[2] + " -> " + av[3])
-strav.append("Hours D  " + av[5].rjust(8))
-strav.append("Hours W  " + av[6])
-strav.append("Hours L  " + av[7].rjust(8))
+strav.append("Date:  " + time.strftime("%Y-%m-%d"))
+strav.append("Range:   " + str(av[0]).rjust(6))
+strav.append("Day:     " + av[1].rjust(6) + " -> " + av[4])
+strav.append("Lunch:   " + av[2].rjust(6) + " -> " + av[3])
+strav.append("Hours D: " + av[5].rjust(6))
+strav.append("Hours W: " + av[6].rjust(6))
+strav.append("Hours L: " + av[7].rjust(6))
 strav.append(
-    "Sal w/d/h {:7.2f} / {:.2f} / {:.2f}".format(sal_week, sal_day, sal_hour))
+        "Sal wdh:  {:.0f} {:.0f} {:.2f}".format(sal_week, sal_day, sal_hour))
 
 if printexisting:
     updatefile()
