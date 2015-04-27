@@ -20,6 +20,10 @@ mdfile=$(cat "$1")
 cssfile="${2:-}"
 htmlfile="${1%.*}.html"
 
+if $poem; then
+	mdfile=$(sed -e '2,$s#^#<br/>#' -e '/^<br\/>$/{N;s#<br/>##g}' <<< "$mdfile")
+fi
+
 if [ -z "$cssfile" ]; then
 	repl="###########"
 	cssfile=$(sed "1,/############$repl/d" "$0")
