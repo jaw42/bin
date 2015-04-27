@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # Created:  Mon 16 Mar 2015
-# Modified: Fri 17 Apr 2015
+# Modified: Thu 23 Apr 2015
 # Author:   Josh Wainwright
 # Filename: amr_python.py
 
@@ -60,10 +60,9 @@ def verbose(pnt_str):
 def countlines(string):
     if not string:
         return 0
-    elif string.count('\n') == 0:
-        return 1
     else:
-        return string.count('\n')
+        nls = string.count('\n')
+        return 1 if nls == 0 else nls
 
 
 # function indent
@@ -211,17 +210,17 @@ def usage():
 
 amr = All My Repos. Perform actions on all repositories found on the machine.
 
-	-h         Show this help text.
-	-v         Be more verbose with output text.
-	-l         Don't perform any actions, simply list the repos found.
-	-d         Pull down changes from remotes (git pull).
-	-u         Push up commits to remotes (git push).
-	-x pattern Exclude any repos matching pattern.
-	-i pattern Only include repos that match pattern.
-	-r command Run the command provided in every repo found that has changes.
-	-s         Open a shell within every repo with changes.
-	-a         Always run the command or shell, even for repos without changes.
-	-R         Reset the include and ignore lists to empty.
+    -h         Show this help text.
+    -v         Be more verbose with output text.
+    -l         Don't perform any actions, simply list the repos found.
+    -d         Pull down changes from remotes (git pull).
+    -u         Push up commits to remotes (git push).
+    -x pattern Exclude any repos matching pattern.
+    -i pattern Only include repos that match pattern.
+    -r command Run the command provided in every repo found that has changes.
+    -s         Open a shell within every repo with changes.
+    -a         Always run the command or shell, even for repos without changes.
+    -R         Reset the include and ignore lists to empty.
 """
 
     print(helptext)
