@@ -331,11 +331,13 @@ void pac() {
 		ofstream pacfile;
 		pacfile.open(TMP_FOLDER"/pac");
 
+#if defined(PACMAN) || defined(APTGET)
 		if (pup != 0) {
 			pacfile << "  \x04[P] \x01" << pup;
 		} else {
 			pacfile << "";
 		}
+#endif
 
 		pacfile.close();
 	}
