@@ -13,10 +13,12 @@ exists() {
 
 exists markdown || exit 1
 
-mdfile="$1"
+poem=false
+[ "x$1" == "x-p" ] && poem=true && shift
+
+mdfile=$(cat "$1")
 cssfile="${2:-}"
 htmlfile="${1%.*}.html"
-tmp=$(mktemp)
 
 if [ -z "$cssfile" ]; then
 	repl="###########"
@@ -25,11 +27,9 @@ else
 	cssfile=$(cat $cssfile)
 fi
 
-echo "$cssfile" | cat - "$mdfile" > "$tmp"
+tmp=$(printf "%s\n%s\n" "$cssfile" "$mdfile")
 
-markdown -S "$tmp" > "$htmlfile"
-
-rm "$tmp"
+markdown -S <<< "$tmp" > "$htmlfile"
 
 exit 0
 # # # # # # # # # # # #
