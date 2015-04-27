@@ -63,8 +63,8 @@ def loop():
                 t_total[i] += int(str2secs(ts))
                 length[i] += 1
                 t_length[i] += 1
-            except:
-                IndexError
+            except (IndexError, ValueError):
+                break
 
     # Return value - contains the information. First value
     retval.append(t_length[1])
@@ -100,8 +100,8 @@ def updatefile():
             month_old = 0
             try:
                 month_old = int(line.split('-')[1])
-            except:
-                IndexError
+            except IndexError:
+                pass
             month_cur = int(time.strftime('%m'))
             if (month_cur - month_old) % 12 < 2:
                 replace = False
@@ -129,8 +129,8 @@ def updatefile():
                 if lnum == addedlines[0][0]:
                     writefile.write(addedlines[0][1] + '\n')
                     addedlines.pop(0)
-            except:
-                IndexError
+            except IndexError:
+                pass
 
         writefile.write(line)
 
