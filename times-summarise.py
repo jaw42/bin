@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Created:  Thu 19 Mar 2015
-# Modified: Fri 24 Apr 2015
+# Modified: Sat 02 May 2015
 # Author:   Josh Wainwright
 # Filename: times-summarise.py
 
@@ -150,7 +150,7 @@ addedlines = []
 
 av = loop()  # 0-4
 av.append(secs2ts(av[4] - av[1])[-7:])  # 5
-av.append(secs2ts((av[4] - av[1]) * 5))  # 6
+av.append(secs2ts(((av[4] - av[1]) - (av[3] - av[2])) * 5))  # 6 hours week
 av.append(secs2ts(av[3] - av[2])[-5:])  # 7
 
 sal_year = 26000
