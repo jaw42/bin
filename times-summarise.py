@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Created:  Thu 19 Mar 2015
-# Modified: Sat 02 May 2015
+# Modified: Fri 08 May 2015
 # Author:   Josh Wainwright
 # Filename: times-summarise.py
 
@@ -93,6 +93,7 @@ def s2h(s):
 
 # Write the results back to the file.
 def updatefile():
+    writefile = open('times.txt', 'w')
     lnum = 0
     replace = True
     for line in lines:
@@ -144,7 +145,6 @@ if len(sys.argv) > 1 and sys.argv[1] == "-n":
     printexisting = False
 
 readfile = open(expanduser('~') + '/Documents/Details/times/times.txt')
-writefile = open('times.txt.tmp', 'w')
 lines = readfile.readlines()
 addedlines = []
 
