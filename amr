@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # Created:  Mon 16 Mar 2015
-# Modified: Fri 01 May 2015
+# Modified: Mon 11 May 2015
 # Author:   Josh Wainwright
 # Filename: amr_python.py
 
@@ -13,7 +13,8 @@ from subprocess import PIPE, STDOUT, Popen, call
 
 isverbose = False
 just_list = False
-ignore = ["Osaka", "plugged", "trunk", "repo_discount", "repo_parallel", "repo_sbase"]
+ignore = ["Osaka", "plugged", "trunk", "repo_discount", "repo_parallel",
+          "repo_sbase"]
 include = []
 summary = False
 ispull_all = False
@@ -24,6 +25,7 @@ repos_conflict = []
 cmd_always = False
 start_shell = False
 custom_cmd = []
+current_dir = ""
 
 
 ## start function sigint_handler
@@ -34,7 +36,7 @@ def sigint_handler(signum, frame):
 ## end function sigint_handler
 
 
-# function run
+## start function run
 def run(cmd):
     verbose("[DEBUG] " + cmd)
     cmd = cmd.split(' ')
@@ -44,10 +46,10 @@ def run(cmd):
     output = output.decode("utf-8")
     output = output.rstrip()
     return RunObject(run_status, output)
-# end function run
+## end function run
 
 
-# class RunObject
+## start class RunObject
 class RunObject(object):
     excode = 0
     output = ""
@@ -55,33 +57,35 @@ class RunObject(object):
     def __init__(self, excode, output):
         self.excode = excode
         self.output = output
-# end class RunObject
+## end class RunObject
 
 
-# function verbose
+## start function verbose
 def verbose(pnt_str):
     if isverbose:
         print(pnt_str)
-# end function verbose
+## end function verbose
 
 
-# function countlines
+## start function countlines
 def countlines(string):
     if not string:
         return 0
     else:
         nls = string.count('\n')
         return 1 if nls == 0 else nls
+## end function countlines
 
 
-# function indent
+## start function indent
 def indent(var, num=1):
     tabs = '\t' * int(num)
     var = var.replace("\n", "\n" + tabs).rstrip()
     print("%s%s" % (tabs, var))
+## end function indent
 
 
-# function get_git_repos
+## start function get_git_repos
 def get_git_repos():
     git_list = []
     home_path = os.path.expanduser("~/")
@@ -112,10 +116,10 @@ def get_git_repos():
     git_list = [os.path.dirname(g) for g in git_list]
 
     return git_list
-# end function get_git_repos
+## end function get_git_repos
 
 
-# function do_summary
+## start function do_summary
 def do_summary(report=True):
     hash_loc = run("git rev-parse @").output
     hash_rem = run("git ls-remote origin HEAD").output.partition('\t')[0]
@@ -132,9 +136,10 @@ def do_summary(report=True):
         elif val == 3: indent("Diverged")
 
     return val
+## end function do_summary
 
 
-# function pull_all
+## start function pull_all
 def pull_all():
     run("git fetch origin master").output
     log = run(
@@ -146,10 +151,10 @@ def pull_all():
     if run_status == 0:
         return 1
     return -1
-# end function pull_all
+## end function pull_all
 
 
-# function push_all
+## start function push_all
 def push_all():
     if ispush_all:
         remotes = run("git remote").output
@@ -159,9 +164,7 @@ def push_all():
             if push.excode == 0:
                 return 1
     return 0
-
-
-# function options
+## end function push_all
 
 
 ## start function cleanup
@@ -187,6 +190,7 @@ def cleanup():
 ## end function cleanup
 
 
+## start function options
 def options(argv):
     try:
         opts, args = getopt.getopt(argv, "hvldux:i:r:sSaR")
@@ -233,10 +237,10 @@ def options(argv):
         elif opt in ["-R", "--reset"]:
             ignore = []
             include = []
-# end function options
+## end function options
 
 
-# function usage
+## start function usage
 def usage():
     b = "\033[4m"
     n = "\033[0m"
@@ -258,78 +262,83 @@ amr = All My Repos. Perform actions on all repositories found on the machine.
 """
 
     print(helptext)
-# end function usage
+## end function usage
 
-options(sys.argv[1:])
+def main(argv):
     signal.signal(signal.SIGINT, sigint_handler)
+    options(sys.argv[1:])
 
-if isverbose:
-    print("Ignore List:")
-    for ig in ignore:
-        print("\t%s" % ig)
-    print("Include List:")
-    for ig in include:
-        print("\t%s" % ig)
-    print("")
+    if isverbose:
+        print("Ignore List:")
+        for ig in ignore:
+            print("\t%s" % ig)
+        print("Include List:")
+        for ig in include:
+            print("\t%s" % ig)
+        print("")
 
-if just_list:
+    if just_list:
+        for git_dir in get_git_repos():
+            print(git_dir)
+        sys.exit(0)
+
+    global current_dir
+    current_dir = os.getcwd()
+
     for git_dir in get_git_repos():
-        print(git_dir)
-    sys.exit(0)
+        add_nl = False
+        try:
+            os.chdir(git_dir)
+            verbose("[DEBUG] " + os.getcwd())
+        except OSError:
+            print("\033[0;31m%s: Folder not found.\033[0m" % git_dir)
+            continue
 
-current_dir = os.getcwd()
+        print("%s" % git_dir)
 
-for git_dir in get_git_repos():
-    add_nl = False
-    try:
-        os.chdir(git_dir)
-        verbose("[DEBUG] " + os.getcwd())
-    except OSError:
-        print("\033[0;31m%s: Folder not found.\033[0m" % git_dir)
-        continue
+        if summary:
+            do_summary()
+            continue
 
-    print("%s" % git_dir)
+        stat_cmd = "git -c color.status=always status --ignore-submodules --short"
+        status_output = run(stat_cmd).output
+        number_lines = countlines(status_output)
 
-    if summary:
-        do_summary()
-        continue
-
-    stat_cmd = "git -c color.status=always status --ignore-submodules --short"
-    status_output = run(stat_cmd).output
-    number_lines = countlines(status_output)
-
-    if number_lines > 0:
-        print("\tChanged %s" % number_lines)
-        indent(status_output)
-        add_nl = True
-
-    if len(custom_cmd) > 0:
-        if number_lines != 0 or cmd_always:
-            for cmd in custom_cmd:
-                call(cmd.split())
-
-    if start_shell:
-        if number_lines != 0 or cmd_always:
-            call(['zsh', '-i'])
-
-    log_cmd = "git log --color=always --branches --not --remotes --oneline"
-    ahead_output = run(log_cmd).output
-    number_ahead = countlines(ahead_output)
-    if number_ahead > 0:
-        print("\tAhead: %s" % (number_ahead))
-        indent(ahead_output)
-        add_nl = True
-        if push_all() == 1:
-            repos_pushed.append(git_dir)
-
-    if ispull_all and do_summary(False) == 1:
-        num_pulled_cur = pull_all()
-        if num_pulled_cur == 1:
+        if number_lines > 0:
+            print("\tChanged %s" % number_lines)
+            indent(status_output)
             add_nl = True
-            repos_pulled.append(git_dir)
-        elif num_pulled_cur == -1:
-            repos_conflict.append(git_dir)
 
-    if add_nl: print("")
+        if len(custom_cmd) > 0:
+            if number_lines != 0 or cmd_always:
+                for cmd in custom_cmd:
+                    call(cmd.split())
+
+        if start_shell:
+            if number_lines != 0 or cmd_always:
+                call(['zsh', '-i'])
+
+        log_cmd = "git log --color=always --branches --not --remotes --oneline"
+        ahead_output = run(log_cmd).output
+        number_ahead = countlines(ahead_output)
+        if number_ahead > 0:
+            print("\tAhead: %s" % (number_ahead))
+            indent(ahead_output)
+            add_nl = True
+            if push_all() == 1:
+                repos_pushed.append(git_dir)
+
+        if ispull_all and do_summary(False) == 1:
+            num_pulled_cur = pull_all()
+            if num_pulled_cur == 1:
+                add_nl = True
+                repos_pulled.append(git_dir)
+            elif num_pulled_cur == -1:
+                repos_conflict.append(git_dir)
+
+        if add_nl: print("")
+
     cleanup()
 
+if __name__ == "__main__":
+    main(sys.argv[1:])
