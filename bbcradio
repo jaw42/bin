@@ -5,4 +5,4 @@ PS3="Select a station: "
 select s in 1 2 3 4 5 6 7 ;do
     break
 done
-$player --cache-secs 15 -quiet -playlist "http://www.radiofeeds.co.uk/bbcradio"${s}".pls";
+$player --cache-secs 30 -quiet -playlist "http://www.radiofeeds.co.uk/bbcradio"${s}".pls";
