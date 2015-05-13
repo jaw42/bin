@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Fri 13 Feb 2015
-# Modified: Sun 26 Apr 2015
+# Modified: Wed 13 May 2015
 # Author:   Josh Wainwright
 # Filename: md.sh
 
@@ -14,11 +14,13 @@ exists() {
 exists markdown || exit 1
 
 poem=false
+cssfile=""
 [ "x$1" == "x-p" ] && poem=true && shift
+[ "x$1" == "x-c" ] && shift && cssfile="$1"
 
 mdfile=$(cat "$1")
-cssfile="${2:-}"
-htmlfile="${1%.*}.html"
+input="$@"
+htmlfile="${input%.*}.html"
 
 if $poem; then
 	mdfile=$(sed -e '2,$s#^#<br/>#' -e '/^<br\/>$/{N;s#<br/>##g}' <<< "$mdfile")
