@@ -18,8 +18,8 @@ cssfile=""
 [ "x$1" == "x-p" ] && poem=true && shift
 [ "x$1" == "x-c" ] && shift && cssfile="$1"
 
-mdfile=$(cat "$1")
 input="$@"
+mdfile=$(sed 's/£/\&pound;/' "$input")
 htmlfile="${input%.*}.html"
 
 if $poem; then
