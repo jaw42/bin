@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Fri 13 Feb 2015
-# Modified: Wed 13 May 2015
+# Modified: Thu 14 May 2015
 # Author:   Josh Wainwright
 # Filename: md.sh
 
@@ -18,8 +18,8 @@ cssfile=""
 [ "x$1" == "x-p" ] && poem=true && shift
 [ "x$1" == "x-c" ] && shift && cssfile="$1"
 
-mdfile=$(cat "$1")
 input="$@"
+mdfile=$(sed -e 's/\xA3/\&pound;/g' -e 's/\x20\xAC/\&euro;/g' "$input")
 htmlfile="${input%.*}.html"
 
 if $poem; then
