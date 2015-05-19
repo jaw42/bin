@@ -1,4 +1,5 @@
-//g++ -Wall -D{computer} -o send send.cpp
+//g++ -Wall -D{computer} -o dwmstatus.o dwmstatus.cpp
+// LAPTOP, DESKTOP, VMBOX
 
 #include <iostream>
 #include <cmath>
