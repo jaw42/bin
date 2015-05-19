@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Fri 13 Feb 2015
-# Modified: Thu 14 May 2015
+# Modified: Fri 15 May 2015
 # Author:   Josh Wainwright
 # Filename: md.sh
 
@@ -13,17 +13,21 @@ exists() {
 
 exists markdown || exit 1
 
+mdopts="-S"
+toc=false
 poem=false
 cssfile=""
+[ "x$1" == "x-t" ] && toc=true && shift
 [ "x$1" == "x-p" ] && poem=true && shift
-[ "x$1" == "x-c" ] && shift && cssfile="$1"
+[ "x$1" == "x-c" ] && shift && cssfile="$1" && shift
 
 input="$@"
-mdfile=$(sed -e 's/\xA3/\&pound;/g' -e 's/\x20\xAC/\&euro;/g' "$input")
 htmlfile="${input%.*}.html"
 
 if $poem; then
 	mdfile=$(sed -e '2,$s#^#<br/>#' -e '/^<br\/>$/{N;s#<br/>##g}' <<< "$mdfile")
+else
+	mdfile=$(cat "$input")
 fi
 
 if [ -z "$cssfile" ]; then
@@ -33,14 +37,20 @@ else
 	cssfile=$(cat $cssfile)
 fi
 
-tmp=$(printf "%s\n%s\n" "$cssfile" "$mdfile")
+$toc && mdopts="$mdopts -f toc -T"
+thehtml=$(markdown $mdopts <<< "$mdfile")
 
-markdown -S <<< "$tmp" > "$htmlfile"
+printf "%s\n%s\n%s\n%s\n" "$cssfile" "$thehtml" "</body>" "</html>" > "$htmlfile"
 
 exit 0
 # # # # # # # # # # # #
 ### START .CSS FILE ###
 #######################
+<!doctype html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8">
 <style type="text/css">
     * {
         margin: 0;
@@ -193,3 +203,5 @@ exit 0
         }
     }
 </style>
+</head>
+<body>
