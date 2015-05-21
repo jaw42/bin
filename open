@@ -175,6 +175,11 @@ verbose "There are $# arugument(s), they are $*."
 
 shift $((OPTIND-1))
 
+if [[ "$(uname)" = *"CYGWIN"* ]]; then
+	cygstart $@ $dump
+	exit 0
+fi
+
 # --------------------------------------------------------------
 # Program Specifying
 # --------------------------------------------------------------
