@@ -22,6 +22,7 @@ cssfile=""
 [ "x$1" == "x-c" ] && shift && cssfile="$1" && shift
 
 input="$@"
+mdfile=$(sed 's/£/\&pound;/' "$input")
 htmlfile="${input%.*}.html"
 
 if $poem; then
