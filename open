@@ -176,7 +176,7 @@ verbose "There are $# arugument(s), they are $*."
 shift $((OPTIND-1))
 
 if [[ "$(uname)" = *"CYGWIN"* ]]; then
-	cygstart $@ $dump
+	cygstart "$@" $dump
 	exit 0
 fi
 
@@ -192,7 +192,7 @@ if $programSpecify ; then
 	verbose "Executing specified program genre - ${!prog}"
 
 	shift $((OPTIND-1))
-	eval ${!prog} $@ $dump
+	eval ${!prog} "$@" $dump
 	exit
 fi
 
