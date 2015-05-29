@@ -1,6 +1,6 @@
-#!/bin/python
+#!/usr/bin/env python
 # Created:  Thu 16 Apr 2015
-# Modified: Thu 16 Apr 2015
+# Modified: Thu 28 May 2015
 # Author:   Josh Wainwright
 # Filename: massrename.py
 
