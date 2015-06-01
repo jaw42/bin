@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # Created:  Thu 28 May 2015
-# Modified: Fri 29 May 2015
+# Modified: Mon 01 Jun 2015
 # Author:   Josh Wainwright
 # Filename: md.py
 
-import os, sys, getopt, tempfile
+import os, sys, getopt, tempfile, re
 from subprocess import Popen, PIPE, STDOUT
 
 mdopts = '-S'
@@ -17,6 +17,12 @@ inputfiles = []
 def cleanfile(mdfile):
     with open(mdfile, 'r') as inp:
         mdcontents = inp.read()
+
+    mdcontentstmp = []
+    for line in mdcontents.split('\n'):
+        line = re.sub('(\[.*\])(.*)\.md\)', '\g<1>\g<2>.html)', line)
+        mdcontentstmp.append(line)
+    mdcontents = '\n'.join(mdcontentstmp)
 
     mdcontents = ifsong(mdcontents)
 
@@ -37,6 +43,7 @@ def ifsong(content):
 
 # start function domarkdown
 def domarkdown(mdfile, htmlfile):
+    global mdopts
     mdcontents = cleanfile(mdfile)
     mdcmd = 'markdown {}'.format(mdopts, mdcontents)
     p = Popen(['markdown', mdopts], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
@@ -64,6 +71,7 @@ def main(argv):
     htmlpath = ''
     global toc
     global song
+    global mdopts
     global cssfile
     global inputfiles
     for opt, arg in opts:
@@ -89,10 +97,11 @@ def main(argv):
         else:
             htmlfile = mdfile.replace('.md', '.html')
 
-        if 'Song' in htmlfile:
-            song = True
+        if 'Song' in htmlfile or 'Poem' in htmlfile:
+            if not 'index' in htmlfile:
+                song = True
 
-        print(mdfile + ' -> ' + htmlfile)
+        print('{} -> {} ({})'.format(mdfile, htmlfile, song))
         domarkdown(mdfile, htmlfile)
 # end function main
 

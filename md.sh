@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Fri 13 Feb 2015
-# Modified: Fri 15 May 2015
+# Modified: Thu 28 May 2015
 # Author:   Josh Wainwright
 # Filename: md.sh
 
@@ -30,6 +30,9 @@ if $poem; then
 else
 	mdfile=$(cat "$input")
 fi
+
+# Change file links from md to html
+mdfile=$(sed 's/\(\[.*\]\)\((.*\)\.md)/\1\2.html)/' <<< "$mdfile")
 
 if [ -z "$cssfile" ]; then
 	repl="###########"
