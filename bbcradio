@@ -2,7 +2,8 @@
 player=mpv
 
 PS3="Select a station: "
-select s in 1 2 3 4 5 6 7 ;do
-    break
-done
+#select s in 1 2 3 4 5 6 7 ;do
+#    break
+#done
+s=2
 $player --cache-secs 30 -quiet -playlist "http://www.radiofeeds.co.uk/bbcradio"${s}".pls";
