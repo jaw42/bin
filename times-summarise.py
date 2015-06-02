@@ -93,7 +93,7 @@ def s2h(s):
 
 # Write the results back to the file.
 def updatefile():
-    writefile = open('times.md', 'w')
+    writefile = open('times.txt', 'w')
     lnum = 0
     replace = True
     for line in lines:
@@ -144,7 +144,7 @@ printexisting = True
 if len(sys.argv) > 1 and sys.argv[1] == "-n":
     printexisting = False
 
-readfile = open(expanduser('~') + '/Documents/Details/times/times.md')
+readfile = open(expanduser('~') + '/Documents/Details/times/times.txt')
 lines = readfile.readlines()
 addedlines = []
 
