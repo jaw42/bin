@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Created:  Thu 28 May 2015
-# Modified: Mon 01 Jun 2015
+# Modified: Mon 08 Jun 2015
 # Author:   Josh Wainwright
 # Filename: md.py
 
@@ -95,9 +95,15 @@ def main(argv):
 
     for mdfile in inputfiles:
         if htmlpath:
-            htmlfile = htmlpath + '/' + mdfile.replace('.md', '.html')
+            if '.md' in mdfile:
+                htmlfile = htmlpath + '/' + mdfile.replace('.md', '.html')
+            else:
+                htmlfile = htmlpath + '/' + mdfile + '.html'
         else:
-            htmlfile = mdfile.replace('.md', '.html')
+            if '.md' in mdfile:
+                htmlfile = mdfile.replace('.md', '.html')
+            else:
+                htmlfile = mdfile + '.html'
 
         if 'Song' in htmlfile or 'Poem' in htmlfile:
             if not 'index' in htmlfile:
