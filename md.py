@@ -21,6 +21,8 @@ def cleanfile(mdfile):
     mdcontentstmp = []
     for line in mdcontents.split('\n'):
         line = re.sub('(\[.*\])(.*)\.md\)', '\g<1>\g<2>.html)', line)
+        if line.startswith('~ '):
+            line = '<br/>' + line[2:]
         mdcontentstmp.append(line)
     mdcontents = '\n'.join(mdcontentstmp)
 
