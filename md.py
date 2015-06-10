@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Created:  Thu 28 May 2015
-# Modified: Mon 08 Jun 2015
+# Modified: Wed 10 Jun 2015
 # Author:   Josh Wainwright
 # Filename: md.py
 
@@ -12,6 +12,22 @@ toc = False
 song = False
 cssfile = os.path.dirname(os.path.realpath(__file__)) + '/cssfile.css'
 inputfiles = []
+
+# start function usage
+def usage():
+    helptext = """md.py [-hts] [-p PATH] [-c CSSFILE] [-o OUTPUT] FILE
+
+    -h, --help  Show this help text
+    -t, --toc   Include a table of contents in generated html output
+    -s, --song  Format the html as a song or poem (likely to be removed)
+    -p PATH, --path=PATH
+                Use the value of PATH as the location to place the html file
+    -c CSSFILE, --css=CSSFILE
+                Use CSSFILE as the css for the generated html file
+    -o OUTPUT, --output=OUTPUT
+                Put the generated html into the file called OUTPUT.
+"""
+    print(helptext)
 
 # start function cleanfile
 def cleanfile(mdfile):
@@ -66,7 +82,7 @@ def domarkdown(mdfile, htmlfile):
 # start function main
 def main(argv):
     try:
-        opts, args = getopt.getopt(argv, 'tp:c:o:s', ['toc', 'path=', 'cssfile=', 'output=', 'song'])
+        opts, args = getopt.getopt(argv, 'htp:c:o:s', ['help', 'toc', 'path=', 'cssfile=', 'output=', 'song'])
     except getopt.GetoptError as opterr:
         print(str(opterr))
 
@@ -77,6 +93,9 @@ def main(argv):
     global cssfile
     global inputfiles
     for opt, arg in opts:
+        if opt in ('-h', '--help'):
+            usage()
+            sys.exit(1)
         if opt in ('-p', '--path'):
             htmlpath = arg
         elif opt in ('-o', '--output'):
