@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Created:  Thu 28 May 2015
-# Modified: Wed 10 Jun 2015
+# Modified: Fri 12 Jun 2015
 # Author:   Josh Wainwright
 # Filename: md.py
 
@@ -36,9 +36,16 @@ def cleanfile(mdfile):
 
     mdcontentstmp = []
     for line in mdcontents.split('\n'):
+
+        # Replace .md links with .html
         line = re.sub('(\[.*\])(.*)\.md\)', '\g<1>\g<2>.html)', line)
+
+        # Use ~ at start of line for poems
         if line.startswith('~ '):
             line = '<br/>' + line[2:]
+        if line.startswith('> ~ '):
+            line = '> <br/>' + line[4:]
+
         mdcontentstmp.append(line)
     mdcontents = '\n'.join(mdcontentstmp)
 
@@ -63,8 +70,8 @@ def ifsong(content):
 def domarkdown(mdfile, htmlfile):
     global mdopts
     mdcontents = cleanfile(mdfile)
-    mdcmd = 'markdown {}'.format(mdopts, mdcontents)
-    p = Popen(['markdown', mdopts], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+    #p = Popen(['markdown', mdopts], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+    p = Popen(['markdown'] + mdopts.split(), stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     mdcmdoutput = p.communicate(input=mdcontents)[0]
 
     try:
