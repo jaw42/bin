@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Created:  Thu 28 May 2015
-# Modified: Fri 12 Jun 2015
+# Modified: Mon 22 Jun 2015
 # Author:   Josh Wainwright
 # Filename: md.py
 
@@ -135,7 +135,7 @@ def main(argv):
             if not 'index' in htmlfile:
                 song = True
 
-        print('{} -> {} ({})'.format(mdfile, htmlfile, song))
+        print('{} -> {}'.format(mdfile, htmlfile))
         domarkdown(mdfile, htmlfile)
 # end function main
 
