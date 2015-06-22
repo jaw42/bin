@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # Created:  Mon 16 Mar 2015
-# Modified: Mon 11 May 2015
+# Modified: Mon 22 Jun 2015
 # Author:   Josh Wainwright
 # Filename: amr_python.py
 
@@ -316,7 +316,8 @@ def main(argv):
 
         if start_shell:
             if number_lines != 0 or cmd_always:
-                call(['zsh', '-i'])
+                shell = os.getenv('SHELL', '/bin/bash')
+                call([shell, '-i'])
 
         log_cmd = "git log --color=always --branches --not --remotes --oneline"
         ahead_output = run(log_cmd).output
