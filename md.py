@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Created:  Thu 28 May 2015
-# Modified: Mon 22 Jun 2015
+# Modified: Wed 24 Jun 2015
 # Author:   Josh Wainwright
 # Filename: md.py
 
@@ -69,10 +69,15 @@ def ifsong(content):
 # start function domarkdown
 def domarkdown(mdfile, htmlfile):
     global mdopts
-    mdcontents = cleanfile(mdfile)
-    #p = Popen(['markdown', mdopts], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    p = Popen(['markdown'] + mdopts.split(), stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    mdcmdoutput = p.communicate(input=mdcontents)[0]
+    if sys.version_info >= (3, 0):
+        mdcontents = cleanfile(mdfile).encode('utf8')
+        p = Popen(['markdown'] + mdopts.split(), stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+        mdcmdoutput = p.communicate(input=mdcontents)[0]
+        mdcmdoutput = mdcmdoutput.decode('utf8')
+    else:
+        mdcontents = cleanfile(mdfile)
+        p = Popen(['markdown'] + mdopts.split(), stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+        mdcmdoutput = p.communicate(input=mdcontents)[0]
 
     try:
         with open(cssfile, 'r') as cssin:
@@ -135,7 +140,7 @@ def main(argv):
             if not 'index' in htmlfile:
                 song = True
 
-        print('{} -> {}'.format(mdfile, htmlfile))
+        print('{} -> {}'.format(mdfile, htmlfile, song))
         domarkdown(mdfile, htmlfile)
 # end function main
 
