@@ -1,19 +1,14 @@
 #!/usr/bin/env python
 # Created:  Thu 16 Apr 2015
-# Modified: Thu 28 May 2015
+# Modified: Wed 08 Jul 2015
 # Author:   Josh Wainwright
 # Filename: massrename.py
 
-import sys
-import os
-import os.path
-import tempfile
+import sys, os, tempfile
+from subprocess import call
 
 if len(sys.argv) > 1:
     listin = sys.argv[1:]
-elif not sys.stdin.isatty():
-    listin = sys.stdin.readlines()
-    listin = [f.rstrip() for f in listin]
 else:
     listin = [f for f in os.listdir('.') if os.path.isfile(f)]
 
@@ -22,21 +17,20 @@ if len(listin) == 0:
     sys.exit(1)
 
 print("### Files to edit ###")
-for f in listin:
-    print(f)
+print('\n'.join(listin))
 print("#####################")
 
-tmpfile = tempfile.NamedTemporaryFile()
-for f in listin:
-    tmpfile.write(f + '\n')
-tmpfile.seek(0)
+EDITOR = os.environ.get('EDITOR', 'vim')
+with tempfile.NamedTemporaryFile() as tmpfile:
+    tmpfile.write('\n'.join(listin))
+    tmpfile.seek(0)
 
-os.system('vim ' + tmpfile.name)
+    call([EDITOR, tmpfile.name])
 
-listout = tmpfile.readlines()
-listout = [f.rstrip() for f in listout]
+    listout = tmpfile.readlines()
+    listout = [f.rstrip() for f in listout]
 
-if not len(listin) == len(listout):
+if len(listin) != len(listout):
     print("Don't add or delete lines")
     sys.exit(1)
 
