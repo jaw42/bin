@@ -1,17 +1,24 @@
 #!/usr/bin/env python
 # Created:  Thu 28 May 2015
-# Modified: Wed 24 Jun 2015
+# Modified: Tue 07 Jul 2015
 # Author:   Josh Wainwright
 # Filename: md.py
 
 import os, sys, getopt, tempfile, re
 from subprocess import Popen, PIPE, STDOUT
 
+verbose = False
 mdopts = '-S'
 toc = False
 song = False
 cssfile = os.path.dirname(os.path.realpath(__file__)) + '/cssfile.css'
 inputfiles = []
+
+# start function verboseprint
+def verboseprint(msg):
+    if verbose:
+        print(msg)
+# end function verboseprint
 
 # start function usage
 def usage():
@@ -108,6 +115,8 @@ def main(argv):
         if opt in ('-h', '--help'):
             usage()
             sys.exit(1)
+        if opt in ('-v', '--verbose'):
+            verbose = True
         if opt in ('-p', '--path'):
             htmlpath = arg
         elif opt in ('-o', '--output'):
@@ -138,9 +147,10 @@ def main(argv):
 
         if 'Song' in htmlfile or 'Poem' in htmlfile:
             if not 'index' in htmlfile:
+                verboseprint('Song = True')
                 song = True
 
-        print('{} -> {}'.format(mdfile, htmlfile, song))
+        verboseprint('{} -> {}'.format(mdfile, htmlfile))
         domarkdown(mdfile, htmlfile)
 # end function main
 
