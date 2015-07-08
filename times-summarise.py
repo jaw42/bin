@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Created:  Thu 19 Mar 2015
-# Modified: Thu 04 Jun 2015
+# Modified: Wed 08 Jul 2015
 # Author:   Josh Wainwright
 # Filename: times-summarise.py
 
@@ -145,7 +145,7 @@ def calcrange(s, e):
     avwhours = secs2ts(((avdend - avdstart) - (avlend - avlstart)) * 5)
     avlhours = secs2ts(avlend - avlstart)[-5:]
 
-    salyear = 26000
+    salyear = 26512
     salweek = salyear / (52 - 5)
     salday = salweek / 5
     salhour = salday / s2h(avdend - avdstart)
