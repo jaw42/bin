@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Created:  Thu 19 Mar 2015
-# Modified: Wed 08 Jul 2015
+# Modified: Mon 17 Aug 2015
 # Author:   Josh Wainwright
 # Filename: times-summarise.py
 
@@ -79,7 +79,7 @@ def updatefile(infile):
                 line = "#: Date:  " + time.strftime("%Y-%m-%d")
                 global s
             month_old = '01'
-        if replace:
+        if line.startswith('#: ') and replace:
             if line.startswith('#: Range'):
                 line = "#: Range:   " + str(s.dayrange).rjust(6)
             elif line.startswith('#: Day'):
