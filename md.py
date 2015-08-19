@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Created:  Thu 28 May 2015
-# Modified: Tue 07 Jul 2015
+# Modified: Mon 03 Aug 2015
 # Author:   Josh Wainwright
 # Filename: md.py
 
@@ -11,7 +11,7 @@ verbose = False
 mdopts = '-S'
 toc = False
 song = False
-cssfile = os.path.dirname(os.path.realpath(__file__)) + '/cssfile.css'
+basedir = ''
 inputfiles = []
 
 # start function verboseprint
@@ -33,6 +33,8 @@ def usage():
                 Use CSSFILE as the css for the generated html file
     -o OUTPUT, --output=OUTPUT
                 Put the generated html into the file called OUTPUT.
+    -b BASEDIR, --basedir=BASEDIR
+                Use the specified directory as the base for link references.
 """
     print(helptext)
 
@@ -90,18 +92,31 @@ def domarkdown(mdfile, htmlfile):
         with open(cssfile, 'r') as cssin:
             csscontent = cssin.read()
     except:
-        csscontent = ''
+        global basedir
+        csscontent = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<title>markdown to html</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="{0}/res/css.css"/>
+<script src="{0}/res/sorttable.js"></script>
+""".format(basedir)
+
+    htmlcontent = []
+    for line in mdcmdoutput.split('\n'):
+        line = line.replace('<table>', '<table class="sortable">')
+        htmlcontent.append(line)
 
     with open(htmlfile, 'w') as htmlout:
         htmlout.write(csscontent)
-        htmlout.write(mdcmdoutput)
+        htmlout.write('\n'.join(htmlcontent))
         htmlout.write('</body>\n</html>\n')
 # end function domarkdown
 
 # start function main
 def main(argv):
     try:
-        opts, args = getopt.getopt(argv, 'htp:c:o:s', ['help', 'toc', 'path=', 'cssfile=', 'output=', 'song'])
+        opts, args = getopt.getopt(argv, 'htp:c:o:sb:', ['help', 'toc', 'path=', 'cssfile=', 'output=', 'song', 'basedir='])
     except getopt.GetoptError as opterr:
         print(str(opterr))
 
@@ -111,6 +126,7 @@ def main(argv):
     global mdopts
     global cssfile
     global inputfiles
+    global basedir
     for opt, arg in opts:
         if opt in ('-h', '--help'):
             usage()
@@ -128,6 +144,9 @@ def main(argv):
             song = True
         elif opt in ('-c', '--cssfile'):
             cssfile = arg
+        elif opt in ('-b', '--basedir'):
+            basedir = arg
+            basedir = basedir.replace('/cygdrive/c', '')
         else:
             assert False, "unknown option"
 
