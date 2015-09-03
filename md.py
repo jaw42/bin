@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Created:  Thu 28 May 2015
-# Modified: Mon 03 Aug 2015
+# Modified: Thu 03 Sep 2015
 # Author:   Josh Wainwright
 # Filename: md.py
 
@@ -98,8 +98,10 @@ def domarkdown(mdfile, htmlfile):
 <head>
 <title>markdown to html</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" type="text/css" href="{0}/res/css.css"/>
-<script src="{0}/res/sorttable.js"></script>
+<link rel="stylesheet" type="text/css" href="{0}res/css.css"/>
+<link rel="stylesheet" type="text/css" href="/res/css.css"/>
+<script src="{0}res/sorttable.js"></script>
+<script src="/res/sorttable.js"></script>
 """.format(basedir)
 
     htmlcontent = []
