@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Tue 01 Sep 2015
-# Modified: Tue 01 Sep 2015
+# Modified: Tue 15 Sep 2015
 # Author:   Josh Wainwright
 # Filename: define
 
@@ -8,8 +8,10 @@ dictfile=~/.dictionary.txt
 
 if [ -e ${dictfile} ]; then
 	w=$1
-	while [ ${#w} -gt 3 ]; do
-		grep -i "^${w}" ${dictfile}
+	first_try=true
+	while [ $first_try -o ${#w} -gt 3 ]; do
+		first_try=false
+		grep --color=always -i "^${w}" ${dictfile}
 		if [ $? -eq 0 ]; then
 			break
 		fi
