@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Created:  Thu 28 May 2015
-# Modified: Thu 03 Sep 2015
+# Modified: Wed 30 Sep 2015
 # Author:   Josh Wainwright
 # Filename: md.py
 
@@ -96,13 +96,13 @@ def domarkdown(mdfile, htmlfile):
         csscontent = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html lang="en">
 <head>
-<title>markdown to html</title>
+<title>{1}</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" type="text/css" href="{0}res/css.css"/>
 <link rel="stylesheet" type="text/css" href="/res/css.css"/>
 <script src="{0}res/sorttable.js"></script>
 <script src="/res/sorttable.js"></script>
-""".format(basedir)
+""".format(basedir, mdfile)
 
     htmlcontent = []
     for line in mdcmdoutput.split('\n'):
@@ -123,6 +123,7 @@ def main(argv):
         print(str(opterr))
 
     htmlpath = ''
+    htmlfile = ''
     global toc
     global song
     global mdopts
@@ -155,21 +156,17 @@ def main(argv):
     inputfiles = args
 
     for mdfile in inputfiles:
-        if htmlpath:
-            if '.md' in mdfile:
-                htmlfile = htmlpath + '/' + mdfile.replace('.md', '.html')
+        if not htmlfile:
+            if htmlpath:
+                if '.md' in mdfile:
+                    htmlfile = htmlpath + '/' + mdfile.replace('.md', '.html')
+                else:
+                    htmlfile = htmlpath + '/' + mdfile + '.html'
             else:
-                htmlfile = htmlpath + '/' + mdfile + '.html'
-        else:
-            if '.md' in mdfile:
-                htmlfile = mdfile.replace('.md', '.html')
-            else:
-                htmlfile = mdfile + '.html'
-
-        if 'Song' in htmlfile or 'Poem' in htmlfile:
-            if not 'index' in htmlfile:
-                verboseprint('Song = True')
-                song = True
+                if '.md' in mdfile:
+                    htmlfile = mdfile.replace('.md', '.html')
+                else:
+                    htmlfile = mdfile + '.html'
 
         verboseprint('{} -> {}'.format(mdfile, htmlfile))
         domarkdown(mdfile, htmlfile)
