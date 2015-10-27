@@ -8,7 +8,10 @@ import sys, os, tempfile
 from subprocess import call
 
 if len(sys.argv) > 1:
-    listin = sys.argv[1:]
+    if sys.argv[1] == '-r':
+        listin = [os.path.join(dp, f) for dp, dn, fn in os.walk('.') for f in fn]
+    else:
+        listin = sys.argv[1:]
 else:
     listin = [f for f in os.listdir('.') if os.path.isfile(f)]
 
