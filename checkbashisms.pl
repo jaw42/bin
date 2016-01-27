@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 # This script is essentially copied from /usr/share/lintian/checks/scripts,
 # which is:
@@ -21,6 +21,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 use strict;
+use warnings;
 use Getopt::Long qw(:config gnu_getopt);
 use File::Temp qw/tempfile/;
 
@@ -80,7 +81,7 @@ my $status = 0;
 my $makefile = 0;
 my (%bashisms, %string_bashisms, %singlequote_bashisms);
 
-my $LEADIN = qr'(?:(?:^|[`&;(|{])\s*|(?:if|then|do|while|shell)\s+)';
+my $LEADIN = qr'(?:(?:^|[`&;(|{])\s*|(?:(?:if|elif|while)(?:\s+!)?|then|do|shell)\s+)';
 init_hashes;
 
 my @bashisms_keys = sort keys %bashisms;
@@ -138,10 +139,10 @@ foreach my $filename (@ARGV) {
 	next unless ($check_lines_count == -1 or $. <= $check_lines_count);
 
 	if ($. == 1) { # This should be an interpreter line
-	    if (m,^\#!\s*(\S+),) {
+	    if (m,^\#!\s*(?:\S+/env\s+)?(\S+),) {
 		my $interpreter = $1;
 
-		if ($interpreter =~ m,/make$,) {
+		if ($interpreter =~ m,(?:^|/)make$,) {
 		    init_hashes if !$makefile++;
 		    $makefile = 1;
 		} else {
@@ -150,10 +151,10 @@ foreach my $filename (@ARGV) {
 		}
 		next if $opt_force;
 
-		if ($interpreter =~ m,/bash$,) {
+		if ($interpreter =~ m,(?:^|/)bash$,) {
 		    $mode = 1;
 		}
-		elsif ($interpreter !~ m,/(sh|posh)$,) {
+		elsif ($interpreter !~ m,(?:^|/)(sh|dash|posh)$,) {
 ### ksh/zsh?
 		    warn "script $display_filename does not appear to be a /bin/sh script; skipping\n";
 		    $status |= 2;
@@ -547,7 +548,7 @@ sub script_is_evil_and_wrong {
 	    # Finally the whole subexpression may be omitted for scripts
 	    # which do not pass on their parameters (i.e. after re-execing
 	    # they take their parameters (and potentially data) from stdin
-	    .?(\${1:?\+.?)?(\$(\@|\*))?~x) {
+	    .?(\$\{1:?\+.?)?(\$(\@|\*))?~x) {
             $ret = $. - 1;
             last;
         } elsif (/^\s*(\w+)=\$0;/) {
@@ -560,7 +561,7 @@ sub script_is_evil_and_wrong {
 	    # As above
 	    .?\$$var.?\s*
 	    (--\s*)?
-	    .?(\${1:?\+.?)?(\$(\@|\*))?.?\s*\&~x) {
+	    .?(\$\{1:?\+.?)?(\$(\@|\*))?.?\s*\&~x) {
 
 	    $backgrounded = 1;
 	} elsif ($backgrounded and m~
@@ -643,7 +644,7 @@ sub init_hashes {
 	qr';;?&' =>  q<;;& and ;& special case operators>,
 	$LEADIN . qr'jobs\s' =>  q<jobs>,
 #	$LEADIN . qr'jobs\s+-[^lp]\s' =>  q<'jobs' with option other than -l or -p>,
-	$LEADIN . qr'command\s+-[^pv]\s' =>  q<'command' with option other than -p or -v>,
+	$LEADIN . qr'command\s+-[^p]\s' =>  q<'command' with option other than -p>,
 	$LEADIN . qr'setvar\s' =>  q<setvar 'foo' 'bar' should be eval 'foo="'"$bar"'"'>,
 	$LEADIN . qr'trap\s+["\']?.*["\']?\s+.*(?:ERR|DEBUG|RETURN)' => q<trap with ERR|DEBUG|RETURN>,
 	$LEADIN . qr'(?:exit|return)\s+-\d' => q<exit|return with negative status code>,
@@ -688,7 +689,7 @@ sub init_hashes {
 	qr'\$\(\([\s\w$*/+-]*\w\-\-.*?\)\)'   => q<'$((n--))' should be '$n; $((n=n-1))'>,
 	qr'\$\(\([\s\w$*/+-]*\-\-\w.*?\)\)'   => q<'$((--n))' should be '$((n=n-1))'>,
 	qr'\$\(\([\s\w$*/+-]*\*\*.*?\)\)'   => q<exponentiation is not POSIX>,
-	$LEADIN . qr'printf\s["\'][^"\']+?%[qb].+?["\']' => q<printf %q|%b>,
+	$LEADIN . qr'printf\s["\'][^"\']*?%[qb].+?["\']' => q<printf %q|%b>,
     );
 
     %singlequote_bashisms = (
