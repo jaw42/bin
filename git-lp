@@ -1,0 +1,39 @@
+#!/bin/bash
+# Created:  2016-04-18
+# Modified: Fri 29 Apr 2016-04-18
+# Author:   Josh Wainwright
+# Filename: git-log.sh
+
+function input() {
+	case $1 in
+		$'\e') exit 1 ;;
+		q) exit 1 ;;
+		J) increment 10 ;;
+		j) increment 1 ;;
+		K) increment -10 ;;
+		k) increment -1 ;;
+		g) x=1 ;;
+		*) increment 1 ;;
+	esac
+}
+
+function increment() {
+	local tmp=$((x + $1))
+	if [ $tmp -lt 0 ]; then
+		x=1
+		return
+	else
+		x=$tmp
+	fi
+}
+
+x=${1:-0}
+increment 0
+
+while true; do
+	clear
+	git log -a -p -n 1 HEAD~$x
+	read -N 1 -s char
+	input $char
+	echo $char $x
+done
