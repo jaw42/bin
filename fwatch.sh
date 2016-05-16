@@ -21,9 +21,8 @@ else
     echo "command:  $cmd"
 fi
 
-previous_checksum="dummy"
+previous_checksum=""
 while [ 1 ]; do
-    # I use Mac so I have `md5`, in linux it's `md5sum`
     checksum=$(cksum $files | cksum)  
     if [ "$checksum" != "$previous_checksum" ]; then
 		date
