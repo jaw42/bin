@@ -2,7 +2,7 @@
 # Usage: colordump
 # Dump 256 ansi colors to the terminal.
 
-printf "How each ANSI color is displayed on your terminal:\n\n"
+printf "ANSI Colours:\n-------------\n\n"
 
 i=0
 row=0
@@ -16,3 +16,22 @@ done
 
 printf '\n\n     e.g., "\\e[41mTEXT\\e[0m" '
 printf "\e[41m(for TEXT like this)\e[0m\n"
+
+printf "\n256 Colours:\n------------\n\n"
+
+i=0
+row=0
+while [ $i -lt 255 ]; do
+    newrow=$((i / 10))
+    [ $newrow -ne $row ] && printf "\n"
+    row=$newrow
+	printf "\e[38;5;%dm %03d \e[0m" $i $i
+	printf "\e[48;5;%dm %03d \e[0m" $i $i
+	i=$((i + 1))
+done
+
+printf '\n\n    e.g., "\\e[38;5;24mTEXT\\[e0m" '
+printf "\e[38;5;24m(for TEXT like this)\e[0m\n"
+
+printf '    e.g., "\\e[48;5;24mTEXT\\[e0m" '
+printf "\e[48;5;24m(for TEXT like this)\e[0m\n"
