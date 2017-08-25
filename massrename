@@ -1,19 +1,14 @@
 #!/usr/bin/env python
 # Created:  Thu 16 Apr 2015
-# Modified: Wed 08 Jul 2015
+# Modified: Tue 06 Jun 2017
 # Author:   Josh Wainwright
 # Filename: massrename.py
 
-import sys, os, tempfile
+import sys, os
+from tempfile import NamedTemporaryFile
 from subprocess import call
 
-if len(sys.argv) > 1:
-    if sys.argv[1] == '-r':
-        listin = [os.path.join(dp, f) for dp, dn, fn in os.walk('.') for f in fn]
-    else:
-        listin = sys.argv[1:]
-else:
-    listin = [f for f in os.listdir('.') if os.path.isfile(f)]
+listin = [f for f in os.listdir('.') if os.path.isfile(f)]
 
 if len(listin) == 0:
     print("No files to rename")
@@ -23,13 +18,13 @@ print("### Files to edit ###")
 print('\n'.join(listin))
 print("#####################")
 
-EDITOR = os.environ.get('EDITOR', 'vim')
-with tempfile.NamedTemporaryFile() as tmpfile:
-    tmpfile.write('\n'.join(listin))
-    tmpfile.seek(0)
+tmpfile = NamedTemporaryFile()
+tmpfile.write('\n'.join(listin))
+tmpfile.seek(0)
 
-    call([EDITOR, tmpfile.name])
+call([os.environ.get('EDITOR', 'vim'), tmpfile.name])
 
+with open(tmpfile.name, 'r') as tmpfile:
     listout = tmpfile.readlines()
     listout = [f.rstrip() for f in listout]
 

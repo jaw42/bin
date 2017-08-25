@@ -84,7 +84,8 @@ int main(int argc, char *argv[]) {
 
 	checkFolders();
 	concatenate();
-	popen("xsetroot -name \"$(tr -cd '\11\12\15\40-\176' < /tmp/dwm_status_bar/content)\"", "r");
+	/* popen("xsetroot -name \"$(tr -cd '\11\12\15\40-\176' < /tmp/dwm_status_bar/content)\"", "r"); */
+	popen("xsetroot -name \"$(cat < /tmp/dwm_status_bar/content)\"", "r");
 
 	return 0;
 }

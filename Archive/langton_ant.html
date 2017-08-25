@@ -1,0 +1,121 @@
+<!--
+Created:  Mon 05 Sep 2016
+Modified: Mon 05 Sep 2016
+Author:   Josh Wainwright
+Filename: rndmwlk.html
+-->
+
+<!DOCTYPE html>
+<html>
+<style>
+body {
+	margin:0;
+}
+canvas {
+	display: block;
+	width: 99vw;
+	height: 99vh;
+}
+</style>
+<body>
+
+<canvas id="myCanvas" width="1000" height="1000">
+Your browser does not support the HTML5 canvas tag.
+
+<script>
+window.requestAnimFrame = (function(callback) {
+	return function(callback) {
+		window.setTimeout(callback, 0);
+	};
+})();
+
+var color = ["black", "red", "blue", "green"];
+var color = 0;
+function drawLine(ctx, x, y, col) {
+	imd[0] = col;
+	imd[1] = col;
+	imd[2] = col;
+	imd[3] = 255;
+	ctx.putImageData(imagedata, x, y );    
+}
+
+function turnleft() {
+	Pos.dir = ( ( Pos.dir - 1 ) % 4 + 4 ) % 4; 
+}
+function turnright() {
+	Pos.dir = ( Pos.dir + 1 ) % 4
+}
+function forward() {
+}
+
+function animate(Pos, ctx) {
+	var data = ctx.getImageData(Pos.x, Pos.y, 1, 1).data;
+	if (data[0] == 0) {
+		drawLine(ctx, Pos.x, Pos.y, 255);
+		turnright()
+	} else if (data[0] == 255) {
+		drawLine(ctx, Pos.x, Pos.y, 0);
+		turnleft()
+	}
+
+	var x_new = Pos.x;
+	var y_new = Pos.y;
+	if (Pos.dir == 0) {
+		y_new = Pos.y - 1;
+	} else if (Pos.dir == 1) {
+		x_new = Pos.x + 1;
+	} else if (Pos.dir == 2) {
+		y_new = Pos.y + 1;
+	} else if (Pos.dir == 3) {
+		x_new = Pos.x - 1;
+	} else {
+		alert('Error: direction is ' + Pos.dir)
+	}
+	
+	if (x_new < 0) {
+		x_new = Pos.x + arr[1];
+	} else if (x_new > Pos.max_x) {
+		x_new = Pos.x + arr[0];
+	} 
+	if (y_new < 0) {
+		y_new = Pos.y + arr[1];
+	} else if (y_new > Pos.max_y) {
+		y_new = Pos.y + arr[0];
+	}
+	//console.log('x: ' + Pos.x + ' y: ' + Pos.y);
+	Pos.x = x_new;
+	Pos.y = y_new;
+	
+	//requestAnimFrame(function() {
+	//	animate(Pos, ctx);
+	//});
+}
+
+var canvas = document.getElementById('myCanvas');
+var ctx = canvas.getContext('2d');
+
+ctx.canvas.width = window.innerWidth;
+ctx.canvas.height = window.innerHeight;
+
+var arr = [-1, 1]
+var Pos = {
+	dir: 0,
+	x: canvas.width/2,
+	y: canvas.height/2,
+	max_x: canvas.width,
+	max_y: canvas.height,
+};
+
+var imagedata = ctx.createImageData(1,1);
+var imd  = imagedata.data;
+
+ctx.moveTo(Pos.x, Pos.y);
+
+setInterval(function() {animate(Pos, ctx);}, 1);
+
+</script>
+
+</canvas>
+
+</body>
+</html>

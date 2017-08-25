@@ -29,7 +29,7 @@ while [ 1 ]; do
         eval "$cmd"
     fi
     previous_checksum="$checksum"
-    sleep 1
+    sleep 5
 done
 
 

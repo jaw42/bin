@@ -1,8 +1,12 @@
 #!/bin/bash
 # Created:  2016-04-18
-# Modified: Fri 29 Apr 2016-04-18
+# Modified: Wed 07 Dec 2016
 # Author:   Josh Wainwright
 # Filename: git-log.sh
+
+printf ':GitLP\n' | vis && stty sane
+
+exit 0
 
 function input() {
 	case $1 in
@@ -20,8 +24,7 @@ function input() {
 function increment() {
 	local tmp=$((x + $1))
 	if [ $tmp -lt 0 ]; then
-		x=1
-		return
+		x=0
 	else
 		x=$tmp
 	fi
@@ -31,9 +34,12 @@ x=${1:-0}
 increment 0
 
 while true; do
+	#git log -a -p -n 1 HEAD~$x
+	c=$(git show --pretty=format:%H --no-patch HEAD~$x)
+	show=$(git show --no-patch --color $c)
+	diff=$(git --no-pager diff --color $c^ $c)
 	clear
-	git log -a -p -n 1 HEAD~$x
+	printf "%s\n\n%s\n" "$show" "$diff" | less -R -F -X -S
 	read -N 1 -s char
 	input $char
-	echo $char $x
 done

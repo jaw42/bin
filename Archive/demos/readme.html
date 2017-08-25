@@ -1,0 +1,151 @@
+<h1>Demos</h1>
+<p>Here are a number of demo scripts that show interesting behaviour or
+demonstrate some purpose. Often they show the difference in performance
+or time for different methods of doing the same thing.</p>
+<ul>
+<li><code>shell_true_false.py</code></li>
+<li><code>min_max.lua</code></li>
+<li><code>get_year.lua</code></li>
+<li><code>hash.lua</code></li>
+<li><code>string_print.lua</code></li>
+<li><code>date2secs.lua</code></li>
+<li><code>str-concat.lua</code></li>
+<li><code>builtin_extern.sh</code></li>
+</ul>
+<h2><code>shell_true_false.py</code></h2>
+<p>Python can start an external command using the <code>subprocess.Popen(...)</code>
+command. This takes an optional argument <code>shell</code> which is either <code>True</code>
+or <code>False</code>.</p>
+<p>When true, the shell is used to run the command, ie <code>sh -c cmd</code>, when
+false, the command is run directly but the command must be passed as
+a list with the command name itself as the first element and arguments
+after.</p>
+<p>This script shows the effect of shell being true vs false.</p>
+<p><strong>Linux</strong></p>
+<pre><code>Shell is True
+99
+Average time: 0.00100619530678
+Shell is False
+99
+Average time: 0.00113763618469
+</code></pre>
+<p><strong>Cygwin</strong></p>
+<pre><code>Shell is True
+99
+Average time: 0.0242535800934
+Shell is False
+99
+Average time: 0.0195034759045
+</code></pre>
+<p>Interestingly, <code>shell=True</code> takes a shorter time under Linux, but a
+longer time under cygwin.</p>
+<h2><code>builtin_extern.sh</code></h2>
+<p>This script compares the effect of using bash builtin string manipulation
+vs using calls to external programs. This is primarily aimed at showing
+the effect of calling many external programs when running under cygwin
+since the overhead of <code>fork()</code>ing there is much higher.</p>
+<p>The script counts the number of newlines in a string, first by replacing
+everything not a newline with nothing then counting the number of
+characters and second by piping the string to <code>wc -l</code>.</p>
+<p><strong>Linux</strong></p>
+<pre><code>1000 : 6
+real    0m0.125s
+user    0m0.040s
+sys     0m0.008s
+1000 : 6
+real    0m1.853s
+user    0m0.048s
+sys     0m0.064s
+</code></pre>
+<p><strong>Cygwin</strong></p>
+<pre><code>1000 : 6
+real    0m0.076s
+user    0m0.062s
+sys     0m0.000s
+1000 : 6
+real    0m43.631s
+user    0m6.101s
+sys     0m16.383s
+</code></pre>
+<p>The difference between builtin vs external calls is much smaller under
+Linux, but is still noticable.</p>
+<h2><code>str-concat.lua</code></h2>
+<p>There are different ways of generating a string which is composed of
+several pieces. This script shows the relative time to make a string
+out of several components by:</p>
+<ol>
+<li>explicitly concatenating them together with the lua <code>..</code>
+concatenation operator</li>
+<li>use <code>table.concat</code> to join the table of components</li>
+<li>use <code>sting.format</code> with a format string set.</li>
+</ol>
+<pre><code>n = 1000000
+String concat: 0.234
+Table concat: 0.468
+String format: 1.31
+</code></pre>
+<p>The time to join the strings will depend on the strings themselves and
+the number, but for this example, explicit is considerably faster.</p>
+<h2><code>date2secs.lua</code></h2>
+<p>Converting a string containing a date/time to seconds since the unix
+epoch is really just a case of getting the right numbers for the right
+positions in the string. Here, we test the speed of matching those
+numbers vs just using the positions directly.</p>
+<pre><code>n = 1000000
+Match: 0.624
+Match2: 0.561
+Sub: 0.546
+</code></pre>
+<p>Matching is marginally slower, but in many cases would provide the better
+readability of the code so would be chosen. Selecting parts of the string
+by index can quickly lead to unmaintainability.</p>
+<h2><code>string_print.lua</code></h2>
+<p>Printing a large amount of text has a performance impact. We have
+the choice to either print the text as it is available, or to save it
+together and print it all at once. Here, we test both, for a short and
+for longer strings.</p>
+<pre><code>str lenght = 1
+Immediate write: 0.998
+Table collect then write: 0.328
+
+str lenght = 1001
+Immediate write: 0.967
+Table collect then write: 2.06
+</code></pre>
+<p>For the case where the individual strings are short, it is faster to
+store them up and print alogether. For longer strings, however, the
+performace impact of creating the table with many large strings and then
+concatenating them together becomes important.</p>
+<h2><code>hash.lua</code></h2>
+<p>Implementation of some simple string hashing algorithms with demonstration
+of the collision rate for a dictionary of strings.</p>
+<h2><code>get_year.lua</code></h2>
+<p>Comparison of three different methods of obtaining the current year
+as an integer, returning a table of values and extracting the relavent
+member, generating the year as a string and converting to a number or
+manual calculation based on the number of seconds in a year. Each could
+be modified to return other values.</p>
+<pre><code>1487695221      2017, 2017, 2017
+date table:     1.232 seconds
+date tonumber:  0.718 seconds
+manual calc:    0.015 seconds
+</code></pre>
+<p>Cleary, the manual calcuation is easily the fastest. The date table has
+to create a whole table of values just for the single interesting one,
+so is inefficient. Using <code>tonumber()</code> is faster as only the relavent
+value is created, but it does involve strings which slow it down. The
+manual method is crude and approximate but very fast by comparison.</p>
+<h2><code>min_max.lua</code></h2>
+<p>Recording the current highest or lowest seen value is common when
+iterating through an unsorted list. The different methods of checking
+the new value against the current high/low value are tested here.</p>
+<pre><code>Func global     1.154   10      10000000
+Func local      0.78    10      10000000
+Ternary         0.203   10      10000000
+Comparison      0.203   10      10000000
+</code></pre>
+<p>Making a global call the <code>math.min</code> or <code>math.max</code> is by far the slowest
+due to the global variable lookup and the cost of the function call. The
+added complexity of the approximated lua ternary expression
+(<code>x = A and x or y</code>) does not add enough benefit. By far the fastest is
+the simple <code>if</code> check.</p>

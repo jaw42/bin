@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created:  Wed 04 Feb 2015
-# Modified: Mon 22 Jun 2015
+# Modified: Sat 10 Sep 2016
 # Author:   Josh Wainwright
 # Filename: lsall
 set -o nounset
@@ -25,14 +25,70 @@ the location specified by DIR, ignoring common version control specific files.
 printf "$helptext"
 }
 
-ftype="-type f"
+##ftype="-type f"
+##filesfile=false
+##verbose=false
+##maxdepth=""
+##cntout=true
+##while getopts "dfvhm:n" opt; do
+##	case "$opt" in
+##		d) ftype="-type d" ;;
+##		f) filesfile=true ;;
+##		v) verbose=true ;;
+##		h) usage && exit 0 ;;
+##		m) maxdepth="-maxdepth $OPTARG" ;;
+##		n) cntout=false ;;
+##		*) echoerr "Flag "$opt" not recognised."
+##			exit 1
+##			;;
+##	esac
+##done
+##shift $((OPTIND-1))
+##
+##path="${@:-.}"
+##eval $filesfile && path=$(pwd)"/"
+##
+##cmd="find "$path" "$maxdepth" \
+##         \( \
+##            -name .svn -o -name .git -o -name .hg -o -name .bzr \
+##         \) \
+##       -prune -o \
+##         \( \
+##            -path \"*/vim/tmp\" -o \
+##            -path \"*/.config/cygwin\" -o \
+##            -path \"*/.cache\" -o \
+##            -path '*\$Recycle.Bin*' \
+##         \) \
+##       -prune -o \
+##         \( \
+##            -name .\#\*   -o -name \*.o     -o -name \*\~   -o -name \*.bin -o \
+##            -name \*.lbin -o -name \*.so    -o -name \*.a   -o -name \*.ln  -o \
+##            -name \*.blg  -o -name \*.bbl   -o -name \*.elc -o -name \*.lof -o \
+##            -name \*.glo  -o -name \*.idx   -o -name \*.lot -o -name \*.fmt -o \
+##            -name \*.tfm  -o -name \*.class -o -name \*.fas -o -name \*.lib -o \
+##            -name \*.fasl -o -name \*.ufsl  -o -name \*.fsl -o -name \*.dxl -o \
+##            -name \*.la   -o -name \*.gmo   -o -name \*.mo  -o -name \*.toc -o \
+##            -name \*.aux  -o -name \*.cp    -o -name \*.fn  -o -name \*.ky  -o \
+##            -name \*.pg   -o -name \*.tp    -o -name \*.vr  -o -name \*.cps -o \
+##            -name \*.fns  -o -name \*.kys   -o -name \*.pgs -o -name \*.tps -o \
+##            -name \*.vrs  -o -name \*.pyc   -o -name \*.pyo \
+##          \) \
+##       -prune -o \
+##       \( $ftype -print \)"
+##
+##if [ "$ftype" = "-type d" ]; then
+##	cmd="($cmd; find "$path" "$maxdepth" -name \".git\" -type d)"
+##fi
+##
+
+ftype="f"
 filesfile=false
 verbose=false
 maxdepth=""
 cntout=true
 while getopts "dfvhm:n" opt; do
 	case "$opt" in
-		d) ftype="-type d" ;;
+		d) ftype="d" ;;
 		f) filesfile=true ;;
 		v) verbose=true ;;
 		h) usage && exit 0 ;;
@@ -48,39 +104,18 @@ shift $((OPTIND-1))
 path="${@:-.}"
 eval $filesfile && path=$(pwd)"/"
 
-cmd="find "$path" "$maxdepth" \
-         \( \
-            -name .svn -o -name .git -o -name .hg -o -name .bzr \
-         \) \
-       -prune -o \
-         \( \
-            -path \"*/vim/tmp\" -o \
-            -path \"*/.config/cygwin\" -o \
-            -path \"*/.cache\" -o \
-            -path '*\$Recycle.Bin*' \
-         \) \
-       -prune -o \
-         \( \
-            -name .\#\*   -o -name \*.o     -o -name \*\~   -o -name \*.bin -o \
-            -name \*.lbin -o -name \*.so    -o -name \*.a   -o -name \*.ln  -o \
-            -name \*.blg  -o -name \*.bbl   -o -name \*.elc -o -name \*.lof -o \
-            -name \*.glo  -o -name \*.idx   -o -name \*.lot -o -name \*.fmt -o \
-            -name \*.tfm  -o -name \*.class -o -name \*.fas -o -name \*.lib -o \
-            -name \*.fasl -o -name \*.ufsl  -o -name \*.fsl -o -name \*.dxl -o \
-            -name \*.la   -o -name \*.gmo   -o -name \*.mo  -o -name \*.toc -o \
-            -name \*.aux  -o -name \*.cp    -o -name \*.fn  -o -name \*.ky  -o \
-            -name \*.pg   -o -name \*.tp    -o -name \*.vr  -o -name \*.cps -o \
-            -name \*.fns  -o -name \*.kys   -o -name \*.pgs -o -name \*.tps -o \
-            -name \*.vrs  -o -name \*.pyc   -o -name \*.pyo \
-          \) \
-       -prune -o \
-       \( $ftype -print \)"
-
-if [ "$ftype" = "-type d" ]; then
-	cmd="($cmd; find "$path" "$maxdepth" -name \".git\" -type d)"
+opt="-F"
+if [ "$ftype" = "d" ]; then
+	opt="-d"
 fi
 
-cmd="$cmd | sed 's#^./##'"
+cmd="tree $path -afx $opt -I '\.git|\.svn|tmp|\.cache|cygwin' -q -U -in --noreport"
+
+if [ "$ftype" = "f" ]; then
+	cmd="$cmd | grep -v '/$'"
+fi
+
+cmd="$cmd | sed -e 's#^./##' -e 's/\*$//'"
 
 if $filesfile; then
 	cmd="$cmd | sed \"s#^$HOME/#~/#\""
