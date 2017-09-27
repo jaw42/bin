@@ -13,6 +13,8 @@ or time for different methods of doing the same thing.
 - `get_year.lua`
 - `min_max.lua`
 - `string_find.lua`
+- `string_letter_iterator.lua`
+- `neighbours.lua`
 
 `shell_true_false.py`
 ---------------------
@@ -198,8 +200,38 @@ the simple `if` check.
 
 In Lua, the `string.find()` function can be passed an option fourth
 argument, `plain` which restricts the find operation to plain text (ignore
-patterns). The it is expected that the performance of a plain text search
+patterns). It is expected that the performance of a plain text search
 is bettern than a pattern search when no patterns are being searched for.
 
 	Patterns enabled        4.04
 	Patterns disabled       3.697
+
+`string_letter_iterator.lua`
+----------------------------
+
+To iterate through the letters in a string, a simple `for` loop using
+`sub()` can be used, or the string functions `gmatch` or `gsub` can be
+used with a pattern of a single character, `.`. The overhead from the
+multiple function calls when using `gsub` makes it perform poorest. For
+short strings, the `for` loop is marginally more performant than
+`gmatch`. For longer strings, there is very little difference.
+
+Short string:
+
+	for loop        0.187
+	gmatch          0.218
+	gsub            0.343
+
+Long string:
+
+	gmatch          2.496
+	for loop        2.776
+	gsub            4.103
+
+`neighbours.lua`
+----------------
+
+Simple demo using an algorithm to generate a set of random coordinates
+that are evenly spaced apart from each other. Generates a number of
+trail points, then works out which of those is the furthest away from
+all of the existing points that have so been accepted.

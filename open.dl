@@ -1,6 +1,6 @@
--- Modified: 2017-02-07
+-- Modified: Mon 04 Sep 2017
 return {
-	{"%.pdf$", "/cygdrive/c/progs/PortableApps/SumatraPDFPortable/SumatraPDFPortable.exe"},
+	{"%.pdf$", "/cygdrive/c/progs/PortableApps/SumatraPDFPortable/App/SumatraPDFPortable.exe"},
 	{"^https?://", "$BROWSER"},
 	{"%.webm$", "$MEDIA --force-window"},
 	{"%.x?html?$", "$BROWSER"},
