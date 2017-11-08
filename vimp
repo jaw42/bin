@@ -1,0 +1,33 @@
+#!/bin/sh
+# Created:  Tue 07 Nov 2017
+# Modified: Wed 08 Nov 2017
+# Author:   Josh Wainwright
+# Filename: vimp
+if ! [ -f "$1" ]; then
+	printf 'Encrypted file required\n'
+	exit
+fi
+
+tmpf=$(mktemp)
+
+printf 'Passphrase: '
+read -r -s pass
+gpg2 --batch --quiet --passphrase "$pass" -d "$1" > "$tmpf"
+trap 'rm -f "$tmpf" "$tmpf.enc"' EXIT INT TERM
+chk=$(md5sum "$tmpf")
+
+$EDITOR "$tmpf"
+
+if [ "$chk" = "$(md5sum "$tmpf")" ]; then
+	printf 'No change\n'
+else
+	printf 'File changed\nRe-encrypt? [Y/n]'
+	read -n 1 -r renc
+	if [ -z "$renc" ] || [ "$renc" = 'y' ] || [ "$renc" = 'Y' ]; then
+		echo "encrypting"
+		gpg2 --batch --passphrase "$pass" --symmetric --cipher-algo aes256 -o "$tmpf.enc" < "$tmpf"
+		mv "$tmpf.enc" "$1"
+	fi
+fi
+
+unset pass
