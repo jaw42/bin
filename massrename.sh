@@ -21,7 +21,8 @@ if [ $# -gt 0 ]; then
 	list=$(find "$path" -maxdepth 1 -type f)
 else
 	list=$(cat)
-	printf 'Reading from STDIN\n' 1>&2 
+	printf 'Reading from STDIN\n' 1>&2
+	0<&-
 fi
 
 tmpf=$(mktemp)
@@ -31,7 +32,8 @@ printf "$list\n" > "$tmpf"
 count_before=$(wc -l < "$tmpf.orig")
 printf '%i files selected\n' "$count_before" 1>&2
 
-$EDITOR "$tmpf"
+tty=/dev/tty
+$EDITOR < $tty > $tty "$tmpf"
 
 if [ "$count_before" -ne "$(wc -l < "$tmpf")" ]; then
 	echo "Don't add or remove lines"
@@ -39,14 +41,21 @@ if [ "$count_before" -ne "$(wc -l < "$tmpf")" ]; then
 fi
 
 if cmp -s "$tmpf.orig" "$tmpf"; then
-	echo "No changes made."
+	echo "No changes made"
 	exit
+else
+	echo "Changes made"
 fi
 
-IFS='\t' paste "$tmpf.orig" "$tmpf" | while read before after; do
-	if [ "$before" != "$after" ]; then
-		echo "$before -> $after"
-		mv "$before" "$after"
+export IFS='	'
+paste "$tmpf.orig" "$tmpf" | while read before after; do
+	if [ -f "$before" ] || [ -d "$before" ]; then
+		if [ "$before" != "$after" ]; then
+			echo "$before -> $after"
+			[ -z "$DRYRUN" ] && mv "$before" "$after"
+		fi
+	else
+		echo 1>&2 "Input is not a file: $before"
 	fi
 done
 
