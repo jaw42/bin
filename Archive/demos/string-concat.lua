@@ -1,4 +1,9 @@
 local a = {'one ', 'two ', 'three ', 'four ', 'five'}
+
+for i=1, 5 do
+	a[i] = a[i]:rep(100)
+end
+
 local l
 local n = 1000000
 local start

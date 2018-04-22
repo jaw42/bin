@@ -6,7 +6,7 @@ or time for different methods of doing the same thing.
 
 - `shell_true_false.py`
 - `builtin_extern.sh`
-- `str-concat.lua`
+- `string-concat.lua`
 - `date2secs.lua`
 - `string_print.lua`
 - `hash.lua`
@@ -91,7 +91,7 @@ The difference between builtin vs external calls is much smaller
 under Linux, but it is still noticably faster to use shell builtin
 functionality.
 
-`str-concat.lua`
+`string-concat.lua`
 ---------------
 
 There are different ways of generating a string which is composed of
@@ -103,6 +103,8 @@ out of several components by:
 2. use `table.concat` to join the table of components
 3. use `sting.format` with a format string set.
 
+In this example, a small number of strings are to be joined together.
+
 ```
 n = 1000000
 String concat: 0.234
@@ -112,6 +114,20 @@ String format: 1.31
 
 The time to join the strings will depend on the strings themselves and
 the number, but for this example, explicit is considerably faster.
+
+Similarly, when using long strings the results will depend on a number
+of factors. However, replacing the strings used for the above example
+with the same strings applied to `:rep(100)`, the following results
+are obtained.
+
+```
+n = 1000000
+String concat: 1.26917
+Table concat: 2.123592
+String format: 3.376287
+```
+
+Again, explicit string concatenation is the most performant.
 
 `date2secs.lua`
 --------------
